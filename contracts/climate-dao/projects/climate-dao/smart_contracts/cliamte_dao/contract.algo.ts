@@ -2,20 +2,19 @@ import { abi } from '@algorandfoundation/algokit-utils';
 
 // --- Decorator placeholders ---
 function GlobalState(_type: any) {
-  return function (target: any, context: any) {
+  return function (target: any, context: ClassFieldDecoratorContext) {
     // Placeholder: No-op
   };
 }
 function BoxState(_keyType: any, _valueType: any) {
-  return function (target: any, context: any) {
+  return function (target: any, context: ClassFieldDecoratorContext) {
     // Placeholder: No-op
   };
 }
 function Method() {
   return function (
     target: any,
-    propertyKey: string,
-    descriptor: PropertyDescriptor
+    context: ClassMethodDecoratorContext
   ) {
     // Placeholder: No-op
   };
@@ -51,7 +50,7 @@ export class ClimateDAO extends Application {
   @BoxState(abi.Uint64, abi.String)
   proposals: Map<number, string> = new Map();
 
-  @Method
+  @Method()
   submitProposal(
     id: bigint,
     title: string,
@@ -73,7 +72,7 @@ export class ClimateDAO extends Application {
     this.proposalCount = id + 1n;
   }
 
-  @Method
+  @Method()
   vote(id: UInt64, choice: UInt64) {
     const proposalJson = this.proposals.get(Number(id));
     if (!proposalJson) return;
@@ -88,7 +87,7 @@ export class ClimateDAO extends Application {
     this.proposals.set(Number(id), JSON.stringify(proposal));
   }
 
-  @Method
+  @Method()
   finalizeProposal(id: UInt64) {
     const proposalJson = this.proposals.get(Number(id));
     if (!proposalJson) return;
