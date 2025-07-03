@@ -1,0 +1,9 @@
+# Changes here will be overwritten by Copier; NEVER EDIT MANUALLY
+_commit: 0.3.2
+_src_path: gh:algorandfoundation/algokit-typescript-template
+author_email: aneeshsharmag@gmail.com
+author_name: Aneesh
+contract_name: cliamte_dao
+preset_name: starter
+project_name: climate-dao
+
