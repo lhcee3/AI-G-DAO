@@ -1,4 +1,5 @@
 // Removed unused import of 'String' from '@algorandfoundation/algokit-utils'
+import { abi } from '@algorandfoundation/algokit-utils'; // Add this import for abi
 
 // If Application is required, define a minimal base class as a placeholder
 class Application {
@@ -31,30 +32,29 @@ export class ClimateDAO extends Application {
   proposals: Map<number, string> = new Map();
   @Method
   submitProposal = (
-    id: UInt64,
-  submitProposal = (
     id: bigint,
-    title: String,
-    description: String,
     title: string,
     description: string,
+    requestedAmount: bigint,
+    aiScore: number
   ) => {
+    const proposal: Proposal = {
+      id: Number(id),
       title,
       description,
       requestedAmount,
       aiScore,
       votesYes: 0,
       votesNo: 0,
-    }));
+    };
 
-    this.proposalCount.set(id + 1n);
+    this.proposals.set(Number(id), JSON.stringify(proposal));
+    this.proposalCount = id + 1n;
   };
 
   @Method
   vote = (id: UInt64, choice: UInt64) => {
-    const proposalJson = this.proposals.get(id);
-  vote = (id: bigint, choice: bigint) => {
-    const proposalJson = this.proposals.get(id);
+    const proposalJson = this.proposals.get(Number(id));
     if (!proposalJson) return;
 
     const proposal: Proposal = JSON.parse(proposalJson);
@@ -64,7 +64,7 @@ export class ClimateDAO extends Application {
       proposal.votesNo += 1;
     }
 
-    this.proposals.set(id, JSON.stringify(proposal));
+    this.proposals.set(Number(id), JSON.stringify(proposal));
   };
   finalizeProposal = (id: UInt64) => {
     const proposalJson = this.proposals.get(id);
@@ -79,3 +79,15 @@ export class ClimateDAO extends Application {
       // ❌ Rejected: do nothing
     }
   };
+    function GlobalState(Uint64: any): (target: undefined, context: ClassFieldDecoratorContext<ClimateDAO, bigint> & { name: "proposalCount"; private: false; static: false; }) => void | ((this: ClimateDAO, value: bigint) => bigint) {
+      throw new Error('Function not implemented.');
+    }
+    function Method(
+      target: any,
+      context: ClassFieldDecoratorContext<ClimateDAO, (...args: any[]) => any>
+    ): void {
+      // This is a placeholder decorator for marking contract methods.
+      // In a real smart contract framework, this would register the method for ABI exposure.
+      // Here, it does nothing but can be extended for logging or metadata.
+    }
+
