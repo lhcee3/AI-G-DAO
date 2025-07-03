@@ -10,7 +10,7 @@ export async function deploy() {
 
   const factory = algorand.client.getTypedAppFactory(CliamteDaoFactory, {
     defaultSender: deployer.addr,
-  })
+  }) as ReturnType<typeof algorand.client.getTypedAppFactory>
 
   const { appClient, result } = await factory.deploy({ onUpdate: 'append', onSchemaBreak: 'append' })
 
