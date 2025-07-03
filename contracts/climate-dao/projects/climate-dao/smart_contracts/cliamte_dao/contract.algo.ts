@@ -1,4 +1,4 @@
-import { abi } from '@algorandfoundation/algokit-utils';
+import { abi } from "@algorandfoundation/algokit-utils";
 
 // --- Decorator placeholders ---
 function GlobalState(_type: any) {
