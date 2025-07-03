@@ -1,0 +1,8 @@
+{
+  "dependencies": {
+    "@algorandfoundation/algokit-utils": "^9.1.1"
+  },
+  "devDependencies": {
+    "typescript": "^5.8.3"
+  }
+}
