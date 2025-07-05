@@ -1,4 +1,8 @@
-import { abi } from "@algorandfoundation/algokit-utils";
+// Minimal abi mock for types
+const abi = {
+  Uint64: "uint64",
+  String: "string"
+};
 
 // --- Decorator placeholders ---
 function GlobalState(_type: any) {
@@ -39,7 +43,7 @@ type Proposal = {
 };
 
 // --- ClimateDAO contract ---
-export class ClimateDAO extends Application {
+class ClimateDAO extends Application {
   constructor() {
     super("climate_dao");
   }
@@ -100,4 +104,14 @@ export class ClimateDAO extends Application {
     }
   }
 }
+
+// Export a function that returns the class (or an instance)
+export function getClimateDAO() {
+  return ClimateDAO;
+}
+
+// Or, if you want to export an instance:
+// export function getClimateDAOInstance() {
+//   return new ClimateDAO();
+// }
 
