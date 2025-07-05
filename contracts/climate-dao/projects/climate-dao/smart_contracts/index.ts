@@ -1,3 +1,5 @@
-import { ClimateDAO } from "./climate_dao/contract.algo";
+import { getClimateDAO } from "./cliamte_dao/contract.algo";
+
+const ClimateDAO = getClimateDAO();
 
 export default new ClimateDAO();
