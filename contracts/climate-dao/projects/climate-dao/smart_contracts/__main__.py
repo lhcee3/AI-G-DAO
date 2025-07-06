@@ -1,120 +1,49 @@
-from beaker import Application, GlobalStateValue
-from pyteal import *
+import sys
+from pathlib import Path
+from beaker import Application
+from algokit_utils import get_algod_client
+from algokit_utils.deploy import deploy_app
+from climate_dao.contract import app
+import logging
 
-app = Application("climate_dao")
+# Setup basic logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
-# Global: number of proposals
-proposal_count = GlobalStateValue(TealType.uint64, key=Bytes("count"))
+# Where artifacts will be written
+artifacts_path = Path(__file__).parent / "artifacts"
 
-# Constants for byte layout
-OFFSET_REQUESTED = Int(0)
-OFFSET_SCORE     = Int(8)
-OFFSET_YES       = Int(16)
-OFFSET_NO        = Int(24)
-OFFSET_FINALIZED = Int(32)
+def build():
+    logger.info("🛠️ Compiling smart contract...")
+    app.build().export(artifacts_path)
+    logger.info(f"✅ Contract compiled to: {artifacts_path}")
 
-@app.external
-def submit_proposal(
-    requested_amount: abi.Uint64,
-    ai_score: abi.Uint64,
-    *,
-    output: abi.String
-) -> Expr:
-    i = proposal_count.get()
-    box_name = Itob(i)
-
-    return Seq(
-        App.box_create(box_name, Int(64)),
-        App.box_put(
-            box_name,
-            Concat(
-                Itob(requested_amount.get()),
-                Itob(ai_score.get()),
-                Itob(Int(0)),  # votes_yes
-                Itob(Int(0)),  # votes_no
-                Itob(Int(0))   # finalized
-            )
-        ),
-        proposal_count.set(i + Int(1)),
-        output.set("Proposal submitted")
+def deploy_localnet():
+    logger.info("🚀 Deploying to localnet...")
+    algod = get_algod_client(network="localnet")
+    deploy_result = deploy_app(
+        client=algod,
+        app=app,
+        signer=algod.account,  # Automatically signs with default localnet account
+        allow_delete=True,
+        allow_update=True,
     )
+    logger.info(f"✅ Deployed app ID: {deploy_result.app_id}")
+    logger.info(f"🌐 Global state: {deploy_result.app_client.get_global_state()}")
 
-@app.external
-def vote(
-    proposal_id: abi.Uint64,
-    choice: abi.Uint64,  # 1 = yes, 0 = no
-    *,
-    output: abi.String
-) -> Expr:
-    box_name = Itob(proposal_id.get())
-    data = App.box_get(box_name)
+def main():
+    if len(sys.argv) < 2:
+        print("Usage: python -m climate_dao [build|deploy-localnet]")
+        return
 
-    yes = Btoi(Extract(data.value(), OFFSET_YES, Int(8)))
-    no  = Btoi(Extract(data.value(), OFFSET_NO, Int(8)))
-    finalized = Btoi(Extract(data.value(), OFFSET_FINALIZED, Int(8)))
+    command = sys.argv[1]
 
-    return Seq(
-        Assert(data.hasValue()),
-        Assert(finalized == Int(0), comment="Proposal already finalized"),
-        If(choice.get() == Int(1)).Then(
-            yes := yes + Int(1)
-        ).Else(
-            no := no + Int(1)
-        ),
-        App.box_put(
-            box_name,
-            Concat(
-                Extract(data.value(), OFFSET_REQUESTED, Int(16)),  # amount + score
-                Itob(yes),
-                Itob(no),
-                Itob(Int(0))  # finalized remains 0
-            )
-        ),
-        output.set("Vote cast")
-    )
+    if command == "build":
+        build()
+    elif command == "deploy-localnet":
+        deploy_localnet()
+    else:
+        print(f"Unknown command: {command}")
 
-@app.external
-def finalize_proposal(
-    proposal_id: abi.Uint64,
-    *,
-    output: abi.String
-) -> Expr:
-    box_name = Itob(proposal_id.get())
-    data = App.box_get(box_name)
-
-    yes = Btoi(Extract(data.value(), OFFSET_YES, Int(8)))
-    no  = Btoi(Extract(data.value(), OFFSET_NO, Int(8)))
-    finalized = Btoi(Extract(data.value(), OFFSET_FINALIZED, Int(8)))
-
-    return Seq(
-        Assert(data.hasValue()),
-        Assert(finalized == Int(0), comment="Already finalized"),
-        App.box_put(
-            box_name,
-            Concat(
-                Extract(data.value(), OFFSET_REQUESTED, Int(32)),
-                Itob(Int(1))  # set finalized flag
-            )
-        ),
-        output.set("Proposal finalized")
-    )
-
-@app.external
-def get_stats(
-    proposal_id: abi.Uint64,
-    *,
-    output: abi.String
-) -> Expr:
-    box_name = Itob(proposal_id.get())
-    data = App.box_get(box_name)
-
-    return Seq(
-        Assert(data.hasValue()),
-        output.set(
-            Concat(
-                Bytes("Votes Yes: "), Itob(Btoi(Extract(data.value(), OFFSET_YES, Int(8)))), Bytes(", "),
-                Bytes("Votes No: "), Itob(Btoi(Extract(data.value(), OFFSET_NO, Int(8)))), Bytes(", "),
-                Bytes("Finalized: "), Itob(Btoi(Extract(data.value(), OFFSET_FINALIZED, Int(8))))
-            )
-        )
-    )
+if __name__ == "__main__":
+    main()
