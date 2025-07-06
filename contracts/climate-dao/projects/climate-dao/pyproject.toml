@@ -12,8 +12,6 @@ python-dotenv = "^1.0.0"
 algorand-python = "^2.0.0"
 algorand-python-testing = "~0"
 pyteal = "0.24.1"
-algokit-utils = "2.2.1"
-beaker-pyteal = "1.1.1"
 setuptools = "^80.9.0"
 
 [tool.poetry.group.dev.dependencies]

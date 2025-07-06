@@ -2,7 +2,10 @@ import sys
 from pathlib import Path
 from beaker import Application
 from algokit_utils import get_algod_client
-from algokit_utils.deploy import deploy_app
+from algokit_utils.deploy_dry_run import deploy_dry_run_create
+from algokit_utils.models import DeployCallArgs
+from algokit_utils import get_algod_client
+
 from climate_dao.contract import app
 import logging
 
