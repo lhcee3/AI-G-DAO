@@ -1,45 +1,28 @@
 import sys
 from pathlib import Path
-import logging
-from smart_contracts.climate_dao.contract import app
-from algokit_utils import get_algod_client
-from algokit_utils.deploy import deploy_app
+from pyteal import compileTeal, Mode
+from climate_dao.contract import approval_program, clear_program
 
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
-
-artifacts_path = Path(__file__).parent / "artifacts"
+artifacts_dir = Path(__file__).parent / "artifacts"
+artifacts_dir.mkdir(exist_ok=True)
 
 def build():
-    logger.info("🔨 Compiling smart contract...")
-    app.build().export(artifacts_path)
-    logger.info(f"✅ Contract compiled to: {artifacts_path}")
+    approval = compileTeal(approval_program(), mode=Mode.Application, version=8)
+    clear = compileTeal(clear_program(), mode=Mode.Application, version=8)
 
-def deploy_localnet():
-    logger.info("🚀 Deploying to localnet...")
-    algod = get_algod_client(network="localnet")
-    result = deploy_app(
-        client=algod,
-        app=app,
-        signer=algod.account,
-        allow_delete=True,
-        allow_update=True,
-    )
-    logger.info(f"✅ Deployed App ID: {result.app_id}")
-    logger.info(f"🌐 Global state: {result.app_client.get_global_state()}")
+    (artifacts_dir / "approval.teal").write_text(approval)
+    (artifacts_dir / "clear.teal").write_text(clear)
+
+    print("✅ Contracts compiled to /artifacts")
 
 def main():
     if len(sys.argv) < 2:
-        print("Usage: python -m smart_contracts [build|deploy-localnet]")
+        print("Usage: python -m smart_contracts [build]")
         return
-
-    command = sys.argv[1]
-    if command == "build":
+    if sys.argv[1] == "build":
         build()
-    elif command == "deploy-localnet":
-        deploy_localnet()
     else:
-        print(f"❌ Unknown command: {command}")
+        print("Unknown command")
 
 if __name__ == "__main__":
     main()
