@@ -1,44 +1,16 @@
-import logging
+from algokit_utils.deploy import AppSpec, DeployCallArgs, deploy_dry_run_create
+from beaker import Application
+from .contract import get_app
 
-import algokit_utils
+def deploy():
+    app: Application = get_app()
 
-logger = logging.getLogger(__name__)
+    print("🚀 Deploying ClimateDAO contract...")
 
-
-# define deployment behaviour based on supplied app spec
-def deploy() -> None:
-    from smart_contracts.artifacts.climate_dao.climate_dao_client import (
-        HelloArgs,
-        ClimateDaoFactory,
+    deploy_dry_run_create(
+        app=app,
+        app_spec=AppSpec.from_app(app),
+        call_config=DeployCallArgs()
     )
 
-    algorand = algokit_utils.AlgorandClient.from_environment()
-    deployer_ = algorand.account.from_environment("DEPLOYER")
-
-    factory = algorand.client.get_typed_app_factory(
-        ClimateDaoFactory, default_sender=deployer_.address
-    )
-
-    app_client, result = factory.deploy(
-        on_update=algokit_utils.OnUpdate.AppendApp,
-        on_schema_break=algokit_utils.OnSchemaBreak.AppendApp,
-    )
-
-    if result.operation_performed in [
-        algokit_utils.OperationPerformed.Create,
-        algokit_utils.OperationPerformed.Replace,
-    ]:
-        algorand.send.payment(
-            algokit_utils.PaymentParams(
-                amount=algokit_utils.AlgoAmount(algo=1),
-                sender=deployer_.address,
-                receiver=app_client.app_address,
-            )
-        )
-
-    name = "world"
-    response = app_client.send.hello(args=HelloArgs(name=name))
-    logger.info(
-        f"Called hello on {app_client.app_name} ({app_client.app_id}) "
-        f"with name={name}, received: {response.abi_return}"
-    )
+    print("✅ Deployment complete.")

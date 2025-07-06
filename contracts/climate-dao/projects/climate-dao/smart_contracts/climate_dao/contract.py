@@ -1,8 +1,18 @@
-from algopy import ARC4Contract, String
-from algopy.arc4 import abimethod
+from beaker import Application, GlobalStateValue
+from pyteal import abi
 
+class ClimateDAO:
+    def __init__(self) -> None:
+        self.app = Application("ClimateDAOApp", state=ClimateDAOState())
 
-class ClimateDao(ARC4Contract):
-    @abimethod()
-    def hello(self, name: String) -> String:
-        return "Hello, " + name
+    def build(self) -> Application:
+        return self.app
+
+class ClimateDAOState:
+    counter = GlobalStateValue(stack_type="uint64", default=0)
+
+climate_dao = ClimateDAO()
+app = climate_dao.build()
+
+def get_app() -> Application:
+    return app
