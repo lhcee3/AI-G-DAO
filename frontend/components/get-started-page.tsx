@@ -1,12 +1,13 @@
 "use client"
 
-import { motion } from "framer-motion"
+import { motion, type Variants } from "framer-motion" // Import Variants
 import { Card, CardDescription, CardTitle } from "@/components/ui/card"
 import { LightbulbIcon, BotIcon, VoteIcon, HandshakeIcon } from "lucide-react"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 
-const containerVariants = {
+const containerVariants: Variants = {
+  // Explicitly type containerVariants
   hidden: { opacity: 0 },
   visible: {
     opacity: 1,
@@ -16,7 +17,8 @@ const containerVariants = {
   },
 }
 
-const itemVariants = {
+const itemVariants: Variants = {
+  // Explicitly type itemVariants
   hidden: { y: 20, opacity: 0 },
   visible: {
     y: 0,
