@@ -1,12 +1,11 @@
 "use client"
 
-import { motion, type Variants } from "framer-motion" // Import Variants
+import { motion, type Variants } from "framer-motion"
 import { Card, CardDescription, CardTitle } from "@/components/ui/card"
 import { LightbulbIcon, BotIcon, VoteIcon, HandshakeIcon } from "lucide-react"
-import { ConnectWallet } from "@/components/connect-wallet" // Add this import
+import { ConnectWallet } from "@/components/connect-wallet"
 
 const containerVariants: Variants = {
-  // Explicitly type containerVariants
   hidden: { opacity: 0 },
   visible: {
     opacity: 1,
@@ -17,7 +16,6 @@ const containerVariants: Variants = {
 }
 
 const itemVariants: Variants = {
-  // Explicitly type itemVariants
   hidden: { y: 20, opacity: 0 },
   visible: {
     y: 0,
@@ -54,7 +52,7 @@ export function GetStartedPage() {
           variants={containerVariants}
         >
           <motion.div variants={itemVariants}>
-            <Card className="flex flex-col items-center text-center p-6 shadow-md bg-black border border-gray-800">
+            <Card className="flex flex-col items-center text-center p-6 shadow-md bg-black/50 border border-gray-800">
               <LightbulbIcon className="w-12 h-12 text-teal-500 mb-4" />
               <CardTitle className="text-xl font-semibold mb-2 text-white">1. Understand the Vision</CardTitle>
               <CardDescription className="text-gray-300">
@@ -63,7 +61,7 @@ export function GetStartedPage() {
             </Card>
           </motion.div>
           <motion.div variants={itemVariants}>
-            <Card className="flex flex-col items-center text-center p-6 shadow-md bg-black border border-gray-800">
+            <Card className="flex flex-col items-center text-center p-6 shadow-md bg-black/50 border border-gray-800">
               <BotIcon className="w-12 h-12 text-teal-500 mb-4" />
               <CardTitle className="text-xl font-semibold mb-2 text-white">2. Get DAO Tokens</CardTitle>
               <CardDescription className="text-gray-300">
@@ -72,7 +70,7 @@ export function GetStartedPage() {
             </Card>
           </motion.div>
           <motion.div variants={itemVariants}>
-            <Card className="flex flex-col items-center text-center p-6 shadow-md bg-black border border-gray-800">
+            <Card className="flex flex-col items-center text-center p-6 shadow-md bg-black/50 border border-gray-800">
               <VoteIcon className="w-12 h-12 text-teal-500 mb-4" />
               <CardTitle className="text-xl font-semibold mb-2 text-white">3. Engage & Vote</CardTitle>
               <CardDescription className="text-gray-300">
@@ -81,7 +79,7 @@ export function GetStartedPage() {
             </Card>
           </motion.div>
           <motion.div variants={itemVariants}>
-            <Card className="flex flex-col items-center text-center p-6 shadow-md bg-black border border-gray-800">
+            <Card className="flex flex-col items-center text-center p-6 shadow-md bg-black/50 border border-gray-800">
               <HandshakeIcon className="w-12 h-12 text-teal-500 mb-4" />
               <CardTitle className="text-xl font-semibold mb-2 text-white">4. See the Impact</CardTitle>
               <CardDescription className="text-gray-300">
@@ -97,7 +95,6 @@ export function GetStartedPage() {
             Start your journey with the AI-Governed DAO today and be a part of a transparent and effective solution to
             climate change.
           </p>
-          {/* Add the ConnectWallet component here */}
           <ConnectWallet />
         </motion.div>
       </motion.div>
