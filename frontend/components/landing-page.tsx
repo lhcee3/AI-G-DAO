@@ -8,8 +8,8 @@ export function LandingPage() {
   return (
     <div className="flex flex-col min-h-[100dvh] bg-gradient-to-br from-black to-gray-950 text-white">
       <main className="flex-1">
-        {/* Hero Section */}
-        <section className="w-full py-12 md:py-24 lg:py-32 xl:py-48 flex items-center justify-center text-center px-4">
+        {/* Hero Section - now transparent to show global gradient */}
+        <section className="w-full py-12 md:py-24 lg:py-32 xl:py-48 flex items-center justify-center text-center px-4 bg-transparent">
           <div className="container space-y-6">
             <div className="space-y-4">
               <h1 className="text-4xl font-bold tracking-tighter sm:text-5xl md:text-6xl lg:text-7xl/none text-white">
@@ -38,8 +38,8 @@ export function LandingPage() {
           </div>
         </section>
 
-        {/* How It Works Section */}
-        <section className="w-full py-12 md:py-24 lg:py-32 bg-gray-900 px-4">
+        {/* How It Works Section - now transparent to show global gradient */}
+        <section className="w-full py-12 md:py-24 lg:py-32 bg-transparent px-4">
           <div className="container space-y-12">
             <div className="flex flex-col items-center justify-center space-y-4 text-center">
               <div className="space-y-2">
@@ -52,28 +52,28 @@ export function LandingPage() {
               </div>
             </div>
             <div className="mx-auto grid items-start gap-8 sm:grid-cols-2 lg:grid-cols-4 lg:gap-12">
-              <Card className="flex flex-col items-center text-center p-6 shadow-md hover:shadow-lg transition-shadow duration-300 bg-black border border-gray-800">
+              <Card className="flex flex-col items-center text-center p-6 shadow-md hover:shadow-lg transition-shadow duration-300 bg-black/50 border border-gray-800">
                 <LightbulbIcon className="w-12 h-12 text-teal-500 mb-4" />
                 <CardTitle className="text-xl font-semibold mb-2 text-white">1. Submit Proposal</CardTitle>
                 <CardDescription className="text-gray-300">
                   Startups and organizations submit their green project proposals to the DAO.
                 </CardDescription>
               </Card>
-              <Card className="flex flex-col items-center text-center p-6 shadow-md hover:shadow-lg transition-shadow duration-300 bg-black border border-gray-800">
+              <Card className="flex flex-col items-center text-center p-6 shadow-md hover:shadow-lg transition-shadow duration-300 bg-black/50 border border-gray-800">
                 <BotIcon className="w-12 h-12 text-teal-500 mb-4" />
                 <CardTitle className="text-xl font-semibold mb-2 text-white">2. AI Evaluation</CardTitle>
                 <CardDescription className="text-gray-300">
                   Our AI engine analyzes the proposal, providing an Environmental Impact Score (e.g., 8.2/10).
                 </CardDescription>
               </Card>
-              <Card className="flex flex-col items-center text-center p-6 shadow-md hover:shadow-lg transition-shadow duration-300 bg-black border border-gray-800">
+              <Card className="flex flex-col items-center text-center p-6 shadow-md hover:shadow-lg transition-shadow duration-300 bg-black/50 border border-gray-800">
                 <VoteIcon className="w-12 h-12 text-teal-500 mb-4" />
                 <CardTitle className="text-xl font-semibold mb-2 text-white">3. Community Vote</CardTitle>
                 <CardDescription className="text-gray-300">
                   DAO members review the AI score and proposal, then cast their votes.
                 </CardDescription>
               </Card>
-              <Card className="flex flex-col items-center text-center p-6 shadow-md hover:shadow-lg transition-shadow duration-300 bg-black border border-gray-800">
+              <Card className="flex flex-col items-center text-center p-6 shadow-md hover:shadow-lg transition-shadow duration-300 bg-black/50 border border-gray-800">
                 <HandshakeIcon className="w-12 h-12 text-teal-500 mb-4" />
                 <CardTitle className="text-xl font-semibold mb-2 text-white">4. Fund & Impact</CardTitle>
                 <CardDescription className="text-gray-300">
@@ -84,8 +84,8 @@ export function LandingPage() {
           </div>
         </section>
 
-        {/* Why Choose Us Section */}
-        <section className="w-full py-12 md:py-24 lg:py-32 bg-gray-950 px-4">
+        {/* Why Choose Us Section - now transparent to show global gradient */}
+        <section className="w-full py-12 md:py-24 lg:py-32 bg-transparent px-4">
           <div className="container space-y-12">
             <div className="flex flex-col items-center justify-center space-y-4 text-center">
               <div className="space-y-2">
@@ -96,7 +96,7 @@ export function LandingPage() {
               </div>
             </div>
             <div className="mx-auto grid max-w-5xl items-start gap-8 sm:grid-cols-2 lg:grid-cols-3 lg:gap-12">
-              <Card className="p-6 shadow-md hover:shadow-lg transition-shadow duration-300 bg-black border border-gray-800">
+              <Card className="p-6 shadow-md hover:shadow-lg transition-shadow duration-300 bg-black/50 border border-gray-800">
                 <CardHeader>
                   <BotIcon className="w-8 h-8 text-teal-500 mb-2" />
                   <CardTitle className="text-white">Intelligent Vetting</CardTitle>
@@ -105,7 +105,7 @@ export function LandingPage() {
                   AI-powered scoring ensures that only the most impactful and viable climate projects receive funding.
                 </CardContent>
               </Card>
-              <Card className="p-6 shadow-md hover:shadow-lg transition-shadow duration-300 bg-black border border-gray-800">
+              <Card className="p-6 shadow-md hover:shadow-lg transition-shadow duration-300 bg-black/50 border border-gray-800">
                 <CardHeader>
                   <VoteIcon className="w-8 h-8 text-teal-500 mb-2" />
                   <CardTitle className="text-white">Decentralized Governance</CardTitle>
@@ -114,7 +114,7 @@ export function LandingPage() {
                   Empowering a global community to collectively decide on the future of climate finance.
                 </CardContent>
               </Card>
-              <Card className="p-6 shadow-md hover:shadow-lg transition-shadow duration-300 bg-black border border-gray-800">
+              <Card className="p-6 shadow-md hover:shadow-lg transition-shadow duration-300 bg-black/50 border border-gray-800">
                 <CardHeader>
                   <LeafIcon className="w-8 h-8 text-teal-500 mb-2" />
                   <CardTitle className="text-white">Real-World Impact</CardTitle>
@@ -123,7 +123,7 @@ export function LandingPage() {
                   Directly fund sustainability and green projects, making a tangible difference in CO₂ reduction.
                 </CardContent>
               </Card>
-              <Card className="p-6 shadow-md hover:shadow-lg transition-shadow duration-300 bg-black border border-gray-800">
+              <Card className="p-6 shadow-md hover:shadow-lg transition-shadow duration-300 bg-black/50 border border-gray-800">
                 <CardHeader>
                   <img src="/placeholder.svg?height=32&width=32" alt="Algorand Icon" className="w-8 h-8 mb-2" />
                   <CardTitle className="text-white">Algorand Advantage</CardTitle>
@@ -132,7 +132,7 @@ export function LandingPage() {
                   Leveraging Algorand's secure, scalable, and environmentally friendly blockchain for operations.
                 </CardContent>
               </Card>
-              <Card className="p-6 shadow-md hover:shadow-lg transition-shadow duration-300 bg-black border border-gray-800">
+              <Card className="p-6 shadow-md hover:shadow-lg transition-shadow duration-300 bg-black/50 border border-gray-800">
                 <CardHeader>
                   <img src="/placeholder.svg?height=32&width=32" alt="Token Icon" className="w-8 h-8 mb-2" />
                   <CardTitle className="text-white">Tokenized Credits</CardTitle>
@@ -141,7 +141,7 @@ export function LandingPage() {
                   Efficient and transparent management of verified carbon credits, tokenized for easy transfer.
                 </CardContent>
               </Card>
-              <Card className="p-6 shadow-md hover:shadow-lg transition-shadow duration-300 bg-black border border-gray-800">
+              <Card className="p-6 shadow-md hover:shadow-lg transition-shadow duration-300 bg-black/50 border border-gray-800">
                 <CardHeader>
                   <LightbulbIcon className="w-8 h-8 text-teal-500 mb-2" />
                   <CardTitle className="text-white">Innovation at Core</CardTitle>
@@ -158,8 +158,8 @@ export function LandingPage() {
         {/* New Projects List Section */}
         <ProjectsList />
 
-        {/* Call to Action Section */}
-        <section className="w-full py-12 md:py-24 lg:py-32 flex items-center justify-center text-center px-4">
+        {/* Call to Action Section - now transparent to show global gradient */}
+        <section className="w-full py-12 md:py-24 lg:py-32 flex items-center justify-center text-center px-4 bg-transparent">
           <div className="container space-y-6">
             <div className="space-y-4">
               <h2 className="text-3xl font-bold tracking-tighter sm:text-5xl text-white">Ready to Make an Impact?</h2>
@@ -182,7 +182,7 @@ export function LandingPage() {
         </section>
       </main>
 
-      {/* Footer */}
+      {/* Footer - remains solid for a strong base */}
       <footer className="flex flex-col gap-2 sm:flex-row py-6 w-full shrink-0 items-center px-4 md:px-6 border-t border-gray-800 bg-black text-gray-300">
         <p className="text-xs">&copy; {new Date().getFullYear()} AI-Governed DAO. All rights reserved.</p>
         <nav className="sm:ml-auto flex gap-4 sm:gap-6">
