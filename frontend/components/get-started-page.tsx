@@ -3,8 +3,7 @@
 import { motion, type Variants } from "framer-motion" // Import Variants
 import { Card, CardDescription, CardTitle } from "@/components/ui/card"
 import { LightbulbIcon, BotIcon, VoteIcon, HandshakeIcon } from "lucide-react"
-import Link from "next/link"
-import { Button } from "@/components/ui/button"
+import { ConnectWallet } from "@/components/connect-wallet" // Add this import
 
 const containerVariants: Variants = {
   // Explicitly type containerVariants
@@ -98,11 +97,8 @@ export function GetStartedPage() {
             Start your journey with the AI-Governed DAO today and be a part of a transparent and effective solution to
             climate change.
           </p>
-          <Link href="#" passHref>
-            <Button className="px-8 py-3 text-lg bg-teal-600 hover:bg-teal-700 text-white rounded-full shadow-lg transition-transform transform hover:scale-105">
-              Get Your DAO Tokens
-            </Button>
-          </Link>
+          {/* Add the ConnectWallet component here */}
+          <ConnectWallet />
         </motion.div>
       </motion.div>
     </div>
