@@ -38,7 +38,7 @@ export function ProjectsList() {
   }
 
   return (
-    <section className="w-full py-12 md:py-24 lg:py-32 bg-gray-900 px-4">
+    <section className="w-full py-12 md:py-24 lg:py-32 bg-transparent px-4">
       <div className="container space-y-12">
         <div className="flex flex-col items-center justify-center space-y-4 text-center">
           <div className="space-y-2">
@@ -52,7 +52,7 @@ export function ProjectsList() {
           {currentProjects.map((project) => (
             <Card
               key={project.id}
-              className="p-6 shadow-md hover:shadow-lg transition-shadow duration-300 bg-black border border-gray-800"
+              className="p-6 shadow-md hover:shadow-lg transition-shadow duration-300 bg-black/50 border border-gray-800"
             >
               <CardHeader>
                 <CardTitle className="text-xl font-semibold mb-2 text-white">{project.title}</CardTitle>
