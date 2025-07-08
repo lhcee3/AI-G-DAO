@@ -27,7 +27,7 @@ export function ConnectWallet() {
   }
 
   return (
-    <Card className="w-full max-w-md mx-auto p-6 shadow-lg bg-black border border-gray-800 text-white">
+    <Card className="w-full max-w-md mx-auto p-6 shadow-lg bg-black/50 border border-gray-800 text-white">
       <CardHeader className="flex flex-col items-center text-center">
         <WalletIcon className="w-12 h-12 text-teal-500 mb-4" />
         <CardTitle className="text-2xl font-bold">Connect Your Wallet</CardTitle>
