@@ -32,13 +32,13 @@ export function LandingPage() {
             </div>
             <div className="flex flex-col gap-4 sm:flex-row justify-center">
               <Button className="px-8 py-3 text-lg bg-teal-600 hover:bg-teal-700 text-white rounded-full shadow-lg transition-transform transform hover:scale-105">
-                <Link href="/get-started">Learn More</Link>
+                <Link href="/connect-wallet">Learn More</Link>
               </Button>
               <Button
                 variant="outline"
                 className="px-8 py-3 text-lg border-white text-white hover:bg-gray-800 rounded-full shadow-lg transition-transform transform hover:scale-105 bg-transparent"
               >
-                Join the DAO
+                <Link href="/connect-wallet">Join the DAO</Link>
               </Button>
             </div>
             <p className="text-sm text-gray-400 mt-8 flex items-center justify-center gap-2">
@@ -196,13 +196,13 @@ export function LandingPage() {
             </div>
             <div className="flex flex-col gap-4 sm:flex-row justify-center">
               <Button className="px-8 py-3 text-lg bg-teal-600 hover:bg-teal-700 text-white rounded-full shadow-lg transition-transform transform hover:scale-105">
-                <Link href="/get-started">Get Started</Link>
+                <Link href="/connect-wallet">Get Started</Link>
               </Button>
               <Button
                 variant="outline"
                 className="px-8 py-3 text-lg border-white text-white hover:bg-gray-800 rounded-full shadow-lg transition-transform transform hover:scale-105 bg-transparent"
               >
-                Submit a Proposal
+                <Link href="/connect-wallet">Submit a Proposal</Link>
               </Button>
             </div>
           </div>
