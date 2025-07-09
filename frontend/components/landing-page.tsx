@@ -2,7 +2,7 @@
 
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { BotIcon, HandshakeIcon, LeafIcon, LightbulbIcon, VoteIcon } from "lucide-react"
+import { BotIcon, CoinsIcon, HandshakeIcon, LeafIcon, LightbulbIcon, VoteIcon } from "lucide-react"
 import { ProjectsList } from "@/components/projects-list"
 import Link from "next/link"
 import Image from "next/image"
@@ -146,9 +146,9 @@ export function LandingPage() {
                   <Image
                     src="/algorand_logo_mark.png"
                     alt="Algorand Logo"
-                    width={40}
-                    height={40}
-                    className="w-10 h-10 mb-4"
+                    width={32}
+                    height={32}
+                    className="w-8 h-8 mb-2"
                     style={{ filter: "brightness(0) invert(1) sepia(1) saturate(10000%) hue-rotate(170deg)" }}
                   />
                   <CardTitle className="text-white">Algorand Advantage</CardTitle>
@@ -159,7 +159,7 @@ export function LandingPage() {
               </Card>
               <Card className="p-6 shadow-md hover:shadow-lg transition-shadow duration-300 bg-black/50 border border-gray-800 backdrop-blur-sm">
                 <CardHeader>
-                  <img src="/placeholder.svg?height=32&width=32" alt="Token Icon" className="w-8 h-8 mb-2" />
+                  <CoinsIcon className="w-8 h-8 text-teal-500 mb-2" />
                   <CardTitle className="text-white">Tokenized Credits</CardTitle>
                 </CardHeader>
                 <CardContent className="text-gray-300">
