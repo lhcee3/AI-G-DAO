@@ -3,7 +3,6 @@
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { BotIcon, CoinsIcon, HandshakeIcon, LeafIcon, LightbulbIcon, VoteIcon } from "lucide-react"
-import { ProjectsList } from "@/components/projects-list"
 import Link from "next/link"
 import Image from "next/image"
 
@@ -19,8 +18,6 @@ export function LandingPage() {
         {/* Hero Section */}
         <section className="w-full py-12 md:py-24 lg:py-32 xl:py-48 flex items-center justify-center text-center px-4 bg-transparent">
           <div className="max-w-7xl w-full space-y-6">
-            {" "}
-            {/* Updated for explicit centering */}
             <div className="space-y-4">
               <h1 className="text-4xl font-bold tracking-tighter sm:text-5xl md:text-6xl lg:text-7xl/none text-white">
                 AI-Governed DAO for <span className="climate-glow">Climate</span> Impact Credits
@@ -50,11 +47,7 @@ export function LandingPage() {
 
         {/* How It Works Section */}
         <section className="w-full py-12 md:py-24 lg:py-32 px-4 flex justify-center">
-          {" "}
-          {/* Added flex justify-center */}
           <div className="max-w-7xl w-full space-y-12">
-            {" "}
-            {/* Updated for explicit centering */}
             <div className="flex flex-col items-center justify-center space-y-4 text-center">
               <div className="space-y-2">
                 <h2 className="text-3xl font-bold tracking-tighter sm:text-5xl text-white">
@@ -100,11 +93,7 @@ export function LandingPage() {
 
         {/* Why Choose Us Section */}
         <section className="w-full py-12 md:py-24 lg:py-32 px-4 flex justify-center">
-          {" "}
-          {/* Added flex justify-center */}
           <div className="max-w-7xl w-full space-y-12">
-            {" "}
-            {/* Updated for explicit centering */}
             <div className="flex flex-col items-center justify-center space-y-4 text-center">
               <div className="space-y-2">
                 <h2 className="text-3xl font-bold tracking-tighter sm:text-5xl text-white">Why Our DAO?</h2>
@@ -180,14 +169,9 @@ export function LandingPage() {
           </div>
         </section>
 
-        {/* New Projects List Section */}
-        <ProjectsList />
-
         {/* Call to Action Section */}
         <section className="w-full py-12 md:py-24 lg:py-32 flex items-center justify-center text-center px-4 bg-transparent">
           <div className="max-w-7xl w-full space-y-6">
-            {" "}
-            {/* Updated for explicit centering */}
             <div className="space-y-4">
               <h2 className="text-3xl font-bold tracking-tighter sm:text-5xl text-white">Ready to Make an Impact?</h2>
               <p className="mx-auto max-w-[700px] text-gray-300 md:text-xl">
