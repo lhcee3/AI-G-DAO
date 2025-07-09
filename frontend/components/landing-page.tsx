@@ -5,6 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { BotIcon, HandshakeIcon, LeafIcon, LightbulbIcon, VoteIcon } from "lucide-react"
 import { ProjectsList } from "@/components/projects-list"
 import Link from "next/link"
+import Image from "next/image"
 
 export function LandingPage() {
   return (
@@ -142,7 +143,14 @@ export function LandingPage() {
               </Card>
               <Card className="p-6 shadow-md hover:shadow-lg transition-shadow duration-300 bg-black/50 border border-gray-800 backdrop-blur-sm">
                 <CardHeader>
-                  <img src="/placeholder.svg?height=32&width=32" alt="Algorand Icon" className="w-8 h-8 mb-2" />
+                  <Image
+                    src="/algorand_logo_mark.png"
+                    alt="Algorand Logo"
+                    width={40}
+                    height={40}
+                    className="w-10 h-10 mb-4"
+                    style={{ filter: "brightness(0) invert(1) sepia(1) saturate(10000%) hue-rotate(170deg)" }}
+                  />
                   <CardTitle className="text-white">Algorand Advantage</CardTitle>
                 </CardHeader>
                 <CardContent className="text-gray-300">
