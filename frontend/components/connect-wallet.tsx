@@ -36,7 +36,7 @@ export function WalletConnectPage() {
       <header className="relative z-10 flex items-center justify-between p-6">
         <Link href="/" className="flex items-center gap-2 text-teal-400 hover:text-teal-300 transition-colors">
           <ArrowLeftIcon className="w-5 h-5" />
-          <span className="text-sm font-medium">Back to Landing</span>
+          <span className="text-sm font-medium">Back to Home</span>
         </Link>
         <div className="text-teal-400 font-bold text-lg">Climate DAO</div>
       </header>
