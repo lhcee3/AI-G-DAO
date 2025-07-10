@@ -92,3 +92,167 @@ export function SubmitProposalPage() {
                       required
                     />
                   </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="category" className="text-yellow-400 font-medium">
+                      Project Category *
+                    </Label>
+                    <select
+                      id="category"
+                      value={formData.category}
+                      onChange={(e) => handleInputChange("category", e.target.value)}
+                      className="w-full px-3 py-2 bg-black/50 border border-yellow-500/30 text-white rounded-md focus:border-yellow-500 focus:outline-none"
+                      required
+                    >
+                      <option value="">Select a category</option>
+                      <option value="renewable-energy">Renewable Energy</option>
+                      <option value="carbon-capture">Carbon Capture</option>
+                      <option value="reforestation">Reforestation</option>
+                      <option value="sustainable-agriculture">Sustainable Agriculture</option>
+                      <option value="waste-management">Waste Management</option>
+                      <option value="clean-transportation">Clean Transportation</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="description" className="text-yellow-400 font-medium">
+                    Project Description *
+                  </Label>
+                  <Textarea
+                    id="description"
+                    value={formData.description}
+                    onChange={(e) => handleInputChange("description", e.target.value)}
+                    placeholder="Describe your project in detail, including objectives, methodology, and expected outcomes..."
+                    className="bg-black/50 border-yellow-500/30 text-white placeholder:text-gray-400 focus:border-yellow-500 min-h-[120px]"
+                    required
+                  />
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  <div className="space-y-2">
+                    <Label htmlFor="fundingAmount" className="text-yellow-400 font-medium flex items-center gap-2">
+                      <DollarSignIcon className="w-4 h-4" />
+                      Funding Requested (USD) *
+                    </Label>
+                    <Input
+                      id="fundingAmount"
+                      type="number"
+                      value={formData.fundingAmount}
+                      onChange={(e) => handleInputChange("fundingAmount", e.target.value)}
+                      placeholder="50000"
+                      className="bg-black/50 border-yellow-500/30 text-white placeholder:text-gray-400 focus:border-yellow-500"
+                      required
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="duration" className="text-yellow-400 font-medium flex items-center gap-2">
+                      <CalendarIcon className="w-4 h-4" />
+                      Project Duration (months) *
+                    </Label>
+                    <Input
+                      id="duration"
+                      type="number"
+                      value={formData.duration}
+                      onChange={(e) => handleInputChange("duration", e.target.value)}
+                      placeholder="12"
+                      className="bg-black/50 border-yellow-500/30 text-white placeholder:text-gray-400 focus:border-yellow-500"
+                      required
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="location" className="text-yellow-400 font-medium">
+                      Location *
+                    </Label>
+                    <Input
+                      id="location"
+                      value={formData.location}
+                      onChange={(e) => handleInputChange("location", e.target.value)}
+                      placeholder="e.g., Kenya, East Africa"
+                      className="bg-black/50 border-yellow-500/30 text-white placeholder:text-gray-400 focus:border-yellow-500"
+                      required
+                    />
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="expectedImpact" className="text-yellow-400 font-medium">
+                    Expected Environmental Impact *
+                  </Label>
+                  <Textarea
+                    id="expectedImpact"
+                    value={formData.expectedImpact}
+                    onChange={(e) => handleInputChange("expectedImpact", e.target.value)}
+                    placeholder="Quantify the expected environmental benefits (e.g., CO₂ reduction, energy saved, trees planted, etc.)"
+                    className="bg-black/50 border-yellow-500/30 text-white placeholder:text-gray-400 focus:border-yellow-500"
+                    required
+                  />
+                </div>
+
+                <div className="space-y-4">
+                  <Label className="text-yellow-400 font-medium flex items-center gap-2">
+                    <UploadIcon className="w-4 h-4" />
+                    Supporting Documents (Optional)
+                  </Label>
+                  <div className="border-2 border-dashed border-yellow-500/30 rounded-lg p-8 text-center">
+                    <UploadIcon className="w-12 h-12 text-yellow-500/50 mx-auto mb-4" />
+                    <p className="text-gray-400 mb-2">Drag and drop files here, or click to browse</p>
+                    <p className="text-sm text-gray-500">PDF, DOC, or image files (max 10MB each)</p>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      className="mt-4 border-yellow-500/50 text-yellow-400 hover:bg-yellow-500/10 bg-transparent"
+                    >
+                      Choose Files
+                    </Button>
+                  </div>
+                </div>
+
+                <div className="flex flex-col sm:flex-row gap-4 pt-6">
+                  <Button
+                    type="submit"
+                    disabled={isSubmitting}
+                    className="flex-1 bg-yellow-500 hover:bg-yellow-600 text-black font-semibold py-3 rounded-lg transition-all duration-300 transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {isSubmitting ? (
+                      <div className="flex items-center space-x-2">
+                        <div className="w-4 h-4 border-2 border-black/30 border-t-black rounded-full animate-spin"></div>
+                        <span>Submitting...</span>
+                      </div>
+                    ) : (
+                      "Submit Proposal for AI Review"
+                    )}
+                  </Button>
+
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className="border-yellow-500/50 text-yellow-400 hover:bg-yellow-500/10 bg-transparent"
+                  >
+                    Save as Draft
+                  </Button>
+                </div>
+              </form>
+            </CardContent>
+          </Card>
+
+          <div className="text-center space-y-2">
+            <p className="text-sm text-gray-800">
+              Need help with your proposal? Check out our{" "}
+              <a href="#" className="text-black font-medium underline underline-offset-2">
+                submission guidelines
+              </a>
+            </p>
+          </div>
+        </div>
+      </main>
+
+      {/* Footer */}
+      <footer className="relative z-10 text-center py-6 text-gray-800 text-sm">
+        <p>&copy; {new Date().getFullYear()} Climate DAO. Empowering sustainable innovation.</p>
+      </footer>
+    </div>
+  )
+}
