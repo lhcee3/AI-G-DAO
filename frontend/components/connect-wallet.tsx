@@ -149,10 +149,20 @@ export function WalletConnectPage() {
         </div>
       </main>
 
-      {/* Footer */}
-      <footer className="relative z-10 text-center py-6 text-gray-400 text-sm">
-        <p>&copy; {new Date().getFullYear()} Climate DAO. Powered by Algorand.</p>
-      </footer>
+<footer className="relative z-10 text-center py-6 text-gray-400 text-sm">
+  <p>
+    &copy; {new Date().getFullYear()} Climate DAO. Powered by Algorand and built by{" "}
+    <a
+      href="https://github.com/lhcee3"
+      target="_blank"
+      rel="noopener noreferrer"
+      className="text-gray-400 hover:text-white underline"
+    >
+      Aneesh
+    </a>.
+  </p>
+</footer>
+
 
       {/* CSS for black/blue moving gradient - same as landing page */}
       <style jsx>{`
