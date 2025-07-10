@@ -103,7 +103,7 @@ export function WalletConnectPage() {
                   >
                     {isConnecting ? (
                       <div className="flex items-center space-x-2">
-                        <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                        <div className="w-4 h-4 border-2 border-white/30 border-t-white hover:bg-yellow-300 rounded-full animate-spin"></div>
                         <span>Connecting...</span>
                       </div>
                     ) : (
@@ -123,7 +123,7 @@ export function WalletConnectPage() {
               <div className="border-t border-teal-500/20 pt-4">
                 <Button
                   variant="outline"
-                  className="w-full border-gray-500/50 text-gray-400 hover:bg-gray-500/10 py-2 text-sm bg-transparent"
+                  className="w-full border-gray-500/50 text-gray-400 hover:bg-yellow-300 py-2 text-sm bg-transparent"
                   onClick={() => {
                     // Navigate to dashboard for testing
                     window.location.href = "/dashboard"
