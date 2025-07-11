@@ -241,7 +241,7 @@ export function SubmitProposalPage() {
           <div className="text-center space-y-2">
             <p className="text-sm text-gray-800">
               Need help with your proposal? Check out our{" "}
-              <a href="#" className="text-black font-medium underline underline-offset-2">
+              <a href="/submission-guidelines" className="text-black font-medium underline underline-offset-2">
                 submission guidelines
               </a>
             </p>
