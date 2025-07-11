@@ -7,7 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 export function SubmissionGuidelinesPage() {
   return (
     <div className="relative flex flex-col min-h-[100dvh] text-black overflow-hidden">
-      {/* Yellow/Black Gradient Background - Same as submit proposal page */}
+      {/* Yellow/Black Gradient Background */}
       <div className="fixed inset-0 z-0">
         <div className="absolute inset-0 bg-gradient-to-br from-yellow-400 via-yellow-500 to-amber-600"></div>
         <div className="absolute inset-0 bg-black/20"></div>
@@ -43,75 +43,45 @@ export function SubmissionGuidelinesPage() {
             </CardHeader>
 
             <CardContent className="space-y-6 text-gray-300">
+              {/* Environmental Impact */}
               <div className="space-y-4">
                 <h3 className="text-xl font-semibold text-yellow-400 flex items-center gap-2">
                   <LeafIcon className="w-6 h-6" />
                   Environmental Impact & Responsibility
                 </h3>
                 <ul className="list-disc list-inside space-y-2 pl-4">
-                  <li>
-                    **Non-Destructive Impact:** Your project **must not** have any destructive or harmful effects on the
-                    environment, ecosystems, or biodiversity. Proposals that involve practices detrimental to natural
-                    habitats, excessive resource depletion, or significant pollution will be rejected.
-                  </li>
-                  <li>
-                    **Positive Contribution:** Clearly articulate how your project will lead to a measurable positive
-                    environmental impact (e.g., CO₂ reduction, waste diversion, water conservation, habitat restoration,
-                    renewable energy generation).
-                  </li>
-                  <li>
-                    **Sustainability:** Demonstrate the long-term sustainability of your project beyond initial funding.
-                    Consider its operational longevity and potential for scalability.
-                  </li>
-                  <li>
-                    **Ethical Sourcing:** If applicable, detail your commitment to ethical and sustainable sourcing of
-                    materials and resources.
-                  </li>
+                  <li>Your project must not have destructive effects on the environment, ecosystems, or biodiversity.</li>
+                  <li>Clearly explain how your project results in measurable environmental benefits — such as CO₂ reduction, water conservation, or habitat restoration.</li>
+                  <li>Show how your project can sustain itself in the long run and scale beyond initial funding.</li>
+                  <li>If relevant, explain how you ethically and sustainably source materials and resources.</li>
                 </ul>
               </div>
 
+              {/* Innovation & Feasibility */}
               <div className="space-y-4 pt-4">
                 <h3 className="text-xl font-semibold text-yellow-400 flex items-center gap-2">
                   <LightbulbIcon className="w-6 h-6" />
                   Innovation & Feasibility
                 </h3>
                 <ul className="list-disc list-inside space-y-2 pl-4">
-                  <li>
-                    **Innovative Approach:** We seek projects that introduce novel solutions, technologies, or
-                    methodologies to address climate challenges. Show how your approach stands out from existing
-                    solutions.
-                  </li>
-                  <li>
-                    **Technological Soundness:** If your project involves technology, provide evidence of its
-                    feasibility, whether through prototypes, pilot programs, or robust research.
-                  </li>
-                  <li>
-                    **Clear Objectives:** Define clear, measurable, achievable, relevant, and time-bound (SMART)
-                    objectives for your project.
-                  </li>
-                  <li>
-                    **Team Capability:** Briefly describe the experience and expertise of your team members relevant to
-                    the project's success.
-                  </li>
+                  <li>Present a novel approach, method, or technology to solve climate-related challenges.</li>
+                  <li>If your project involves tech, back it up with evidence — like prototypes, pilots, or solid research.</li>
+                  <li>Clearly define measurable, achievable, and time-bound (SMART) goals for your project.</li>
+                  <li>Describe your team's experience and qualifications relevant to project success.</li>
                 </ul>
               </div>
 
+              {/* General Submission */}
               <div className="space-y-4 pt-4">
                 <h3 className="text-xl font-semibold text-yellow-400 flex items-center gap-2">
                   <FileTextIcon className="w-6 h-6" />
                   General Submission Requirements
                 </h3>
                 <ul className="list-disc list-inside space-y-2 pl-4">
-                  <li>**Completeness:** Ensure all required fields in the proposal form are accurately filled out.</li>
-                  <li>
-                    **Clarity:** Present your proposal clearly and concisely. Avoid jargon where possible, or explain it
-                    thoroughly.
-                  </li>
-                  <li>
-                    **Supporting Documents:** While optional, providing detailed reports, case studies, or
-                    certifications can significantly strengthen your proposal.
-                  </li>
-                  <li>**Transparency:** Be transparent about your project's budget, timeline, and potential risks.</li>
+                  <li>Ensure all form fields are properly completed.</li>
+                  <li>Write your proposal in clear, simple terms. Avoid jargon or explain it clearly.</li>
+                  <li>Optionally include detailed reports, case studies, or certifications to strengthen your submission.</li>
+                  <li>Be transparent about your budget, timeline, and any project risks.</li>
                 </ul>
               </div>
             </CardContent>
