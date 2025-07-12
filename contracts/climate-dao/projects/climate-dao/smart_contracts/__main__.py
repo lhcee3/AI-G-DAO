@@ -1,7 +1,7 @@
 import sys
 from pathlib import Path
 from pyteal import compileTeal, Mode
-from climate_dao.contract import approval_program, clear_program
+from .climate_dao.contract import approval_program, clear_program
 
 artifacts_dir = Path(__file__).parent / "artifacts"
 artifacts_dir.mkdir(exist_ok=True)
