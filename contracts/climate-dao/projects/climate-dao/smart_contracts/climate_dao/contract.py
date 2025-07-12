@@ -16,7 +16,8 @@ def approval_program():
 
     submit_proposal = Seq(
         (i := ScratchVar()).store(App.globalGet(Bytes("count"))),
-        App.box_create(Itob(i.load()), Int(64)),
+        # Fix: Store the result of box_create or use Pop() to discard it
+        Pop(App.box_create(Itob(i.load()), Int(64))),
         App.box_put(
             Itob(i.load()),
             Concat(
