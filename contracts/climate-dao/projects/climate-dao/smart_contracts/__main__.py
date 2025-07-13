@@ -13,7 +13,7 @@ def build():
     (artifacts_dir / "approval.teal").write_text(approval)
     (artifacts_dir / "clear.teal").write_text(clear)
 
-    print("✅ Contracts compiled to /artifacts")
+    print(" Contracts compiled to /artifacts")
 
 def main():
     if len(sys.argv) < 2:

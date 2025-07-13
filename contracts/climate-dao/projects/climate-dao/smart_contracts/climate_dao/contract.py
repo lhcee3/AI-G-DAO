@@ -33,19 +33,19 @@ def approval_program():
     )
 
     vote = Seq(
-        (pid := Btoi(Txn.application_args[1])),
-        (choice := Btoi(Txn.application_args[2])),
-        (data := App.box_get(Itob(pid))),
+        (pid := ScratchVar()).store(Btoi(Txn.application_args[1])),
+        (choice := ScratchVar()).store(Btoi(Txn.application_args[2])),
+        (data := App.box_get(Itob(pid.load()))),
         Assert(data.hasValue()),
         (yes := ScratchVar()).store(Btoi(Extract(data.value(), OFFSET_YES, Int(8)))),
         (no := ScratchVar()).store(Btoi(Extract(data.value(), OFFSET_NO, Int(8)))),
-        (finalized := Btoi(Extract(data.value(), OFFSET_FINALIZED, Int(8)))),
-        Assert(finalized == Int(0)),
-        If(choice == Int(1))
+        (finalized := ScratchVar()).store(Btoi(Extract(data.value(), OFFSET_FINALIZED, Int(8)))),
+        Assert(finalized.load() == Int(0)),
+        If(choice.load() == Int(1))
             .Then(yes.store(yes.load() + Int(1)))
             .Else(no.store(no.load() + Int(1))),
         App.box_put(
-            Itob(pid),
+            Itob(pid.load()),
             Concat(
                 Extract(data.value(), OFFSET_REQUESTED, Int(16)),
                 Itob(yes.load()),
@@ -57,13 +57,13 @@ def approval_program():
     )
 
     finalize = Seq(
-        (pid := Btoi(Txn.application_args[1])),
-        (data := App.box_get(Itob(pid))),
+        (pid := ScratchVar()).store(Btoi(Txn.application_args[1])),
+        (data := App.box_get(Itob(pid.load()))),
         Assert(data.hasValue()),
-        (finalized := Btoi(Extract(data.value(), OFFSET_FINALIZED, Int(8)))),
-        Assert(finalized == Int(0)),
+        (finalized := ScratchVar()).store(Btoi(Extract(data.value(), OFFSET_FINALIZED, Int(8)))),
+        Assert(finalized.load() == Int(0)),
         App.box_put(
-            Itob(pid),
+            Itob(pid.load()),
             Concat(
                 Extract(data.value(), OFFSET_REQUESTED, Int(32)),
                 Itob(Int(1))

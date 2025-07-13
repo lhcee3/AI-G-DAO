@@ -1,0 +1,147 @@
+#pragma version 8
+txn ApplicationID
+int 0
+==
+bnz main_l11
+txna ApplicationArgs 0
+byte "submit_proposal"
+==
+bnz main_l10
+txna ApplicationArgs 0
+byte "vote"
+==
+bnz main_l6
+txna ApplicationArgs 0
+byte "finalize_proposal"
+==
+bnz main_l5
+err
+main_l5:
+txna ApplicationArgs 1
+btoi
+store 8
+load 8
+itob
+box_get
+store 10
+store 9
+load 10
+assert
+load 9
+extract 32 8
+btoi
+store 11
+load 11
+int 0
+==
+assert
+load 8
+itob
+load 9
+extract 0 32
+int 1
+itob
+concat
+box_put
+int 1
+return
+main_l6:
+txna ApplicationArgs 1
+btoi
+store 1
+txna ApplicationArgs 2
+btoi
+store 2
+load 1
+itob
+box_get
+store 4
+store 3
+load 4
+assert
+load 3
+extract 16 8
+btoi
+store 5
+load 3
+extract 24 8
+btoi
+store 6
+load 3
+extract 32 8
+btoi
+store 7
+load 7
+int 0
+==
+assert
+load 2
+int 1
+==
+bnz main_l9
+load 6
+int 1
++
+store 6
+main_l8:
+load 1
+itob
+load 3
+extract 0 16
+load 5
+itob
+concat
+load 6
+itob
+concat
+int 0
+itob
+concat
+box_put
+int 1
+return
+main_l9:
+load 5
+int 1
++
+store 5
+b main_l8
+main_l10:
+byte "count"
+app_global_get
+store 0
+load 0
+itob
+int 64
+box_create
+pop
+load 0
+itob
+txna ApplicationArgs 1
+extract 0 8
+txna ApplicationArgs 2
+extract 0 8
+concat
+int 0
+itob
+concat
+int 0
+itob
+concat
+int 0
+itob
+concat
+box_put
+byte "count"
+load 0
+int 1
++
+app_global_put
+int 1
+return
+main_l11:
+byte "count"
+int 0
+app_global_put
+int 1
+return
