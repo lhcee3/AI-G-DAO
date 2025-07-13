@@ -11,6 +11,9 @@ python = "^3.12"
 python-dotenv = "^1.0.0"
 algorand-python = "^2.0.0"
 algorand-python-testing = "~0"
+pyteal = "0.24.1"
+algokit-utils = "4.1.0"
+algokit-client-generator = "2.1.0"
 
 [tool.poetry.group.dev.dependencies]
 algokit-client-generator = "^2.1.0"
