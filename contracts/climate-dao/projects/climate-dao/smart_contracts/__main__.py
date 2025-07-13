@@ -1,4 +1,7 @@
-from algorand_python.cli import cli
+from contract import approval_program, clear_state_program
 
-if __name__ == "__main__":
-    cli()
+with open("approval.teal", "w") as f:
+    f.write(approval_program().teal())
+
+with open("clear.teal", "w") as f:
+    f.write(clear_state_program().teal())
