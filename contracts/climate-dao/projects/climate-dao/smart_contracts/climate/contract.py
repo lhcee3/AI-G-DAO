@@ -1,122 +1,142 @@
-from algorand_python import (
-    Application,
-    Global,
-    Account,
-    ABIReturnSubroutine,
-    abi,
-    ApplicationClient,
-    OnCreate,
-    OnCall,
-)
-from algorand_python.stdlib import (
-    itxn_create_payment,
-    GlobalStateValue,
-    LocalStateValue,
-)
-from algorand_python.types import TealType
 
-app = Application("ClimateDAO")
+from pyteal import *
 
+def approval_program():
+    # ========================
+    # GLOBAL STATE VARIABLES
+    # ========================
+    proposal_count_key = Bytes("proposal_count")
 
-# ========================
-# GLOBAL STATE VARIABLES
-# ========================
-proposal_count = GlobalStateValue(name="proposal_count", type=abi.Uint64)
+    # ========================
+    # LOCAL STATE VARIABLES
+    # ========================
+    voted_key = Bytes("voted")  # We'll store JSON-style stringified IDs for simplicity
 
-# ========================
-# DATA STRUCTS
-# ========================
-class Proposal(abi.NamedTuple):
-    id: abi.Field[abi.Uint64]
-    title: abi.Field[abi.String]
-    description: abi.Field[abi.String]
-    proposer: abi.Field[abi.Address]
-    impact_score: abi.Field[abi.Uint64]
-    yes_votes: abi.Field[abi.Uint64]
-    no_votes: abi.Field[abi.Uint64]
-    timestamp: abi.Field[abi.Uint64]
+    # ========================
+    # SUBROUTINE: Compose proposal key
+    # ========================
+    @Subroutine(TealType.bytes)
+    def proposal_key(proposal_id: Expr) -> Expr:
+        return Concat(Bytes("p_"), Itob(proposal_id))
 
+    # ========================
+    # SUBMIT PROPOSAL
+    # ========================
+    @Subroutine(TealType.none)
+    def submit_proposal():
+        id = App.globalGet(proposal_count_key)
+        key = proposal_key(id)
 
-# ========================
-# LOCAL STATE (PER USER)
-# ========================
-voted_proposals = LocalStateValue(name="voted_proposals", type=abi.DynamicArray[abi.Uint64])
+        title = Txn.application_args[1]
+        desc = Txn.application_args[2]
+        impact = Txn.application_args[3]
+        proposer = Txn.sender()
+        timestamp = Global.latest_timestamp()
 
-# ========================
-# ON CREATE
-# ========================
-@app.on_create
-def on_create():
-    return proposal_count.set(0)
+        data = Concat(
+            Itob(id),
+            Bytes("|"), title,
+            Bytes("|"), desc,
+            Bytes("|"), proposer,
+            Bytes("|"), impact,
+            Bytes("|"), Itob(Int(0)),  # yes
+            Bytes("|"), Itob(Int(0)),  # no
+            Bytes("|"), Itob(timestamp)
+        )
 
+        return Seq([
+            App.globalPut(key, data),
+            App.globalPut(proposal_count_key, id + Int(1)),
+            Approve()
+        ])
 
-# ========================
-# SUBMIT PROPOSAL
-# ========================
-@app.external
-def submit_proposal(
-    title: abi.String,
-    description: abi.String,
-    impact_score: abi.Uint64,
-    proposer: abi.Account,
-    output: abi.DynamicBytes,
-):
-    id = proposal_count.get()
-    key = f"p_{id}"
-    data = Proposal()
-    data.set(
-        id,
-        title,
-        description,
-        proposer.address(),
-        impact_score,
-        abi.Uint64(0),
-        abi.Uint64(0),
-        Global.latest_timestamp()
+    # ========================
+    # VOTE
+    # ========================
+    @Subroutine(TealType.none)
+    def vote():
+        pid = Btoi(Txn.application_args[1])
+        vote_yes = Txn.application_args[2]
+        key = proposal_key(pid)
+        existing = App.globalGet(key)
+
+        # Decode
+        parts = ScratchVar(TealType.bytes)
+        yes_votes = ScratchVar(TealType.uint64)
+        no_votes = ScratchVar(TealType.uint64)
+
+        # Get previous votes
+        yes_votes_val = ExtractUint64(existing, Len(existing) - 16)
+        no_votes_val = ExtractUint64(existing, Len(existing) - 8)
+
+        # Check local voted proposals
+        voted = App.localGet(Txn.sender(), voted_key)
+        has_voted = Substring(voted, Int(0), Int(4096)).find(Itob(pid)) != -1  # crude check
+
+        return Seq([
+            Assert(key != Bytes("")),
+            Assert(Not(has_voted)),
+
+            yes_votes.store(yes_votes_val),
+            no_votes.store(no_votes_val),
+
+            If(vote_yes == Bytes("yes")).Then(
+                yes_votes.store(yes_votes.load() + Int(1))
+            ).Else(
+                no_votes.store(no_votes.load() + Int(1))
+            ),
+
+            # Build back updated string
+            updated = Concat(
+                Substring(existing, Int(0), Len(existing) - 16),
+                Itob(yes_votes.load()),
+                Itob(no_votes.load())
+            ),
+
+            App.globalPut(key, updated),
+
+            # Update voted proposals
+            App.localPut(Txn.sender(), voted_key, Concat(voted, Itob(pid), Bytes(","))),
+
+            Approve()
+        ])
+
+    # ========================
+    # GET PROPOSAL
+    # ========================
+    @Subroutine(TealType.bytes)
+    def get_proposal():
+        pid = Btoi(Txn.application_args[1])
+        key = proposal_key(pid)
+        return App.globalGet(key)
+
+    # ========================
+    # HANDLERS
+    # ========================
+    on_create = Seq([
+        App.globalPut(proposal_count_key, Int(0)),
+        Approve()
+    ])
+
+    on_opt_in = Seq([
+        App.localPut(Txn.sender(), voted_key, Bytes("")),
+        Approve()
+    ])
+
+    on_call = Cond(
+        [Txn.application_args[0] == Bytes("submit_proposal"), submit_proposal()],
+        [Txn.application_args[0] == Bytes("vote"), vote()],
+        [Txn.application_args[0] == Bytes("get_proposal"), Return(get_proposal())]
     )
-    app.global_set(key, data.encode())
-    proposal_count.increment()
-    output.set_bytes(key.encode())
+
+    program = Cond(
+        [Txn.application_id() == Int(0), on_create],
+        [Txn.on_completion() == OnComplete.OptIn, on_opt_in],
+        [Txn.on_completion() == OnComplete.NoOp, on_call],
+    )
+
+    return program
 
 
-# ========================
-# VOTE ON PROPOSAL
-# ========================
-@app.external
-def vote(
-    proposal_id: abi.Uint64,
-    vote_yes: abi.Bool,
-    sender: abi.Account
-):
-    key = f"p_{proposal_id.get()}"
-    proposal_data = app.global_get(key)
-    proposal = Proposal()
-    proposal.decode(proposal_data)
-
-    # Check if already voted
-    already_voted = voted_proposals.contains(proposal_id)
-    assert not already_voted, "Already voted on this proposal"
-
-    # Tally the vote
-    if vote_yes.get():
-        new_yes = proposal.yes_votes.get() + 1
-        proposal.yes_votes.set(new_yes)
-    else:
-        new_no = proposal.no_votes.get() + 1
-        proposal.no_votes.set(new_no)
-
-    # Save back
-    app.global_set(key, proposal.encode())
-
-    # Update user state
-    voted_proposals.append(proposal_id)
-
-
-# ========================
-# GET PROPOSAL
-# ========================
-@app.external(read_only=True)
-def get_proposal(proposal_id: abi.Uint64, output: Proposal):
-    key = f"p_{proposal_id.get()}"
-    proposal_data = app.global_get(key)
-    output.decode(proposal_data)
+def clear_state_program():
+    return Approve()
