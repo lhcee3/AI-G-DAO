@@ -1,4 +1,4 @@
-from algorand_python.cli import cli
+from algorand_python import cli
 
 if __name__ == "__main__":
     cli()
