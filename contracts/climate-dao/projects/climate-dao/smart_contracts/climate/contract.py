@@ -1,5 +1,62 @@
 
-from pyteal import *
+from pyteal import (
+    Approve,
+    Assert,
+    Btoi,
+    Bytes,
+    Concat,
+    Cond,
+    Extract,
+    ExtractBytes,
+    ExtractUint64,
+    Expr,
+    Global,
+    If,
+    Int,
+    Itob,
+    Len,
+    Not,
+    OnComplete,
+    Return,
+    ScratchVar,
+    Seq,
+    Subroutine,
+    Substring,
+    TealType,
+    Txn,
+    TxnField,
+    TxnType,
+    TxnObject,
+    TxnGroupIndex,
+    TxnApplicationArgs,
+    TxnSender,
+    TxnOnCompletion,
+    TxnApplicationId,
+    TxnAccounts,
+    TxnForeignApps,
+    TxnForeignAssets,
+    TxnNote,
+    TxnReceiver,
+    TxnAmount,
+    TxnCloseRemainderTo,
+    TxnRekeyTo,
+    TxnFee,
+    App,
+    AppParam,
+    AppLocalGet,
+    AppGlobalGet,
+    AppGlobalPut,
+    AppLocalPut,
+    AppLocalDel,
+    AppGlobalDel,
+    AppLocalGetEx,
+    AppGlobalGetEx,
+    TxnGroupSize,
+    GlobalGroupSize,
+    Mode,
+    compileTeal,
+)
+
 
 def approval_program():
     # ========================
@@ -17,7 +74,7 @@ def approval_program():
     # ========================
     @Subroutine(TealType.bytes)
     def proposal_key(proposal_id: Expr) -> Expr:
-        return Concat(Bytes("p_"), Itob(proposal_id))
+        return Concat(Bytes("p_"), Itob(proposal_id))   
 
     # ========================
     # SUBMIT PROPOSAL
@@ -73,33 +130,37 @@ def approval_program():
         voted = App.localGet(Txn.sender(), voted_key)
         has_voted = Substring(voted, Int(0), Int(4096)).find(Itob(pid)) != -1  # crude check
 
-        return Seq([
-            Assert(key != Bytes("")),
-            Assert(Not(has_voted)),
+return Seq([
+    Assert(key != Bytes("")),
+    Assert(Not(has_voted)),
 
-            yes_votes.store(yes_votes_val),
-            no_votes.store(no_votes_val),
+    yes_votes.store(yes_votes_val),
+    no_votes.store(no_votes_val),
 
-            If(vote_yes == Bytes("yes")).Then(
-                yes_votes.store(yes_votes.load() + Int(1))
-            ).Else(
-                no_votes.store(no_votes.load() + Int(1))
-            ),
+    If(vote_yes == Bytes("yes")).Then(
+        yes_votes.store(yes_votes.load() + Int(1))
+    ).Else(
+        no_votes.store(no_votes.load() + Int(1))
+    ),
 
-            # Build back updated string
-            updated = Concat(
-                Substring(existing, Int(0), Len(existing) - 16),
-                Itob(yes_votes.load()),
-                Itob(no_votes.load())
-            ),
+    App.globalPut(
+        key,
+        Concat(
+            Substring(existing, Int(0), Len(existing) - Int(16)),
+            Itob(yes_votes.load()),
+            Itob(no_votes.load())
+        )
+    ),
 
-            App.globalPut(key, updated),
+    App.localPut(
+        Txn.sender(),
+        voted_key,
+        Concat(voted, Itob(pid), Bytes(","))
+    ),
 
-            # Update voted proposals
-            App.localPut(Txn.sender(), voted_key, Concat(voted, Itob(pid), Bytes(","))),
+    Approve()
+])
 
-            Approve()
-        ])
 
     # ========================
     # GET PROPOSAL
