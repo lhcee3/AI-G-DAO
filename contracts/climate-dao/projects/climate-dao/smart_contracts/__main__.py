@@ -1,5 +1,5 @@
 from pyteal import compileTeal, Mode
-from climate.contract import approval_program, clear_state_program  
+from .climate.contract import approval_program, clear_state_program
 
 if __name__ == "__main__":
     with open("approval.teal", "w") as f:
