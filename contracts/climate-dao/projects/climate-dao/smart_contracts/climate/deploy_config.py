@@ -1,11 +1,6 @@
-from algokit_utils.config import ConfigurableApplicationClient
-from contract import ClimateDAO
+from algokit_utils.config import DeploymentConfig
+from dataclasses import dataclass
 
-climate_app = ClimateDAO()
-
-def deploy():
-    client = ConfigurableApplicationClient(
-        app=climate_app,
-        app_id=None,  # set manually if needed
-    )
-    client.create()
+@dataclass
+class ClimateDAOConfig(DeploymentConfig):
+    pass  # Optional config can be added here
