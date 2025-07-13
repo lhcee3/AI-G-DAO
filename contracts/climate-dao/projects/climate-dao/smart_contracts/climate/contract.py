@@ -130,36 +130,36 @@ def approval_program():
         voted = App.localGet(Txn.sender(), voted_key)
         has_voted = Substring(voted, Int(0), Int(4096)).find(Itob(pid)) != -1  # crude check
 
-return Seq([
-    Assert(key != Bytes("")),
-    Assert(Not(has_voted)),
+        return Seq([
+            Assert(key != Bytes("")),
+            Assert(Not(has_voted)),
 
-    yes_votes.store(yes_votes_val),
-    no_votes.store(no_votes_val),
+            yes_votes.store(yes_votes_val),
+            no_votes.store(no_votes_val),
 
-    If(vote_yes == Bytes("yes")).Then(
-        yes_votes.store(yes_votes.load() + Int(1))
-    ).Else(
-        no_votes.store(no_votes.load() + Int(1))
-    ),
+            If(vote_yes == Bytes("yes")).Then(
+                yes_votes.store(yes_votes.load() + Int(1))
+            ).Else(
+                no_votes.store(no_votes.load() + Int(1))
+            ),
 
-    App.globalPut(
-        key,
-        Concat(
-            Substring(existing, Int(0), Len(existing) - Int(16)),
-            Itob(yes_votes.load()),
-            Itob(no_votes.load())
-        )
-    ),
+            App.globalPut(
+                key,
+                Concat(
+                    Substring(existing, Int(0), Len(existing) - Int(16)),
+                    Itob(yes_votes.load()),
+                    Itob(no_votes.load())
+                )
+            ),
 
-    App.localPut(
-        Txn.sender(),
-        voted_key,
-        Concat(voted, Itob(pid), Bytes(","))
-    ),
+            App.localPut(
+                Txn.sender(),
+                voted_key,
+                Concat(voted, Itob(pid), Bytes(","))
+            ),
 
-    Approve()
-])
+            Approve()
+        ])
 
 
     # ========================
