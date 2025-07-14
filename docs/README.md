@@ -29,4 +29,4 @@ This project is currently under development. Contributions are welcome, and deta
 
 ## License
 
-(Please add your chosen license here, e.g., MIT, Apache 2.0, etc.)
+License coming soon!
