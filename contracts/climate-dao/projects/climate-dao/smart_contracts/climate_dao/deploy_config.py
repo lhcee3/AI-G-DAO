@@ -1,44 +1,27 @@
-import logging
-
-import algokit_utils
-
-logger = logging.getLogger(__name__)
 
 
-# define deployment behaviour based on supplied app spec
-def deploy() -> None:
-    from smart_contracts.artifacts.climate_dao.climate_dao_client import (
-        HelloArgs,
-        ClimateDaoFactory,
-    )
+# Admin wallet address (replace with your testnet/mainnet address)
+DAO_ADMIN = "YOUR_ALGORAND_ADMIN_ADDRESS"
 
-    algorand = algokit_utils.AlgorandClient.from_environment()
-    deployer_ = algorand.account.from_environment("DEPLOYER")
+# Token configuration
+DAO_TOKEN_CONFIG = {
+    "name": "Climate DAO Token",
+    "unit": "CDAO",
+    "total_supply": 1_000_000_000,
+    "decimals": 6
+}
 
-    factory = algorand.client.get_typed_app_factory(
-        ClimateDaoFactory, default_sender=deployer_.address
-    )
+CREDIT_TOKEN_CONFIG = {
+    "name": "Climate Credit Coin",
+    "unit": "CCC",
+    "total_supply": 10_000_000_000,
+    "decimals": 2
+}
 
-    app_client, result = factory.deploy(
-        on_update=algokit_utils.OnUpdate.AppendApp,
-        on_schema_break=algokit_utils.OnSchemaBreak.AppendApp,
-    )
-
-    if result.operation_performed in [
-        algokit_utils.OperationPerformed.Create,
-        algokit_utils.OperationPerformed.Replace,
-    ]:
-        algorand.send.payment(
-            algokit_utils.PaymentParams(
-                amount=algokit_utils.AlgoAmount(algo=1),
-                sender=deployer_.address,
-                receiver=app_client.app_address,
-            )
-        )
-
-    name = "world"
-    response = app_client.send.hello(args=HelloArgs(name=name))
-    logger.info(
-        f"Called hello on {app_client.app_name} ({app_client.app_id}) "
-        f"with name={name}, received: {response.abi_return}"
-    )
+# Voting settings
+DEFAULT_VOTING_PARAMETERS = {
+    "voting_period_secs": 604800,
+    "quorum_threshold": 51,
+    "approval_threshold": 60,
+    "min_power_to_propose": 1000
+}
