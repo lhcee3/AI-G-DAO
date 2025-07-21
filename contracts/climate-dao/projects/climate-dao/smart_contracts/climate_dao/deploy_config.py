@@ -1,5 +1,4 @@
 
-
 # Admin wallet address (replace with your testnet/mainnet address)
 DAO_ADMIN = "YOUR_ALGORAND_ADMIN_ADDRESS"
 
