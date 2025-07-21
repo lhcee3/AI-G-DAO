@@ -31,7 +31,7 @@ class VoterRecord(Struct):
 
 # ── CONTRACT: Core Climate DAO ──
 class ClimateDAO(ARC4Contract):
-     """Core Climate DAO contract for governance and climate credits"""
+    """Core Climate DAO contract for governance and climate credits"""
     
     def __init__(self) -> None:
         """Initialize the Climate DAO contract"""
@@ -257,7 +257,7 @@ class ClimateDAO(ARC4Contract):
 
 # ── CONTRACT: Impact Analytics ──
 class ImpactAnalytics(ARC4Contract):
-       """Contract for tracking and analyzing environmental impact of climate projects"""
+    """Contract for tracking and analyzing environmental impact of climate projects"""
     
     def __init__(self) -> None:
         """Initialize the Impact Analytics contract"""
@@ -449,7 +449,7 @@ class ImpactAnalytics(ARC4Contract):
 
 # ── CONTRACT: Voting System ──
 class VotingSystem(ARC4Contract):
-       """Contract for tracking and analyzing environmental impact of climate projects"""
+    """Contract for tracking and analyzing environmental impact of climate projects"""
     
     def __init__(self) -> None:
         """Initialize the Impact Analytics contract"""
@@ -637,4 +637,3 @@ class VotingSystem(ARC4Contract):
     def opt_out(self) -> None:
         """Opt out of the Impact Analytics contract"""
         pass
-
