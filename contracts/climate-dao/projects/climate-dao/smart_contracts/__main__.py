@@ -1,5 +1,5 @@
-from .contract import ClimateDAO, ImpactAnalytics, VotingSystem
-from .deploy_config import DAO_ADMIN, DAO_TOKEN_CONFIG
+from smart_contracts.climate_dao.contract import ClimateDAO, ImpactAnalytics, VotingSystem
+from smart_contracts.climate_dao.deploy_config import DAO_ADMIN, DAO_TOKEN_CONFIG
 
 def main():
     print("🛠️  Climate DAO Smart Contracts")

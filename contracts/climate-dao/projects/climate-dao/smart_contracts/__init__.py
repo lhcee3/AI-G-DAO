@@ -1,1 +1,1 @@
-from .contract import ClimateDAO, ImpactAnalytics, VotingSystem
+from smart_contracts.climate_dao.contract import ClimateDAO, ImpactAnalytics, VotingSystem
