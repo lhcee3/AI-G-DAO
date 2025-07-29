@@ -1,28 +1,30 @@
 "use client"
 
-import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { WalletIcon, ArrowLeftIcon, CheckCircleIcon } from "lucide-react"
 import Link from "next/link"
+import { useWallet } from "@/hooks/use-wallet"
+import { useRouter } from "next/navigation"
 
 export function WalletConnectPage() {
-  const [walletAddress, setWalletAddress] = useState<string | null>(null)
-  const [isConnecting, setIsConnecting] = useState(false)
+  const { isConnected, address, balance, connect, disconnect, loading, error } = useWallet()
+  const router = useRouter()
 
   const handleConnectWallet = async () => {
-    setIsConnecting(true)
-    // Simulate wallet connection
-    await new Promise((resolve) => setTimeout(resolve, 2000))
-
-    // Dummy wallet address for demonstration
-    const dummyAddress = "ALGO_XYZ_123_ABC_456_DEF_789_GHI_012_JKL_345_MNO_678_PQR_901"
-    setWalletAddress(dummyAddress)
-    setIsConnecting(false)
+    try {
+      await connect()
+    } catch (err) {
+      console.error('Failed to connect wallet:', err)
+    }
   }
 
   const handleDisconnect = () => {
-    setWalletAddress(null)
+    disconnect()
+  }
+
+  const handleEnterDashboard = () => {
+    router.push('/dashboard')
   }
 
   return (
@@ -62,7 +64,13 @@ export function WalletConnectPage() {
             </CardHeader>
 
             <CardContent className="space-y-6">
-              {walletAddress ? (
+              {error && (
+                <div className="bg-red-500/10 border border-red-500/30 rounded-lg p-4">
+                  <p className="text-red-400 text-sm">{error}</p>
+                </div>
+              )}
+
+              {isConnected && address ? (
                 <div className="space-y-4">
                   <div className="flex items-center justify-center space-x-2 text-green-400">
                     <CheckCircleIcon className="w-5 h-5" />
@@ -71,16 +79,14 @@ export function WalletConnectPage() {
 
                   <div className="bg-teal-500/10 border border-teal-500/30 rounded-lg p-4">
                     <p className="text-xs text-gray-400 mb-1">Connected Address:</p>
-                    <p className="text-sm text-teal-400 font-mono break-all">{walletAddress}</p>
+                    <p className="text-sm text-teal-400 font-mono break-all">{address}</p>
+                    <p className="text-xs text-gray-400 mt-2">Balance: {balance.toFixed(2)} ALGO</p>
                   </div>
 
                   <div className="space-y-3">
                     <Button
                       className="w-full bg-teal-600 hover:bg-teal-700 text-white font-semibold py-3 rounded-lg transition-all duration-300 transform hover:scale-105"
-                      onClick={() => {
-                        // Navigate to dashboard - we'll implement this later
-                        console.log("Navigate to dashboard")
-                      }}
+                      onClick={handleEnterDashboard}
                     >
                       Enter DAO Dashboard
                     </Button>
@@ -99,11 +105,11 @@ export function WalletConnectPage() {
                   <Button
                     className="w-full bg-teal-600 hover:bg-teal-700 text-white font-semibold py-4 rounded-lg transition-all duration-300 transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed"
                     onClick={handleConnectWallet}
-                    disabled={isConnecting}
+                    disabled={loading}
                   >
-                    {isConnecting ? (
+                    {loading ? (
                       <div className="flex items-center space-x-2">
-                        <div className="w-4 h-4 border-2 border-white/30 border-t-white hover:bg-yellow-300 rounded-full animate-spin"></div>
+                        <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
                         <span>Connecting...</span>
                       </div>
                     ) : (

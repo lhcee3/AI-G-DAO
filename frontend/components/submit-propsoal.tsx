@@ -10,9 +10,15 @@ import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { ArrowLeftIcon, UploadIcon, FileTextIcon, DollarSignIcon, CalendarIcon } from "lucide-react"
 import Link from "next/link"
+import { useWallet } from "@/hooks/use-wallet"
+import { useClimateDAO } from "@/hooks/use-climate-dao"
+import { useRouter } from "next/navigation"
 
 export function SubmitProposalPage() {
-  const [isSubmitting, setIsSubmitting] = useState(false)
+  const { isConnected, address } = useWallet()
+  const { submitProposal, loading, error } = useClimateDAO()
+  const router = useRouter()
+  
   const [formData, setFormData] = useState({
     projectTitle: "",
     description: "",
@@ -25,13 +31,41 @@ export function SubmitProposalPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    setIsSubmitting(true)
+    
+    if (!isConnected) {
+      alert("Please connect your wallet first!")
+      router.push('/connect-wallet')
+      return
+    }
 
-    // Simulate submission
-    await new Promise((resolve) => setTimeout(resolve, 2000))
-
-    alert("Proposal submitted successfully! It will now be evaluated by our AI system.")
-    setIsSubmitting(false)
+    try {
+      const fundingAmountNum = parseInt(formData.fundingAmount) || 0
+      const impactScore = parseInt(formData.expectedImpact) || 0
+      
+      const txId = await submitProposal(
+        formData.projectTitle,
+        formData.description,
+        fundingAmountNum,
+        impactScore
+      )
+      
+      alert(`Proposal submitted successfully! Transaction ID: ${txId}`)
+      
+      // Reset form
+      setFormData({
+        projectTitle: "",
+        description: "",
+        fundingAmount: "",
+        duration: "",
+        expectedImpact: "",
+        category: "",
+        location: "",
+      })
+      
+    } catch (err) {
+      console.error('Failed to submit proposal:', err)
+      alert(`Failed to submit proposal: ${err instanceof Error ? err.message : 'Unknown error'}`)
+    }
   }
 
   const handleInputChange = (field: string, value: string) => {
@@ -211,18 +245,35 @@ export function SubmitProposalPage() {
                 </div>
 
                 <div className="flex flex-col sm:flex-row gap-4 pt-6">
+                  {error && (
+                    <div className="bg-red-500/10 border border-red-500/30 rounded-lg p-3 mb-4">
+                      <p className="text-red-600 text-sm">{error}</p>
+                    </div>
+                  )}
+                  
+                  {!isConnected && (
+                    <div className="bg-yellow-500/10 border border-yellow-500/30 rounded-lg p-3 mb-4">
+                      <p className="text-yellow-600 text-sm">
+                        Please connect your wallet to submit proposals.{" "}
+                        <Link href="/connect-wallet" className="underline">
+                          Connect Wallet
+                        </Link>
+                      </p>
+                    </div>
+                  )}
+                  
                   <Button
                     type="submit"
-                    disabled={isSubmitting}
+                    disabled={loading || !isConnected}
                     className="flex-1 bg-yellow-500 hover:bg-yellow-600 text-black font-semibold py-3 rounded-lg transition-all duration-300 transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed"
                   >
-                    {isSubmitting ? (
+                    {loading ? (
                       <div className="flex items-center space-x-2">
                         <div className="w-4 h-4 border-2 border-black/30 border-t-black rounded-full animate-spin"></div>
-                        <span>Submitting...</span>
+                        <span>Submitting to Blockchain...</span>
                       </div>
                     ) : (
-                      "Submit Proposal for AI Review"
+                      "Submit Proposal to DAO"
                     )}
                   </Button>
 
