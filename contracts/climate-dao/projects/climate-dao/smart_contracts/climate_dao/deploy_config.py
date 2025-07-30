@@ -1,6 +1,5 @@
 
-# Admin wallet address (replace with your testnet/mainnet address)
-DAO_ADMIN = "YOUR_ALGORAND_ADMIN_ADDRESS"
+DAO_ADMIN = "3YCNRIUFVGOIX4K7K2NLRTIAH23ULNC47NZT6IQTPRTOQUVCWEIFTGTNUA"  # Your TestNet address
 
 # Token configuration
 DAO_TOKEN_CONFIG = {
