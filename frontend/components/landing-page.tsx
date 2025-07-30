@@ -46,16 +46,11 @@ export function LandingPage() {
               </p>
             </div>
             
-            <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
+            <div className="flex justify-center items-center">
               <Link href="/connect-wallet">
                 <Button size="lg" className="px-8 py-4 text-lg bg-teal-600 hover:bg-teal-700 text-white rounded-xl shadow-lg transition-all duration-300 transform hover:scale-105">
                   Join the DAO
                   <ArrowRightIcon className="ml-2 w-5 h-5" />
-                </Button>
-              </Link>
-              <Link href="/submit-proposal">
-                <Button size="lg" variant="outline" className="px-8 py-4 text-lg border-white/30 text-white hover:bg-white/10 rounded-xl shadow-lg transition-all duration-300 bg-transparent">
-                  Submit Proposal
                 </Button>
               </Link>
             </div>
