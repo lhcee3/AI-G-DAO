@@ -2,211 +2,262 @@
 
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { BotIcon, CoinsIcon, HandshakeIcon, LeafIcon, LightbulbIcon, VoteIcon } from "lucide-react"
+import { BotIcon, CoinsIcon, HandshakeIcon, LeafIcon, LightbulbIcon, VoteIcon, ArrowRightIcon, CheckCircleIcon } from "lucide-react"
 import Link from "next/link"
 import Image from "next/image"
 
 export function LandingPage() {
   return (
     <div className="relative flex flex-col min-h-[100dvh] text-white overflow-hidden">
-      {/* Moving Gradient Background - Applied to the entire page */}
+      {/* Moving Gradient Background */}
       <div className="fixed inset-0 z-0">
         <div className="absolute inset-0 animate-moving-gradient"></div>
       </div>
 
+      {/* Header */}
+      <header className="relative z-10 flex items-center justify-between p-6">
+        <div className="text-teal-400 font-bold text-xl">Climate DAO</div>
+        <Link href="/connect-wallet">
+          <Button variant="outline" className="border-teal-500/50 text-teal-400 hover:bg-teal-500/10 bg-transparent">
+            Connect Wallet
+          </Button>
+        </Link>
+      </header>
+
       <main className="relative z-10 flex-1">
         {/* Hero Section */}
-        <section className="w-full py-12 md:py-24 lg:py-32 xl:py-48 flex items-center justify-center text-center px-4 bg-transparent">
-          <div className="max-w-7xl w-full space-y-6">
-            <div className="space-y-4">
-              <h1 className="text-4xl font-bold tracking-tighter sm:text-5xl md:text-6xl lg:text-7xl/none text-white">
-                AI-Governed DAO for <span className="climate-glow">Climate</span> Impact Credits
+        <section className="flex items-center justify-center min-h-[70vh] px-4">
+          <div className="max-w-4xl mx-auto text-center space-y-8">
+            {/* Algorand Badge */}
+            <div className="flex justify-center mb-6">
+              <div className="inline-flex items-center gap-2 px-4 py-2 bg-teal-500/10 border border-teal-500/30 rounded-full text-sm text-teal-400 backdrop-blur-sm">
+                <LeafIcon className="w-4 h-4" />
+                <span>Powered by Algorand's carbon-negative blockchain</span>
+              </div>
+            </div>
+            
+            <div className="space-y-6">
+              <h1 className="text-5xl md:text-7xl font-bold tracking-tight">
+                AI-Governed DAO for <span className="climate-glow">Climate</span> Impact
               </h1>
-              <p className="mx-auto max-w-[800px] text-gray-300 md:text-xl">
-                Revolutionizing Green Project Funding with Hybrid Intelligence on Algorand. Leveraging AI for impact
-                assessment and human wisdom for decentralized governance.
+              <p className="text-xl md:text-2xl text-gray-300 max-w-3xl mx-auto leading-relaxed">
+                Revolutionizing green project funding with hybrid intelligence on Algorand. 
+                AI-powered impact assessment meets human wisdom for climate action.
               </p>
             </div>
-            <div className="flex flex-col gap-4 sm:flex-row justify-center">
-              <Button className="px-8 py-3 text-lg bg-teal-600 hover:bg-teal-700 text-white rounded-full shadow-lg transition-transform transform hover:scale-105">
-                <Link href="/connect-wallet">Learn More</Link>
-              </Button>
-              <Button
-                variant="outline"
-                className="px-8 py-3 text-lg border-white text-white hover:bg-gray-800 rounded-full shadow-lg transition-transform transform hover:scale-105 bg-transparent"
-              >
-                <Link href="/connect-wallet">Join the DAO</Link>
-              </Button>
-            </div>
-            <p className="text-sm text-gray-400 mt-8 flex items-center justify-center gap-2">
-              <LeafIcon className="w-4 h-4 text-teal-500" />
-              Powered by Algorand's ultra-low carbon footprint blockchain.
-            </p>
-          </div>
-        </section>
-
-        {/* How It Works Section */}
-        <section className="w-full py-12 md:py-24 lg:py-32 px-4 flex justify-center">
-          <div className="max-w-7xl w-full space-y-12">
-            <div className="flex flex-col items-center justify-center space-y-4 text-center">
-              <div className="space-y-2">
-                <h2 className="text-3xl font-bold tracking-tighter sm:text-5xl text-white">
-                  Our Hybrid Decision-Making Model
-                </h2>
-                <p className="max-w-[900px] text-gray-300 md:text-xl/relaxed lg:text-base/relaxed xl:text-xl/relaxed">
-                  Combining the precision of AI with the wisdom of the community for impactful climate action.
-                </p>
-              </div>
-            </div>
-            <div className="mx-auto grid items-start gap-8 sm:grid-cols-2 lg:grid-cols-4 lg:gap-12">
-              <Card className="flex flex-col items-center text-center p-6 shadow-md hover:shadow-lg transition-shadow duration-300 bg-black/50 border border-gray-800 backdrop-blur-sm">
-                <LightbulbIcon className="w-12 h-12 text-teal-500 mb-4" />
-                <CardTitle className="text-xl font-semibold mb-2 text-white">1. Submit Proposal</CardTitle>
-                <CardDescription className="text-gray-300">
-                  Startups and organizations submit their green project proposals to the DAO.
-                </CardDescription>
-              </Card>
-              <Card className="flex flex-col items-center text-center p-6 shadow-md hover:shadow-lg transition-shadow duration-300 bg-black/50 border border-gray-800 backdrop-blur-sm">
-                <BotIcon className="w-12 h-12 text-teal-500 mb-4" />
-                <CardTitle className="text-xl font-semibold mb-2 text-white">2. AI Evaluation</CardTitle>
-                <CardDescription className="text-gray-300">
-                  Our AI engine analyzes the proposal, providing an Environmental Impact Score (e.g., 8.2/10).
-                </CardDescription>
-              </Card>
-              <Card className="flex flex-col items-center text-center p-6 shadow-md hover:shadow-lg transition-shadow duration-300 bg-black/50 border border-gray-800 backdrop-blur-sm">
-                <VoteIcon className="w-12 h-12 text-teal-500 mb-4" />
-                <CardTitle className="text-xl font-semibold mb-2 text-white">3. Community Vote</CardTitle>
-                <CardDescription className="text-gray-300">
-                  DAO members review the AI score and proposal, then cast their votes.
-                </CardDescription>
-              </Card>
-              <Card className="flex flex-col items-center text-center p-6 shadow-md hover:shadow-lg transition-shadow duration-300 bg-black/50 border border-gray-800 backdrop-blur-sm">
-                <HandshakeIcon className="w-12 h-12 text-teal-500 mb-4" />
-                <CardTitle className="text-xl font-semibold mb-2 text-white">4. Fund & Impact</CardTitle>
-                <CardDescription className="text-gray-300">
-                  If approved, smart contracts release funding or tokenized carbon credits to the project.
-                </CardDescription>
-              </Card>
+            
+            <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
+              <Link href="/connect-wallet">
+                <Button size="lg" className="px-8 py-4 text-lg bg-teal-600 hover:bg-teal-700 text-white rounded-xl shadow-lg transition-all duration-300 transform hover:scale-105">
+                  Join the DAO
+                  <ArrowRightIcon className="ml-2 w-5 h-5" />
+                </Button>
+              </Link>
+              <Link href="/submit-proposal">
+                <Button size="lg" variant="outline" className="px-8 py-4 text-lg border-white/30 text-white hover:bg-white/10 rounded-xl shadow-lg transition-all duration-300 bg-transparent">
+                  Submit Proposal
+                </Button>
+              </Link>
             </div>
           </div>
         </section>
 
-        {/* Why Choose Us Section */}
-        <section className="w-full py-12 md:py-24 lg:py-32 px-4 flex justify-center">
-          <div className="max-w-7xl w-full space-y-12">
-            <div className="flex flex-col items-center justify-center space-y-4 text-center">
-              <div className="space-y-2">
-                <h2 className="text-3xl font-bold tracking-tighter sm:text-5xl text-white">Why Our DAO?</h2>
-                <p className="max-w-[900px] text-gray-300 md:text-xl/relaxed lg:text-base/relaxed xl:text-xl/relaxed">
-                  Driving transparent, efficient, and impactful climate action through innovation.
-                </p>
-              </div>
-            </div>
-            <div className="mx-auto grid max-w-5xl items-start gap-8 sm:grid-cols-2 lg:grid-cols-3 lg:gap-12">
-              <Card className="p-6 shadow-md hover:shadow-lg transition-shadow duration-300 bg-black/50 border border-gray-800 backdrop-blur-sm">
-                <CardHeader>
-                  <BotIcon className="w-8 h-8 text-teal-500 mb-2" />
-                  <CardTitle className="text-white">Intelligent Vetting</CardTitle>
-                </CardHeader>
-                <CardContent className="text-gray-300">
-                  AI-powered scoring ensures that only the most impactful and viable climate projects receive funding.
-                </CardContent>
-              </Card>
-              <Card className="p-6 shadow-md hover:shadow-lg transition-shadow duration-300 bg-black/50 border border-gray-800 backdrop-blur-sm">
-                <CardHeader>
-                  <VoteIcon className="w-8 h-8 text-teal-500 mb-2" />
-                  <CardTitle className="text-white">Decentralized Governance</CardTitle>
-                </CardHeader>
-                <CardContent className="text-gray-300">
-                  Empowering a global community to collectively decide on the future of climate finance.
-                </CardContent>
-              </Card>
-              <Card className="p-6 shadow-md hover:shadow-lg transition-shadow duration-300 bg-black/50 border border-gray-800 backdrop-blur-sm">
-                <CardHeader>
-                  <LeafIcon className="w-8 h-8 text-teal-500 mb-2" />
-                  <CardTitle className="text-white">Real-World Impact</CardTitle>
-                </CardHeader>
-                <CardContent className="text-gray-300">
-                  Directly fund sustainability and green projects, making a tangible difference in CO₂ reduction.
-                </CardContent>
-              </Card>
-              <Card className="p-6 shadow-md hover:shadow-lg transition-shadow duration-300 bg-black/50 border border-gray-800 backdrop-blur-sm">
-                <CardHeader>
-                  <Image
-                    src="/algorand_logo_mark.png"
-                    alt="Algorand Logo"
-                    width={32}
-                    height={32}
-                    className="w-8 h-8 mb-2"
-                    style={{ filter: "brightness(0) invert(1) sepia(1) saturate(10000%) hue-rotate(170deg)" }}
-                  />
-                  <CardTitle className="text-white">Algorand Advantage</CardTitle>
-                </CardHeader>
-                <CardContent className="text-gray-300">
-                  Leveraging Algorand's secure, scalable, and environmentally friendly blockchain for operations.
-                </CardContent>
-              </Card>
-              <Card className="p-6 shadow-md hover:shadow-lg transition-shadow duration-300 bg-black/50 border border-gray-800 backdrop-blur-sm">
-                <CardHeader>
-                  <CoinsIcon className="w-8 h-8 text-teal-500 mb-2" />
-                  <CardTitle className="text-white">Tokenized Credits</CardTitle>
-                </CardHeader>
-                <CardContent className="text-gray-300">
-                  Efficient and transparent management of verified carbon credits, tokenized for easy transfer.
-                </CardContent>
-              </Card>
-              <Card className="p-6 shadow-md hover:shadow-lg transition-shadow duration-300 bg-black/50 border border-gray-800 backdrop-blur-sm">
-                <CardHeader>
-                  <LightbulbIcon className="w-8 h-8 text-teal-500 mb-2" />
-                  <CardTitle className="text-white">Innovation at Core</CardTitle>
-                </CardHeader>
-                <CardContent className="text-gray-300">
-                  A unique hybrid decision-making model setting new standards for decentralized environmental
-                  initiatives.
-                </CardContent>
-              </Card>
-            </div>
-          </div>
-        </section>
-
-        {/* Call to Action Section */}
-        <section className="w-full py-12 md:py-24 lg:py-32 flex items-center justify-center text-center px-4 bg-transparent">
-          <div className="max-w-7xl w-full space-y-6">
-            <div className="space-y-4">
-              <h2 className="text-3xl font-bold tracking-tighter sm:text-5xl text-white">Ready to Make an Impact?</h2>
-              <p className="mx-auto max-w-[700px] text-gray-300 md:text-xl">
-                Join our community and help shape a sustainable future by funding verified climate projects.
+        {/* How It Works - Simplified */}
+        <section className="py-20 px-4">
+          <div className="max-w-6xl mx-auto">
+            <div className="text-center mb-16">
+              <h2 className="text-4xl font-bold text-white mb-4">
+                Hybrid Decision-Making Model
+              </h2>
+              <p className="text-xl text-gray-300 max-w-2xl mx-auto">
+                AI precision meets community wisdom for impactful climate action
               </p>
             </div>
-            <div className="flex flex-col gap-4 sm:flex-row justify-center">
-              <Button className="px-8 py-3 text-lg bg-teal-600 hover:bg-teal-700 text-white rounded-full shadow-lg transition-transform transform hover:scale-105">
-                <Link href="/connect-wallet">Get Started</Link>
-              </Button>
-              <Button
-                variant="outline"
-                className="px-8 py-3 text-lg border-white text-white hover:bg-gray-800 rounded-full shadow-lg transition-transform transform hover:scale-105 bg-transparent"
-              >
-                <Link href="/connect-wallet">Submit a Proposal</Link>
-              </Button>
+
+            <div className="grid md:grid-cols-4 gap-8">
+              <div className="text-center space-y-4">
+                <div className="w-16 h-16 bg-teal-500/20 rounded-full flex items-center justify-center mx-auto">
+                  <LightbulbIcon className="w-8 h-8 text-teal-400" />
+                </div>
+                <div>
+                  <h3 className="text-xl font-semibold text-white mb-2">Submit</h3>
+                  <p className="text-gray-300 text-sm">Organizations submit green project proposals</p>
+                </div>
+              </div>
+
+              <div className="text-center space-y-4">
+                <div className="w-16 h-16 bg-teal-500/20 rounded-full flex items-center justify-center mx-auto">
+                  <BotIcon className="w-8 h-8 text-teal-400" />
+                </div>
+                <div>
+                  <h3 className="text-xl font-semibold text-white mb-2">AI Analysis</h3>
+                  <p className="text-gray-300 text-sm">AI evaluates environmental impact score</p>
+                </div>
+              </div>
+
+              <div className="text-center space-y-4">
+                <div className="w-16 h-16 bg-teal-500/20 rounded-full flex items-center justify-center mx-auto">
+                  <VoteIcon className="w-8 h-8 text-teal-400" />
+                </div>
+                <div>
+                  <h3 className="text-xl font-semibold text-white mb-2">Vote</h3>
+                  <p className="text-gray-300 text-sm">Community reviews and votes on proposals</p>
+                </div>
+              </div>
+
+              <div className="text-center space-y-4">
+                <div className="w-16 h-16 bg-teal-500/20 rounded-full flex items-center justify-center mx-auto">
+                  <HandshakeIcon className="w-8 h-8 text-teal-400" />
+                </div>
+                <div>
+                  <h3 className="text-xl font-semibold text-white mb-2">Fund</h3>
+                  <p className="text-gray-300 text-sm">Smart contracts release funding automatically</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Key Features */}
+        <section className="py-20 px-4">
+          <div className="max-w-6xl mx-auto">
+            <div className="text-center mb-16">
+              <h2 className="text-4xl font-bold text-white mb-4">Why Climate DAO?</h2>
+              <p className="text-xl text-gray-300 max-w-2xl mx-auto">
+                Transparent, efficient, and impactful climate action through innovation
+              </p>
+            </div>
+
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+              <Card className="bg-black/30 border-teal-500/20 backdrop-blur-sm hover:bg-black/40 transition-all duration-300">
+                <CardContent className="p-6">
+                  <div className="flex items-center gap-3 mb-4">
+                    <BotIcon className="w-6 h-6 text-teal-400" />
+                    <h3 className="text-lg font-semibold text-white">AI-Powered Vetting</h3>
+                  </div>
+                  <p className="text-gray-300 text-sm">
+                    Intelligent scoring ensures only the most impactful climate projects receive funding
+                  </p>
+                </CardContent>
+              </Card>
+
+              <Card className="bg-black/30 border-teal-500/20 backdrop-blur-sm hover:bg-black/40 transition-all duration-300">
+                <CardContent className="p-6">
+                  <div className="flex items-center gap-3 mb-4">
+                    <VoteIcon className="w-6 h-6 text-teal-400" />
+                    <h3 className="text-lg font-semibold text-white">Decentralized Governance</h3>
+                  </div>
+                  <p className="text-gray-300 text-sm">
+                    Global community collectively decides the future of climate finance
+                  </p>
+                </CardContent>
+              </Card>
+
+              <Card className="bg-black/30 border-teal-500/20 backdrop-blur-sm hover:bg-black/40 transition-all duration-300">
+                <CardContent className="p-6">
+                  <div className="flex items-center gap-3 mb-4">
+                    <LeafIcon className="w-6 h-6 text-teal-400" />
+                    <h3 className="text-lg font-semibold text-white">Real Impact</h3>
+                  </div>
+                  <p className="text-gray-300 text-sm">
+                    Direct funding for verified projects with measurable CO₂ reduction
+                  </p>
+                </CardContent>
+              </Card>
+
+              <Card className="bg-black/30 border-teal-500/20 backdrop-blur-sm hover:bg-black/40 transition-all duration-300">
+                <CardContent className="p-6">
+                  <div className="flex items-center gap-3 mb-4">
+                    <Image
+                      src="/algorand_logo_mark.png"
+                      alt="Algorand"
+                      width={24}
+                      height={24}
+                      className="w-6 h-6"
+                      style={{ filter: "brightness(0) invert(1) sepia(1) saturate(10000%) hue-rotate(170deg)" }}
+                    />
+                    <h3 className="text-lg font-semibold text-white">Algorand Powered</h3>
+                  </div>
+                  <p className="text-gray-300 text-sm">
+                    Secure, scalable, and environmentally friendly blockchain infrastructure
+                  </p>
+                </CardContent>
+              </Card>
+
+              <Card className="bg-black/30 border-teal-500/20 backdrop-blur-sm hover:bg-black/40 transition-all duration-300">
+                <CardContent className="p-6">
+                  <div className="flex items-center gap-3 mb-4">
+                    <CoinsIcon className="w-6 h-6 text-teal-400" />
+                    <h3 className="text-lg font-semibold text-white">Tokenized Credits</h3>
+                  </div>
+                  <p className="text-gray-300 text-sm">
+                    Transparent management of verified carbon credits with easy transfer
+                  </p>
+                </CardContent>
+              </Card>
+
+              <Card className="bg-black/30 border-teal-500/20 backdrop-blur-sm hover:bg-black/40 transition-all duration-300">
+                <CardContent className="p-6">
+                  <div className="flex items-center gap-3 mb-4">
+                    <CheckCircleIcon className="w-6 h-6 text-teal-400" />
+                    <h3 className="text-lg font-semibold text-white">Hybrid Innovation</h3>
+                  </div>
+                  <p className="text-gray-300 text-sm">
+                    Unique decision-making model setting new standards for environmental initiatives
+                  </p>
+                </CardContent>
+              </Card>
+            </div>
+          </div>
+        </section>
+
+        {/* CTA Section */}
+        <section className="py-20 px-4">
+          <div className="max-w-4xl mx-auto text-center">
+            <div className="bg-black/20 backdrop-blur-sm border border-teal-500/20 rounded-2xl p-12">
+              <h2 className="text-4xl font-bold text-white mb-4">Ready to Shape Climate's Future?</h2>
+              <p className="text-xl text-gray-300 mb-8 max-w-2xl mx-auto">
+                Join our community of innovators funding verified climate projects through intelligent governance
+              </p>
+              <Link href="/connect-wallet">
+                <Button size="lg" className="px-8 py-4 text-lg bg-teal-600 hover:bg-teal-700 text-white rounded-xl shadow-lg transition-all duration-300 transform hover:scale-105">
+                  Get Started Now
+                  <ArrowRightIcon className="ml-2 w-5 h-5" />
+                </Button>
+              </Link>
             </div>
           </div>
         </section>
       </main>
 
       {/* Footer */}
-      <footer className="relative z-10 flex flex-col gap-2 sm:flex-row py-6 w-full shrink-0 items-center px-4 md:px-6 border-t border-gray-800 bg-black text-gray-300">
-        <p className="text-xs">&copy; {new Date().getFullYear()} AI-Governed DAO. All rights reserved.</p>
-        <nav className="sm:ml-auto flex gap-4 sm:gap-6">
-          <a className="text-xs hover:underline underline-offset-4" href="#">
-            Privacy Policy
-          </a>
-          <a className="text-xs hover:underline underline-offset-4" href="#">
-            Terms of Service
-          </a>
-        </nav>
+      <footer className="relative z-10 border-t border-gray-800/50 bg-black/20 backdrop-blur-sm">
+        <div className="max-w-6xl mx-auto px-4 py-8">
+          <div className="flex flex-col md:flex-row justify-between items-center gap-4">
+            <div className="text-gray-400 text-sm">
+              &copy; {new Date().getFullYear()} Climate DAO. Built by{" "}
+              <a
+                href="https://github.com/lhcee3"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-teal-400 hover:text-teal-300 underline"
+              >
+                Aneesh
+              </a>
+            </div>
+            <div className="flex gap-6 text-sm">
+              <a href="#" className="text-gray-400 hover:text-white transition-colors">
+                Privacy Policy
+              </a>
+              <a href="#" className="text-gray-400 hover:text-white transition-colors">
+                Terms of Service
+              </a>
+            </div>
+          </div>
+        </div>
       </footer>
 
-      {/* CSS for moving gradient and blinking glow */}
+      {/* CSS for animations */}
       <style jsx>{`
         @keyframes moving-gradient {
           0% {
@@ -220,7 +271,7 @@ export function LandingPage() {
           }
         }
         .animate-moving-gradient {
-          background: linear-gradient(270deg, #000000, #000080, #000000); /* Black to Navy Blue */
+          background: linear-gradient(270deg, #000000, #000080, #000000);
           background-size: 400% 400%;
           animation: moving-gradient 15s ease infinite;
         }
@@ -235,7 +286,7 @@ export function LandingPage() {
         }
         .climate-glow {
           animation: blink-glow 3s infinite alternate;
-          color: #00FFFF; /* Teal color for the word itself */
+          color: #00FFFF;
         }
       `}</style>
     </div>
