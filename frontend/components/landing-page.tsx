@@ -51,7 +51,8 @@ export function LandingPage() {
               <Link href="/connect-wallet">
                 <StarBorder 
                   color="#14b8a6" 
-                  speed="3s"
+                  speed="2s"
+                  thickness={4}
                   className="transition-all duration-300 transform hover:scale-105"
                 >
                   <div className="flex items-center gap-2 text-lg font-semibold px-2 py-1">
