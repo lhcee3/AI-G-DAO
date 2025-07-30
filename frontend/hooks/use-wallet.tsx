@@ -31,7 +31,7 @@ export function WalletProvider({ children }: WalletProviderProps) {
   useEffect(() => {
     // Check for existing connection
     const savedAddress = localStorage.getItem('algorand_address');
-    if (savedAddress) {
+    if (savedAddress && savedAddress.length === 58) { // Only process valid addresses
       setAddress(savedAddress);
       setIsConnected(true);
       fetchBalance(savedAddress);
@@ -40,10 +40,18 @@ export function WalletProvider({ children }: WalletProviderProps) {
 
   const fetchBalance = async (addr: string) => {
     try {
+      // Validate Algorand address format (58 characters, base32)
+      if (!addr || addr.length !== 58) {
+        console.warn('Invalid address format, skipping balance fetch');
+        setBalance(0);
+        return;
+      }
+      
       const accountInfo = await algodClient.accountInformation(addr).do();
       setBalance(Number(accountInfo.amount) / 1000000); // Convert microAlgos to Algos
     } catch (err) {
       console.error('Failed to fetch balance:', err);
+      setBalance(0); // Set balance to 0 on error instead of throwing
     }
   };
 
@@ -52,15 +60,22 @@ export function WalletProvider({ children }: WalletProviderProps) {
     setError(null);
 
     try {
-      // For now, we'll use a simple connection method
-      // In production, you'd use WalletConnect or other wallet providers
-      const testAddress = 'TESTADDRESS123456789'; // Placeholder for development
+      // For development, we'll simulate connection without actual wallet integration
+      // In production, this would integrate with Pera Wallet, MyAlgo, etc.
       
-      setAddress(testAddress);
+      // Use a valid TestNet address format for demonstration
+      const demoAddress = "3YCNRIUFVGOIX4K7K2NLRTIAH23ULNC47NZT6IQTPRTOQUVCWEIFTGTNUA"; 
+      
+      setAddress(demoAddress);
       setIsConnected(true);
-      localStorage.setItem('algorand_address', testAddress);
+      localStorage.setItem('algorand_address', demoAddress);
       
-      await fetchBalance(testAddress);
+      // Only fetch balance if we have a real address
+      if (demoAddress.length === 58) { // Valid Algorand address length
+        await fetchBalance(demoAddress);
+      } else {
+        setBalance(0); // Set demo balance
+      }
     } catch (err) {
       setError('Failed to connect wallet');
       console.error('Connection error:', err);

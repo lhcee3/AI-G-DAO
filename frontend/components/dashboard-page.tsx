@@ -63,6 +63,16 @@ export function DashboardPage() {
                 <p className="text-gray-300 text-sm">Track environmental impact</p>
               </CardContent>
             </Card>
+
+            <Card className="bg-black/80 border-yellow-500/50 backdrop-blur-sm hover:bg-black/90 transition-all cursor-pointer">
+              <CardContent className="p-6 text-center">
+                <Link href="/proposal-review" className="block">
+                  <div className="w-12 h-12 text-yellow-400 mx-auto mb-4 text-2xl">🤖</div>
+                  <h3 className="text-yellow-400 font-semibold text-lg mb-2">AI Review</h3>
+                  <p className="text-gray-300 text-sm">Get AI analysis for proposals</p>
+                </Link>
+              </CardContent>
+            </Card>
           </div>
 
           {/* Recent Activity */}
