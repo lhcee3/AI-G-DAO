@@ -2,7 +2,7 @@
 
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { PlusIcon, VoteIcon, CoinsIcon, BarChart3Icon, FileTextIcon, SettingsIcon } from "lucide-react"
+import { PlusIcon, VoteIcon, CoinsIcon, BarChart3Icon, FileTextIcon, SettingsIcon, BrainCircuitIcon } from "lucide-react"
 import Link from "next/link"
 
 export function DashboardPage() {
@@ -42,6 +42,16 @@ export function DashboardPage() {
 
             <Card className="bg-black/80 border-yellow-500/50 backdrop-blur-sm hover:bg-black/90 transition-all cursor-pointer">
               <CardContent className="p-6 text-center">
+                <Link href="/proposal-review" className="block">
+                  <BrainCircuitIcon className="w-12 h-12 text-yellow-400 mx-auto mb-4" />
+                  <h3 className="text-yellow-400 font-semibold text-lg mb-2">AI Review</h3>
+                  <p className="text-gray-300 text-sm">Get AI analysis for proposals</p>
+                </Link>
+              </CardContent>
+            </Card>
+
+            <Card className="bg-black/80 border-yellow-500/50 backdrop-blur-sm hover:bg-black/90 transition-all cursor-pointer">
+              <CardContent className="p-6 text-center">
                 <VoteIcon className="w-12 h-12 text-yellow-400 mx-auto mb-4" />
                 <h3 className="text-yellow-400 font-semibold text-lg mb-2">Vote on Proposals</h3>
                 <p className="text-gray-300 text-sm">Participate in DAO governance</p>
@@ -50,27 +60,9 @@ export function DashboardPage() {
 
             <Card className="bg-black/80 border-yellow-500/50 backdrop-blur-sm hover:bg-black/90 transition-all cursor-pointer">
               <CardContent className="p-6 text-center">
-                <CoinsIcon className="w-12 h-12 text-yellow-400 mx-auto mb-4" />
-                <h3 className="text-yellow-400 font-semibold text-lg mb-2">My Tokens</h3>
-                <p className="text-gray-300 text-sm">View your DAO token balance</p>
-              </CardContent>
-            </Card>
-
-            <Card className="bg-black/80 border-yellow-500/50 backdrop-blur-sm hover:bg-black/90 transition-all cursor-pointer">
-              <CardContent className="p-6 text-center">
                 <BarChart3Icon className="w-12 h-12 text-yellow-400 mx-auto mb-4" />
                 <h3 className="text-yellow-400 font-semibold text-lg mb-2">Impact Analytics</h3>
                 <p className="text-gray-300 text-sm">Track environmental impact</p>
-              </CardContent>
-            </Card>
-
-            <Card className="bg-black/80 border-yellow-500/50 backdrop-blur-sm hover:bg-black/90 transition-all cursor-pointer">
-              <CardContent className="p-6 text-center">
-                <Link href="/proposal-review" className="block">
-                  <div className="w-12 h-12 text-yellow-400 mx-auto mb-4 text-2xl">🤖</div>
-                  <h3 className="text-yellow-400 font-semibold text-lg mb-2">AI Review</h3>
-                  <p className="text-gray-300 text-sm">Get AI analysis for proposals</p>
-                </Link>
               </CardContent>
             </Card>
           </div>
