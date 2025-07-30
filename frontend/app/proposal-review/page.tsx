@@ -7,13 +7,15 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { ArrowLeftIcon, SparklesIcon } from "lucide-react"
+import { ArrowLeftIcon, SparklesIcon, WalletIcon } from "lucide-react"
 import Link from "next/link"
 import { useAIReview } from "@/hooks/use-ai-review"
 import { AIReviewDisplay } from "@/components/ai-review-display"
+import { useWallet } from "@/hooks/use-wallet"
 
 export default function ProposalReviewPage() {
   const { isAnalyzing, reviewResult, error, analyzeProposalData, clearReview } = useAIReview()
+  const { isConnected, address } = useWallet()
   
   const [formData, setFormData] = useState({
     projectTitle: "",
@@ -54,12 +56,32 @@ export default function ProposalReviewPage() {
       </div>
 
       {/* Header */}
-      <header className="relative z-10 flex items-center justify-between p-6">
+      <header className="relative z-10 flex items-center justify-between p-6 border-b border-black/20">
         <Link href="/dashboard" className="flex items-center gap-2 text-black hover:text-gray-800 transition-colors">
           <ArrowLeftIcon className="w-5 h-5" />
           <span className="text-sm font-medium">Back to Dashboard</span>
         </Link>
         <div className="text-black font-bold text-lg">AI Proposal Review</div>
+        <div className="flex items-center gap-4">
+          {isConnected ? (
+            <div className="flex items-center gap-3">
+              <div className="text-right">
+                <div className="text-sm text-gray-800">AI Analysis Ready</div>
+                <div className="text-xs text-gray-700">
+                  {address ? `${address.slice(0, 6)}...${address.slice(-4)}` : 'Connected'}
+                </div>
+              </div>
+              <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+            </div>
+          ) : (
+            <Link href="/connect-wallet">
+              <Button variant="outline" size="sm" className="border-black/30 text-black hover:bg-black/10 bg-transparent">
+                <WalletIcon className="w-4 h-4 mr-2" />
+                Connect Wallet
+              </Button>
+            </Link>
+          )}
+        </div>
       </header>
 
       <main className="relative z-10 flex-1 flex flex-col lg:flex-row gap-8 px-6 pb-6">

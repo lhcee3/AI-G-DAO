@@ -5,7 +5,9 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
-import { VoteIcon, CheckCircleIcon, XCircleIcon, ClockIcon, TrendingUpIcon, LeafIcon } from 'lucide-react';
+import { VoteIcon, CheckCircleIcon, XCircleIcon, ClockIcon, TrendingUpIcon, LeafIcon, WalletIcon } from 'lucide-react';
+import { useWallet } from '@/hooks/use-wallet';
+import Link from 'next/link';
 
 interface Proposal {
   id: string;
@@ -88,8 +90,13 @@ const getStatusColor = (status: string) => {
 
 export default function VotePage() {
   const [votedProposals, setVotedProposals] = useState<Set<string>>(new Set());
+  const { isConnected, address, balance } = useWallet();
 
   const handleVote = (proposalId: string, voteType: 'for' | 'against') => {
+    if (!isConnected) {
+      alert('Please connect your wallet to vote');
+      return;
+    }
     setVotedProposals(prev => new Set([...prev, proposalId]));
     // Here you would integrate with smart contract for actual voting
     console.log(`Voted ${voteType} on proposal ${proposalId}`);
@@ -110,7 +117,24 @@ export default function VotePage() {
           <div className="text-black font-bold text-xl">Vote on Proposals</div>
         </div>
         <div className="flex items-center gap-4">
-          <span className="text-sm text-gray-800">Your voting power: 250 tokens</span>
+          {isConnected ? (
+            <div className="flex items-center gap-3">
+              <div className="text-right">
+                <div className="text-sm text-gray-800">Voting power: {balance.toFixed(0)} tokens</div>
+                <div className="text-xs text-gray-700">
+                  {address ? `${address.slice(0, 6)}...${address.slice(-4)}` : 'Connected'}
+                </div>
+              </div>
+              <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+            </div>
+          ) : (
+            <Link href="/connect-wallet">
+              <Button variant="outline" size="sm" className="border-black/30 text-black hover:bg-black/10 bg-transparent">
+                <WalletIcon className="w-4 h-4 mr-2" />
+                Connect to Vote
+              </Button>
+            </Link>
+          )}
         </div>
       </header>
 
@@ -217,21 +241,21 @@ export default function VotePage() {
                           <Button
                             size="sm"
                             onClick={() => handleVote(proposal.id, 'for')}
-                            disabled={hasVoted}
+                            disabled={hasVoted || !isConnected}
                             className="bg-green-600 hover:bg-green-700 text-white disabled:opacity-50"
                           >
                             <CheckCircleIcon className="w-4 h-4 mr-1" />
-                            {hasVoted ? 'Voted' : 'Vote Yes'}
+                            {hasVoted ? 'Voted' : isConnected ? 'Vote Yes' : 'Connect Wallet'}
                           </Button>
                           <Button
                             size="sm"
                             variant="outline"
                             onClick={() => handleVote(proposal.id, 'against')}
-                            disabled={hasVoted}
+                            disabled={hasVoted || !isConnected}
                             className="border-red-500/50 text-red-400 hover:bg-red-500/10 bg-transparent disabled:opacity-50"
                           >
                             <XCircleIcon className="w-4 h-4 mr-1" />
-                            {hasVoted ? 'Voted' : 'Vote No'}
+                            {hasVoted ? 'Voted' : isConnected ? 'Vote No' : 'Connect Wallet'}
                           </Button>
                         </div>
                       )}

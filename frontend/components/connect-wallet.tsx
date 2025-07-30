@@ -124,20 +124,6 @@ export function WalletConnectPage() {
                   </div>
                 </div>
               )}
-
-              {/* Testing bypass button */}
-              <div className="border-t border-teal-500/20 pt-4">
-                <Button
-                  variant="outline"
-                  className="w-full border-gray-500/50 text-gray-400 hover:bg-yellow-300 py-2 text-sm bg-transparent"
-                  onClick={() => {
-                    // Navigate to dashboard for testing
-                    window.location.href = "/dashboard"
-                  }}
-                >
-                  Proceed without connection (Testing)
-                </Button>
-              </div>
             </CardContent>
           </Card>
 

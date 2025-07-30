@@ -2,10 +2,13 @@
 
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { PlusIcon, VoteIcon, CoinsIcon, BarChart3Icon, FileTextIcon, SettingsIcon, BrainCircuitIcon } from "lucide-react"
+import { PlusIcon, VoteIcon, CoinsIcon, BarChart3Icon, FileTextIcon, SettingsIcon, BrainCircuitIcon, WalletIcon } from "lucide-react"
 import Link from "next/link"
+import { useWallet } from "@/hooks/use-wallet"
 
 export function DashboardPage() {
+  const { isConnected, address, balance } = useWallet()
+  
   return (
     <div className="relative flex flex-col min-h-[100dvh] text-black overflow-hidden">
       {/* Yellow/Black Gradient Background */}
@@ -18,7 +21,24 @@ export function DashboardPage() {
       <header className="relative z-10 flex items-center justify-between p-6 border-b border-black/20">
         <div className="text-black font-bold text-xl">Climate DAO Dashboard</div>
         <div className="flex items-center gap-4">
-          <span className="text-sm text-gray-800">Welcome back!</span>
+          {isConnected ? (
+            <div className="flex items-center gap-3">
+              <div className="text-right">
+                <div className="text-sm text-gray-800">
+                  {address ? `${address.slice(0, 6)}...${address.slice(-4)}` : 'Connected'}
+                </div>
+                <div className="text-xs text-gray-700">{balance.toFixed(2)} ALGO</div>
+              </div>
+              <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+            </div>
+          ) : (
+            <Link href="/connect-wallet">
+              <Button variant="outline" size="sm" className="border-black/30 text-black hover:bg-black/10 bg-transparent">
+                <WalletIcon className="w-4 h-4 mr-2" />
+                Connect Wallet
+              </Button>
+            </Link>
+          )}
           <Button variant="outline" size="sm" className="border-black/30 text-black hover:bg-black/10 bg-transparent">
             <SettingsIcon className="w-4 h-4 mr-2" />
             Settings

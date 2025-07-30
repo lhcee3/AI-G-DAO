@@ -3,6 +3,7 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
+import { Button } from '@/components/ui/button';
 import { 
   BarChart3Icon, 
   TrendingUpIcon, 
@@ -11,8 +12,11 @@ import {
   RecycleIcon, 
   TreesIcon,
   DropletIcon,
-  ThermometerIcon
+  ThermometerIcon,
+  WalletIcon
 } from 'lucide-react';
+import { useWallet } from '@/hooks/use-wallet';
+import Link from 'next/link';
 
 interface ImpactMetric {
   id: string;
@@ -171,6 +175,8 @@ const getStatusColor = (status: string) => {
 };
 
 export default function ImpactAnalyticsPage() {
+  const { isConnected, address, balance } = useWallet();
+  
   return (
     <div className="relative flex flex-col min-h-[100dvh] text-black overflow-hidden">
       {/* Yellow/Black Gradient Background */}
@@ -186,7 +192,27 @@ export default function ImpactAnalyticsPage() {
           <div className="text-black font-bold text-xl">Impact Analytics</div>
         </div>
         <div className="flex items-center gap-4">
-          <span className="text-sm text-gray-800">Real-time environmental impact tracking</span>
+          {isConnected ? (
+            <div className="flex items-center gap-3">
+              <div className="text-right">
+                <div className="text-sm text-gray-800">Real-time tracking</div>
+                <div className="text-xs text-gray-700">
+                  {address ? `${address.slice(0, 6)}...${address.slice(-4)}` : 'Connected'}
+                </div>
+              </div>
+              <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+            </div>
+          ) : (
+            <div className="flex items-center gap-2">
+              <span className="text-sm text-gray-800">Real-time environmental impact tracking</span>
+              <Link href="/connect-wallet">
+                <Button variant="outline" size="sm" className="border-black/30 text-black hover:bg-black/10 bg-transparent">
+                  <WalletIcon className="w-4 h-4 mr-2" />
+                  Connect Wallet
+                </Button>
+              </Link>
+            </div>
+          )}
         </div>
       </header>
 
