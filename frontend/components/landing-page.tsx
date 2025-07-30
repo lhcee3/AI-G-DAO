@@ -5,6 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { BotIcon, CoinsIcon, HandshakeIcon, LeafIcon, LightbulbIcon, VoteIcon, ArrowRightIcon, CheckCircleIcon } from "lucide-react"
 import Link from "next/link"
 import Image from "next/image"
+import StarBorder from "@/components/ui/star-border"
 
 export function LandingPage() {
   return (
@@ -48,10 +49,16 @@ export function LandingPage() {
             
             <div className="flex justify-center items-center">
               <Link href="/connect-wallet">
-                <Button size="lg" className="px-8 py-4 text-lg bg-teal-600 hover:bg-teal-700 text-white rounded-xl shadow-lg transition-all duration-300 transform hover:scale-105">
-                  Join the DAO
-                  <ArrowRightIcon className="ml-2 w-5 h-5" />
-                </Button>
+                <StarBorder 
+                  color="#14b8a6" 
+                  speed="3s"
+                  className="transition-all duration-300 transform hover:scale-105"
+                >
+                  <div className="flex items-center gap-2 text-lg font-semibold px-2 py-1">
+                    Join the DAO
+                    <ArrowRightIcon className="w-5 h-5" />
+                  </div>
+                </StarBorder>
               </Link>
             </div>
           </div>
