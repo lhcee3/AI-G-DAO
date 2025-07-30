@@ -52,17 +52,21 @@ export function DashboardPage() {
 
             <Card className="bg-black/80 border-yellow-500/50 backdrop-blur-sm hover:bg-black/90 transition-all cursor-pointer">
               <CardContent className="p-6 text-center">
-                <VoteIcon className="w-12 h-12 text-yellow-400 mx-auto mb-4" />
-                <h3 className="text-yellow-400 font-semibold text-lg mb-2">Vote on Proposals</h3>
-                <p className="text-gray-300 text-sm">Participate in DAO governance</p>
+                <Link href="/vote" className="block">
+                  <VoteIcon className="w-12 h-12 text-yellow-400 mx-auto mb-4" />
+                  <h3 className="text-yellow-400 font-semibold text-lg mb-2">Vote on Proposals</h3>
+                  <p className="text-gray-300 text-sm">Participate in DAO governance</p>
+                </Link>
               </CardContent>
             </Card>
 
             <Card className="bg-black/80 border-yellow-500/50 backdrop-blur-sm hover:bg-black/90 transition-all cursor-pointer">
               <CardContent className="p-6 text-center">
-                <BarChart3Icon className="w-12 h-12 text-yellow-400 mx-auto mb-4" />
-                <h3 className="text-yellow-400 font-semibold text-lg mb-2">Impact Analytics</h3>
-                <p className="text-gray-300 text-sm">Track environmental impact</p>
+                <Link href="/impact-analytics" className="block">
+                  <BarChart3Icon className="w-12 h-12 text-yellow-400 mx-auto mb-4" />
+                  <h3 className="text-yellow-400 font-semibold text-lg mb-2">Impact Analytics</h3>
+                  <p className="text-gray-300 text-sm">Track environmental impact</p>
+                </Link>
               </CardContent>
             </Card>
           </div>
