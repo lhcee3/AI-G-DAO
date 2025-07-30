@@ -12,10 +12,10 @@ interface AIReviewDisplayProps {
 
 export function AIReviewDisplay({ review }: AIReviewDisplayProps) {
   return (
-    <Card className="bg-black/60 border-teal-500/30 backdrop-blur-sm">
+    <Card className="bg-black/80 border-yellow-500/50 backdrop-blur-sm">
       <CardHeader>
         <div className="flex items-center justify-between">
-          <CardTitle className="text-white flex items-center gap-2">
+          <CardTitle className="text-yellow-400 flex items-center gap-2">
             🤖 AI Analysis Results
           </CardTitle>
           <Badge className={getCategoryBadgeColor(review.category)}>
@@ -28,7 +28,7 @@ export function AIReviewDisplay({ review }: AIReviewDisplayProps) {
         {/* Overall Score */}
         <div className="space-y-2">
           <div className="flex justify-between items-center">
-            <span className="text-white font-medium">Overall Score</span>
+            <span className="text-yellow-400 font-medium">Overall Score</span>
             <span className={`font-bold text-lg ${getScoreColor(review.score)}`}>
               {review.score}/100
             </span>
@@ -42,19 +42,19 @@ export function AIReviewDisplay({ review }: AIReviewDisplayProps) {
             <div className={`text-lg font-bold ${getScoreColor(review.environmentalScore)}`}>
               {review.environmentalScore}
             </div>
-            <div className="text-sm text-gray-400">Environmental</div>
+            <div className="text-sm text-gray-300">Environmental</div>
           </div>
           <div className="text-center">
             <div className={`text-lg font-bold ${getScoreColor(review.feasibilityScore)}`}>
               {review.feasibilityScore}
             </div>
-            <div className="text-sm text-gray-400">Feasibility</div>
+            <div className="text-sm text-gray-300">Feasibility</div>
           </div>
           <div className="text-center">
             <div className={`text-lg font-bold ${getScoreColor(review.innovationScore)}`}>
               {review.innovationScore}
             </div>
-            <div className="text-sm text-gray-400">Innovation</div>
+            <div className="text-sm text-gray-300">Innovation</div>
           </div>
         </div>
 
@@ -78,7 +78,7 @@ export function AIReviewDisplay({ review }: AIReviewDisplayProps) {
         {/* Concerns */}
         {review.concerns.length > 0 && (
           <div className="space-y-2">
-            <h4 className="text-yellow-400 font-medium flex items-center gap-2">
+            <h4 className="text-orange-400 font-medium flex items-center gap-2">
               <AlertTriangleIcon className="w-4 h-4" />
               Concerns
             </h4>
@@ -95,7 +95,7 @@ export function AIReviewDisplay({ review }: AIReviewDisplayProps) {
         {/* Suggestions */}
         {review.suggestions.length > 0 && (
           <div className="space-y-2">
-            <h4 className="text-blue-400 font-medium flex items-center gap-2">
+            <h4 className="text-yellow-300 font-medium flex items-center gap-2">
               <LightbulbIcon className="w-4 h-4" />
               Suggestions
             </h4>
