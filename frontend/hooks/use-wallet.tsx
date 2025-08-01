@@ -27,9 +27,13 @@ export function WalletProvider({ children }: WalletProviderProps) {
   const [balance, setBalance] = useState(0);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [isClient, setIsClient] = useState(false);
 
   useEffect(() => {
-    // Check for existing connection
+    // Set client-side flag to prevent SSR issues
+    setIsClient(true);
+    
+    // Check for existing connection only on client side
     const savedAddress = localStorage.getItem('algorand_address');
     if (savedAddress && savedAddress.length === 58) { // Only process valid addresses
       setAddress(savedAddress);
@@ -39,6 +43,8 @@ export function WalletProvider({ children }: WalletProviderProps) {
   }, []);
 
   const fetchBalance = async (addr: string) => {
+    if (!isClient) return; // Prevent SSR issues
+    
     try {
       // Validate Algorand address format (58 characters, base32)
       if (!addr || addr.length !== 58) {
@@ -56,6 +62,8 @@ export function WalletProvider({ children }: WalletProviderProps) {
   };
 
   const connect = async () => {
+    if (!isClient) return; // Prevent SSR issues
+    
     setLoading(true);
     setError(null);
 
@@ -85,6 +93,8 @@ export function WalletProvider({ children }: WalletProviderProps) {
   };
 
   const disconnect = () => {
+    if (!isClient) return; // Prevent SSR issues
+    
     setAddress(null);
     setIsConnected(false);
     setBalance(0);
