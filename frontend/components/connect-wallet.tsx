@@ -8,12 +8,12 @@ import { useWallet } from "@/hooks/use-wallet"
 import { useRouter } from "next/navigation"
 
 export function WalletConnectPage() {
-  const { isConnected, address, balance, connect, disconnect, loading, error } = useWallet()
+  const { isConnected, address, balance, connect, disconnect, loading, error, walletType } = useWallet()
   const router = useRouter()
 
-  const handleConnectWallet = async () => {
+  const handleConnectWallet = async (type: 'pera' | 'demo' = 'pera') => {
     try {
-      await connect()
+      await connect(type)
     } catch (err) {
       console.error('Failed to connect wallet:', err)
     }
@@ -74,13 +74,22 @@ export function WalletConnectPage() {
                 <div className="space-y-4">
                   <div className="flex items-center justify-center space-x-2 text-green-400">
                     <CheckCircleIcon className="w-5 h-5" />
-                    <span className="font-semibold">Wallet Connected!</span>
+                    <span className="font-semibold">
+                      {walletType === 'pera' ? 'Pera Wallet Connected!' : 'Demo Mode Active'}
+                    </span>
                   </div>
 
                   <div className="bg-teal-500/10 border border-teal-500/30 rounded-lg p-4">
-                    <p className="text-xs text-gray-400 mb-1">Connected Address:</p>
+                    <p className="text-xs text-gray-400 mb-1">
+                      {walletType === 'pera' ? 'Connected Address:' : 'Demo Address:'}
+                    </p>
                     <p className="text-sm text-teal-400 font-mono break-all">{address}</p>
                     <p className="text-xs text-gray-400 mt-2">Balance: {balance.toFixed(2)} ALGO</p>
+                    {walletType === 'demo' && (
+                      <p className="text-xs text-yellow-400 mt-1">
+                        ⚠️ Demo mode - cannot submit real transactions
+                      </p>
+                    )}
                   </div>
 
                   <div className="space-y-3">
@@ -104,7 +113,7 @@ export function WalletConnectPage() {
                 <div className="space-y-4">
                   <Button
                     className="w-full bg-teal-600 hover:bg-teal-700 text-white font-semibold py-4 rounded-lg transition-all duration-300 transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed"
-                    onClick={handleConnectWallet}
+                    onClick={() => handleConnectWallet('pera')}
                     disabled={loading}
                   >
                     {loading ? (
@@ -113,8 +122,17 @@ export function WalletConnectPage() {
                         <span>Connecting...</span>
                       </div>
                     ) : (
-                      "Connect Algorand Wallet"
+                      "Connect Pera Wallet"
                     )}
+                  </Button>
+
+                  <Button
+                    variant="outline"
+                    className="w-full border-gray-600 text-gray-300 hover:bg-gray-800 hover:text-white font-semibold py-4 rounded-lg transition-all duration-300"
+                    onClick={() => handleConnectWallet('demo')}
+                    disabled={loading}
+                  >
+                    Demo Mode (View Only)
                   </Button>
 
                   <div className="text-center">

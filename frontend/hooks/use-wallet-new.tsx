@@ -142,28 +142,14 @@ export function WalletProvider({ children }: WalletProviderProps) {
       }
       return false;
     } catch (error) {
-      // Handle different types of errors
+      console.error('Pera Wallet connection failed:', error);
+      // If it's a user rejection or wallet not found, provide helpful message
       const errorMessage = error instanceof Error ? error.message : String(error);
-      
-      // Check if user cancelled - these should be silent
-      if (errorMessage?.includes('User rejected') || 
-          errorMessage?.includes('rejected') ||
-          errorMessage?.includes('cancelled') ||
-          errorMessage?.includes('User denied') ||
-          errorMessage?.includes('Modal closed by user') ||
-          errorMessage?.includes('Connection request reset')) {
-        // User cancelled - this is normal behavior, don't throw error
-        console.log('User cancelled Pera Wallet connection');
-        return false;
-      }
-      
-      // For actual errors, provide helpful messages
-      if (errorMessage?.includes('No wallet') || errorMessage?.includes('not initialized')) {
+      if (errorMessage?.includes('User rejected') || errorMessage?.includes('rejected')) {
+        throw new Error('Connection cancelled by user');
+      } else if (errorMessage?.includes('No wallet') || errorMessage?.includes('not initialized')) {
         throw new Error('Pera Wallet not found. Please install Pera Wallet first.');
       }
-      
-      // Log the error for debugging but provide user-friendly message
-      console.warn('Pera Wallet connection failed:', error);
       throw new Error('Failed to connect to Pera Wallet. Please try again.');
     }
   };
@@ -188,18 +174,29 @@ export function WalletProvider({ children }: WalletProviderProps) {
 
     try {
       if (preferredWallet === 'pera') {
-        const connected = await connectPeraWallet();
-        if (!connected) {
-          // User cancelled - this is normal, just reset loading state
-          setLoading(false);
-          return;
+        try {
+          await connectPeraWallet();
+        } catch (peraError) {
+          const errorMessage = peraError instanceof Error ? peraError.message : String(peraError);
+          console.warn('Pera Wallet failed:', errorMessage);
+          
+          // If user cancelled, don't fallback to demo
+          if (errorMessage.includes('cancelled by user')) {
+            throw peraError;
+          }
+          
+          // For other errors, show specific message but don't auto-fallback
+          setError(`Pera Wallet connection failed: ${errorMessage}. You can try Demo Mode instead.`);
+          throw peraError;
         }
       } else {
         await connectDemoWallet();
       }
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Failed to connect wallet';
-      setError(errorMessage);
+      if (!error) { // Only set error if not already set above
+        const errorMessage = err instanceof Error ? err.message : 'Failed to connect wallet';
+        setError(errorMessage);
+      }
       console.error('Connection error:', err);
     } finally {
       setLoading(false);
