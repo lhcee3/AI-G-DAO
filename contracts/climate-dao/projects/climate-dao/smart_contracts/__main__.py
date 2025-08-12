@@ -46,16 +46,52 @@ def deploy_contracts():
     print(f"[INFO] Deploying with admin address: {DAO_ADMIN}")
     print(f"[INFO] Network: TestNet")
     
-    # TODO: Implement actual deployment logic
-    # This would typically use AlgoKit utilities to deploy
-    print("\n[INFO] Deployment logic not yet implemented")
-    print("   Please set up your TestNet account and configure deployment")
+    # Check for mnemonic
+    import os
+    mnemonic = os.getenv('DEPLOYER_MNEMONIC')
+    if not mnemonic:
+        print("\n[ERROR] DEPLOYER_MNEMONIC environment variable not set")
+        print("   Please set it using: $env:DEPLOYER_MNEMONIC='your 25 word mnemonic'")
+        return False
     
-    print("\n[NEXT STEPS]")
-    print("1. Fund your TestNet account: https://bank.testnet.algorand.network/")
-    print("2. Set environment variable: DEPLOYER_MNEMONIC=your_25_word_mnemonic")
-    print("3. Update DAO_ADMIN in deploy_config.py with your account address")
-    print("4. Run: algokit project deploy")
+    try:
+        print("\n[DEPLOY] Setting up Algorand client...")
+        from algosdk.v2client import algod
+        from algosdk import account, mnemonic as algo_mnemonic
+        
+        # Create Algorand client for TestNet
+        algod_address = "https://testnet-api.algonode.cloud"
+        algod_client = algod.AlgodClient("", algod_address, headers={"User-Agent": "AlgoKit"})
+        
+        # Get account from mnemonic
+        private_key = algo_mnemonic.to_private_key(mnemonic)
+        deployer_address = account.address_from_private_key(private_key)
+        
+        print(f"[INFO] Deployer address: {deployer_address}")
+        
+        # Check account balance
+        account_info = algod_client.account_info(deployer_address)
+        balance = account_info.get('amount', 0) / 1_000_000  # Convert microAlgos to Algos
+        print(f"[INFO] Account balance: {balance} ALGO")
+        
+        if balance < 1:
+            print("[WARNING] Low balance! Please fund your account at: https://bank.testnet.algorand.network/")
+            print("   You need at least 1 ALGO to deploy contracts")
+        
+        # For now, just show successful connection
+        print("\n[SUCCESS] Connected to Algorand TestNet")
+        print("[INFO] Smart contract deployment would happen here")
+        print("   - ClimateDAO main contract")
+        print("   - VotingSystem contract") 
+        print("   - ImpactAnalytics contract")
+        print("\n[NEXT] Implement actual PyTeal contract compilation and deployment")
+        
+        return True
+        
+    except Exception as e:
+        print(f"[ERROR] Deployment failed: {str(e)}")
+        print("   Make sure your mnemonic is correct and account is funded")
+        return False
     
     return True
 
