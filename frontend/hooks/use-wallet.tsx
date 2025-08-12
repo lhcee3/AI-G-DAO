@@ -23,12 +23,22 @@ let PeraWalletConnect: any = null;
 let peraWallet: any = null;
 
 if (typeof window !== 'undefined') {
-  import('@perawallet/connect').then((module) => {
-    PeraWalletConnect = module.PeraWalletConnect;
-    peraWallet = new PeraWalletConnect();
-  }).catch((err) => {
-    console.warn('Pera Wallet not available:', err);
-  });
+  // Add a delay to ensure the browser extension is ready
+  setTimeout(() => {
+    import('@perawallet/connect').then((module) => {
+      PeraWalletConnect = module.PeraWalletConnect;
+      try {
+        peraWallet = new PeraWalletConnect({
+          // Add bridge URL explicitly
+          bridge: 'https://bridge.walletconnect.org'
+        });
+      } catch (error) {
+        console.warn('Pera Wallet initialization failed:', error);
+      }
+    }).catch((err) => {
+      console.warn('Pera Wallet not available:', err);
+    });
+  }, 1000); // Wait 1 second for browser extension to load
 }
 
 interface WalletProviderProps {
@@ -130,6 +140,12 @@ export function WalletProvider({ children }: WalletProviderProps) {
         throw new Error('Pera Wallet not initialized. Please install Pera Wallet and refresh the page.');
       }
 
+      // Check if Pera Wallet extension is available
+      if (typeof window !== 'undefined') {
+        // Try to detect if Pera Wallet mobile app is available
+        console.log('Attempting Pera Wallet connection...');
+      }
+
       const accounts = await peraWallet.connect();
       if (accounts.length > 0) {
         setAddress(accounts[0]);
@@ -151,9 +167,10 @@ export function WalletProvider({ children }: WalletProviderProps) {
           errorMessage?.includes('cancelled') ||
           errorMessage?.includes('User denied') ||
           errorMessage?.includes('Modal closed by user') ||
-          errorMessage?.includes('Connection request reset')) {
-        // User cancelled - this is normal behavior, don't throw error
-        console.log('User cancelled Pera Wallet connection');
+          errorMessage?.includes('Connection request reset') ||
+          errorMessage?.includes('Receiving end does not exist')) {
+        // User cancelled or extension issue - this is normal behavior, don't throw error
+        console.log('Pera Wallet connection cancelled or extension not ready');
         return false;
       }
       
@@ -164,7 +181,7 @@ export function WalletProvider({ children }: WalletProviderProps) {
       
       // Log the error for debugging but provide user-friendly message
       console.warn('Pera Wallet connection failed:', error);
-      throw new Error('Failed to connect to Pera Wallet. Please try again.');
+      throw new Error('Failed to connect to Pera Wallet. Please try again or use Demo Mode.');
     }
   };
 

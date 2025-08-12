@@ -7,10 +7,10 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 export function SubmissionGuidelinesPage() {
   return (
     <div className="relative flex flex-col min-h-[100dvh] text-black overflow-hidden">
-      {/* Yellow/Black Gradient Background */}
+      {/* Blue/Black Gradient Background */}
       <div className="fixed inset-0 z-0">
-        <div className="absolute inset-0 bg-gradient-to-br from-yellow-400 via-yellow-500 to-amber-600"></div>
-        <div className="absolute inset-0 bg-black/20"></div>
+        <div className="absolute inset-0 bg-gradient-to-br from-blue-900 via-blue-800 to-black"></div>
+        <div className="absolute inset-0 bg-black/40"></div>
       </div>
 
       {/* Header */}
@@ -34,18 +34,18 @@ export function SubmissionGuidelinesPage() {
             </p>
           </div>
 
-          <Card className="bg-black/80 border-yellow-500/50 backdrop-blur-sm shadow-2xl">
+          <Card className="bg-black/80 border-blue-500/50 backdrop-blur-sm shadow-2xl">
             <CardHeader className="text-center space-y-4">
-              <div className="mx-auto w-16 h-16 bg-yellow-500/20 rounded-full flex items-center justify-center">
-                <CheckCircleIcon className="w-8 h-8 text-yellow-400" />
+              <div className="mx-auto w-16 h-16 bg-blue-500/20 rounded-full flex items-center justify-center">
+                <CheckCircleIcon className="w-8 h-8 text-blue-400" />
               </div>
-              <CardTitle className="text-2xl text-yellow-400">Key Principles for Your Proposal</CardTitle>
+              <CardTitle className="text-2xl text-blue-400">Key Principles for Your Proposal</CardTitle>
             </CardHeader>
 
             <CardContent className="space-y-6 text-gray-300">
               {/* Environmental Impact */}
               <div className="space-y-4">
-                <h3 className="text-xl font-semibold text-yellow-400 flex items-center gap-2">
+                <h3 className="text-xl font-semibold text-blue-400 flex items-center gap-2">
                   <LeafIcon className="w-6 h-6" />
                   Environmental Impact & Responsibility
                 </h3>
@@ -59,7 +59,7 @@ export function SubmissionGuidelinesPage() {
 
               {/* Innovation & Feasibility */}
               <div className="space-y-4 pt-4">
-                <h3 className="text-xl font-semibold text-yellow-400 flex items-center gap-2">
+                <h3 className="text-xl font-semibold text-blue-400 flex items-center gap-2">
                   <LightbulbIcon className="w-6 h-6" />
                   Innovation & Feasibility
                 </h3>
@@ -73,7 +73,7 @@ export function SubmissionGuidelinesPage() {
 
               {/* General Submission */}
               <div className="space-y-4 pt-4">
-                <h3 className="text-xl font-semibold text-yellow-400 flex items-center gap-2">
+                <h3 className="text-xl font-semibold text-blue-400 flex items-center gap-2">
                   <FileTextIcon className="w-6 h-6" />
                   General Submission Requirements
                 </h3>

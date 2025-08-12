@@ -74,10 +74,10 @@ export function SubmitProposalPage() {
 
   return (
     <div className="relative flex flex-col min-h-[100dvh] text-black overflow-hidden">
-      {/* Yellow/Black Gradient Background */}
+      {/* Blue/Black Gradient Background */}
       <div className="fixed inset-0 z-0">
-        <div className="absolute inset-0 bg-gradient-to-br from-yellow-400 via-yellow-500 to-amber-600"></div>
-        <div className="absolute inset-0 bg-black/20"></div>
+        <div className="absolute inset-0 bg-gradient-to-br from-blue-900 via-blue-800 to-black"></div>
+        <div className="absolute inset-0 bg-black/40"></div>
       </div>
 
       {/* Header */}
@@ -99,12 +99,12 @@ export function SubmitProposalPage() {
             </p>
           </div>
 
-          <Card className="bg-black/80 border-yellow-500/50 backdrop-blur-sm shadow-2xl">
+          <Card className="bg-black/80 border-blue-500/50 backdrop-blur-sm shadow-2xl">
             <CardHeader className="text-center space-y-4">
-              <div className="mx-auto w-16 h-16 bg-yellow-500/20 rounded-full flex items-center justify-center">
-                <FileTextIcon className="w-8 h-8 text-yellow-400" />
+              <div className="mx-auto w-16 h-16 bg-blue-500/20 rounded-full flex items-center justify-center">
+                <FileTextIcon className="w-8 h-8 text-blue-400" />
               </div>
-              <CardTitle className="text-2xl text-yellow-400">Project Proposal Form</CardTitle>
+              <CardTitle className="text-2xl text-blue-400">Project Proposal Form</CardTitle>
               <CardDescription className="text-gray-300">
                 Provide detailed information about your climate impact project
               </CardDescription>
@@ -114,7 +114,7 @@ export function SubmitProposalPage() {
               <form onSubmit={handleSubmit} className="space-y-6">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div className="space-y-2">
-                    <Label htmlFor="projectTitle" className="text-yellow-400 font-medium">
+                    <Label htmlFor="projectTitle" className="text-blue-400 font-medium">
                       Project Title *
                     </Label>
                     <Input
@@ -122,20 +122,20 @@ export function SubmitProposalPage() {
                       value={formData.projectTitle}
                       onChange={(e) => handleInputChange("projectTitle", e.target.value)}
                       placeholder="e.g., Solar Panel Installation for Rural Schools"
-                      className="bg-black/50 border-yellow-500/30 text-white placeholder:text-gray-400 focus:border-yellow-500"
+                      className="bg-black/50 border-blue-500/30 text-white placeholder:text-gray-400 focus:border-blue-500"
                       required
                     />
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="category" className="text-yellow-400 font-medium">
+                    <Label htmlFor="category" className="text-blue-400 font-medium">
                       Project Category *
                     </Label>
                     <select
                       id="category"
                       value={formData.category}
                       onChange={(e) => handleInputChange("category", e.target.value)}
-                      className="w-full px-3 py-2 bg-black/50 border border-yellow-500/30 text-white rounded-md focus:border-yellow-500 focus:outline-none"
+                      className="w-full px-3 py-2 bg-black/50 border border-blue-500/30 text-white rounded-md focus:border-blue-500 focus:outline-none"
                       required
                     >
                       <option value="">Select a category</option>
@@ -150,7 +150,7 @@ export function SubmitProposalPage() {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="description" className="text-yellow-400 font-medium">
+                  <Label htmlFor="description" className="text-blue-400 font-medium">
                     Project Description *
                   </Label>
                   <Textarea
@@ -158,14 +158,14 @@ export function SubmitProposalPage() {
                     value={formData.description}
                     onChange={(e) => handleInputChange("description", e.target.value)}
                     placeholder="Describe your project in detail, including objectives, methodology, and expected outcomes..."
-                    className="bg-black/50 border-yellow-500/30 text-white placeholder:text-gray-400 focus:border-yellow-500 min-h-[120px]"
+                    className="bg-black/50 border-blue-500/30 text-white placeholder:text-gray-400 focus:border-blue-500 min-h-[120px]"
                     required
                   />
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                   <div className="space-y-2">
-                    <Label htmlFor="fundingAmount" className="text-yellow-400 font-medium flex items-center gap-2">
+                    <Label htmlFor="fundingAmount" className="text-blue-400 font-medium flex items-center gap-2">
                       <DollarSignIcon className="w-4 h-4" />
                       Funding Requested (USD) *
                     </Label>
@@ -175,13 +175,13 @@ export function SubmitProposalPage() {
                       value={formData.fundingAmount}
                       onChange={(e) => handleInputChange("fundingAmount", e.target.value)}
                       placeholder="50000"
-                      className="bg-black/50 border-yellow-500/30 text-white placeholder:text-gray-400 focus:border-yellow-500"
+                      className="bg-black/50 border-blue-500/30 text-white placeholder:text-gray-400 focus:border-blue-500"
                       required
                     />
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="duration" className="text-yellow-400 font-medium flex items-center gap-2">
+                    <Label htmlFor="duration" className="text-blue-400 font-medium flex items-center gap-2">
                       <CalendarIcon className="w-4 h-4" />
                       Project Duration (months) *
                     </Label>
@@ -191,13 +191,13 @@ export function SubmitProposalPage() {
                       value={formData.duration}
                       onChange={(e) => handleInputChange("duration", e.target.value)}
                       placeholder="12"
-                      className="bg-black/50 border-yellow-500/30 text-white placeholder:text-gray-400 focus:border-yellow-500"
+                      className="bg-black/50 border-blue-500/30 text-white placeholder:text-gray-400 focus:border-blue-500"
                       required
                     />
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="location" className="text-yellow-400 font-medium">
+                    <Label htmlFor="location" className="text-blue-400 font-medium">
                       Location *
                     </Label>
                     <Input
@@ -205,14 +205,14 @@ export function SubmitProposalPage() {
                       value={formData.location}
                       onChange={(e) => handleInputChange("location", e.target.value)}
                       placeholder="e.g., Kenya, East Africa"
-                      className="bg-black/50 border-yellow-500/30 text-white placeholder:text-gray-400 focus:border-yellow-500"
+                      className="bg-black/50 border-blue-500/30 text-white placeholder:text-gray-400 focus:border-blue-500"
                       required
                     />
                   </div>
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="expectedImpact" className="text-yellow-400 font-medium">
+                  <Label htmlFor="expectedImpact" className="text-blue-400 font-medium">
                     Expected Environmental Impact *
                   </Label>
                   <Textarea
@@ -220,24 +220,24 @@ export function SubmitProposalPage() {
                     value={formData.expectedImpact}
                     onChange={(e) => handleInputChange("expectedImpact", e.target.value)}
                     placeholder="Quantify the expected environmental benefits (e.g., CO₂ reduction, energy saved, trees planted, etc.)"
-                    className="bg-black/50 border-yellow-500/30 text-white placeholder:text-gray-400 focus:border-yellow-500"
+                    className="bg-black/50 border-blue-500/30 text-white placeholder:text-gray-400 focus:border-blue-500"
                     required
                   />
                 </div>
 
                 <div className="space-y-4">
-                  <Label className="text-yellow-400 font-medium flex items-center gap-2">
+                  <Label className="text-blue-400 font-medium flex items-center gap-2">
                     <UploadIcon className="w-4 h-4" />
                     Supporting Documents (Optional)
                   </Label>
-                  <div className="border-2 border-dashed border-yellow-500/30 rounded-lg p-8 text-center">
-                    <UploadIcon className="w-12 h-12 text-yellow-500/50 mx-auto mb-4" />
+                  <div className="border-2 border-dashed border-blue-500/30 rounded-lg p-8 text-center">
+                    <UploadIcon className="w-12 h-12 text-blue-500/50 mx-auto mb-4" />
                     <p className="text-gray-400 mb-2">Drag and drop files here, or click to browse</p>
                     <p className="text-sm text-gray-500">PDF, DOC, or image files (max 10MB each)</p>
                     <Button
                       type="button"
                       variant="outline"
-                      className="mt-4 border-yellow-500/50 text-yellow-400 hover:bg-yellow-500/10 bg-transparent"
+                      className="mt-4 border-blue-500/50 text-blue-400 hover:bg-blue-500/10 bg-transparent"
                     >
                       Choose Files
                     </Button>
@@ -252,8 +252,8 @@ export function SubmitProposalPage() {
                   )}
                   
                   {!isConnected && (
-                    <div className="bg-yellow-500/10 border border-yellow-500/30 rounded-lg p-3 mb-4">
-                      <p className="text-yellow-600 text-sm">
+                    <div className="bg-blue-500/10 border border-blue-500/30 rounded-lg p-3 mb-4">
+                      <p className="text-blue-600 text-sm">
                         Please connect your wallet to submit proposals.{" "}
                         <Link href="/connect-wallet" className="underline">
                           Connect Wallet
@@ -265,7 +265,7 @@ export function SubmitProposalPage() {
                   <Button
                     type="submit"
                     disabled={loading || !isConnected}
-                    className="flex-1 bg-yellow-500 hover:bg-yellow-600 text-black font-semibold py-3 rounded-lg transition-all duration-300 transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="flex-1 bg-blue-500 hover:bg-blue-600 text-black font-semibold py-3 rounded-lg transition-all duration-300 transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     {loading ? (
                       <div className="flex items-center space-x-2">
@@ -280,7 +280,7 @@ export function SubmitProposalPage() {
                   <Button
                     type="button"
                     variant="outline"
-                    className="border-yellow-500/50 text-yellow-400 hover:bg-yellow-500/10 bg-transparent"
+                    className="border-blue-500/50 text-blue-400 hover:bg-blue-500/10 bg-transparent"
                   >
                     Save as Draft
                   </Button>
