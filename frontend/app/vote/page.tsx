@@ -103,25 +103,25 @@ export default function VotePage() {
   };
 
   return (
-    <div className="relative flex flex-col min-h-[100dvh] text-black overflow-hidden">
-      {/* Yellow/Black Gradient Background */}
+    <div className="relative flex flex-col min-h-[100dvh] text-white overflow-hidden">
+      {/* Blue Gradient Background */}
       <div className="fixed inset-0 z-0">
-        <div className="absolute inset-0 bg-gradient-to-br from-yellow-400 via-yellow-500 to-amber-600"></div>
+        <div className="absolute inset-0 bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900"></div>
         <div className="absolute inset-0 bg-black/20"></div>
       </div>
 
       {/* Header */}
-      <header className="relative z-10 flex items-center justify-between p-6 border-b border-black/20">
+      <header className="relative z-10 flex items-center justify-between p-6 border-b border-white/20">
         <div className="flex items-center gap-4">
-          <VoteIcon className="w-8 h-8 text-black" />
-          <div className="text-black font-bold text-xl">Vote on Proposals</div>
+          <VoteIcon className="w-8 h-8 text-white" />
+          <div className="text-white font-bold text-xl">Vote on Proposals</div>
         </div>
         <div className="flex items-center gap-4">
           {isConnected ? (
             <div className="flex items-center gap-3">
               <div className="text-right">
-                <div className="text-sm text-gray-800">Voting power: {balance.toFixed(0)} tokens</div>
-                <div className="text-xs text-gray-700">
+                <div className="text-sm text-white/90">Voting power: {balance.toFixed(0)} tokens</div>
+                <div className="text-xs text-white/70">
                   {address ? `${address.slice(0, 6)}...${address.slice(-4)}` : 'Connected'}
                 </div>
               </div>
@@ -129,7 +129,7 @@ export default function VotePage() {
             </div>
           ) : (
             <Link href="/connect-wallet">
-              <Button variant="outline" size="sm" className="border-black/30 text-black hover:bg-black/10 bg-transparent">
+              <Button variant="outline" size="sm" className="border-white/30 text-white hover:bg-white/10 bg-transparent">
                 <WalletIcon className="w-4 h-4 mr-2" />
                 Connect to Vote
               </Button>
@@ -142,49 +142,49 @@ export default function VotePage() {
         <div className="max-w-6xl mx-auto space-y-8">
           {/* Statistics */}
           <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-            <Card className="bg-black/80 border-yellow-500/50 backdrop-blur-sm">
+            <Card className="bg-white/5 backdrop-blur-xl border-white/10 rounded-3xl">
               <CardContent className="p-4 text-center">
-                <TrendingUpIcon className="w-8 h-8 text-yellow-400 mx-auto mb-2" />
-                <div className="text-2xl font-bold text-yellow-400">12</div>
-                <div className="text-sm text-gray-300">Active Proposals</div>
+                <TrendingUpIcon className="w-8 h-8 text-blue-400 mx-auto mb-2" />
+                <div className="text-2xl font-bold text-white">12</div>
+                <div className="text-sm text-white/60">Active Proposals</div>
               </CardContent>
             </Card>
-            <Card className="bg-black/80 border-yellow-500/50 backdrop-blur-sm">
+            <Card className="bg-white/5 backdrop-blur-xl border-white/10 rounded-3xl">
               <CardContent className="p-4 text-center">
                 <CheckCircleIcon className="w-8 h-8 text-green-400 mx-auto mb-2" />
-                <div className="text-2xl font-bold text-green-400">28</div>
-                <div className="text-sm text-gray-300">Passed Proposals</div>
+                <div className="text-2xl font-bold text-white">28</div>
+                <div className="text-sm text-white/60">Passed Proposals</div>
               </CardContent>
             </Card>
-            <Card className="bg-black/80 border-yellow-500/50 backdrop-blur-sm">
+            <Card className="bg-white/5 backdrop-blur-xl border-white/10 rounded-3xl">
               <CardContent className="p-4 text-center">
-                <LeafIcon className="w-8 h-8 text-blue-400 mx-auto mb-2" />
-                <div className="text-2xl font-bold text-blue-400">85%</div>
-                <div className="text-sm text-gray-300">Avg AI Score</div>
+                <LeafIcon className="w-8 h-8 text-cyan-400 mx-auto mb-2" />
+                <div className="text-2xl font-bold text-white">85%</div>
+                <div className="text-sm text-white/60">Avg AI Score</div>
               </CardContent>
             </Card>
-            <Card className="bg-black/80 border-yellow-500/50 backdrop-blur-sm">
+            <Card className="bg-white/5 backdrop-blur-xl border-white/10 rounded-3xl">
               <CardContent className="p-4 text-center">
                 <ClockIcon className="w-8 h-8 text-purple-400 mx-auto mb-2" />
-                <div className="text-2xl font-bold text-purple-400">5.2M</div>
-                <div className="text-sm text-gray-300">Total Funding</div>
+                <div className="text-2xl font-bold text-white">5.2M</div>
+                <div className="text-sm text-white/60">Total Funding</div>
               </CardContent>
             </Card>
           </div>
 
           {/* Proposals List */}
           <div className="space-y-6">
-            <h2 className="text-2xl font-bold text-black">Active Proposals</h2>
+            <h2 className="text-2xl font-bold text-white">Active Proposals</h2>
             {mockProposals.map((proposal) => {
               const votePercentage = (proposal.votesFor / proposal.totalVotes) * 100;
               const hasVoted = votedProposals.has(proposal.id);
               
               return (
-                <Card key={proposal.id} className="bg-black/80 border-yellow-500/50 backdrop-blur-sm">
+                <Card key={proposal.id} className="bg-white/5 backdrop-blur-xl border-white/10 rounded-3xl hover:bg-white/10 transition-all duration-300">
                   <CardHeader>
                     <div className="flex items-start justify-between">
                       <div className="space-y-2">
-                        <CardTitle className="text-yellow-400 text-xl">{proposal.title}</CardTitle>
+                        <CardTitle className="text-white text-xl">{proposal.title}</CardTitle>
                         <div className="flex items-center gap-2">
                           <Badge className={getCategoryColor(proposal.category)}>
                             {proposal.category.replace('-', ' ').toUpperCase()}
@@ -198,41 +198,46 @@ export default function VotePage() {
                         </div>
                       </div>
                       <div className="text-right">
-                        <div className="text-yellow-400 font-bold text-lg">
+                        <div className="text-white font-bold text-lg">
                           ${proposal.fundingRequested.toLocaleString()}
                         </div>
-                        <div className="text-sm text-gray-300">Requested</div>
+                        <div className="text-sm text-white/60">Requested</div>
                       </div>
                     </div>
                   </CardHeader>
                   
                   <CardContent className="space-y-4">
-                    <p className="text-gray-300">{proposal.description}</p>
+                    <p className="text-white/80">{proposal.description}</p>
                     
-                    <div className="bg-yellow-500/10 border border-yellow-500/30 rounded-lg p-3">
-                      <div className="text-sm text-yellow-400 font-medium mb-1">Environmental Impact</div>
-                      <div className="text-gray-300">{proposal.environmentalImpact}</div>
+                    <div className="bg-blue-500/10 border border-blue-500/30 rounded-lg p-3">
+                      <div className="text-sm text-blue-400 font-medium mb-1">Environmental Impact</div>
+                      <div className="text-white/80">{proposal.environmentalImpact}</div>
                     </div>
 
                     {/* Voting Progress */}
                     <div className="space-y-2">
                       <div className="flex justify-between text-sm">
-                        <span className="text-gray-300">
+                        <span className="text-white/70">
                           For: {proposal.votesFor} ({votePercentage.toFixed(1)}%)
                         </span>
-                        <span className="text-gray-300">
+                        <span className="text-white/70">
                           Against: {proposal.votesAgainst} ({(100 - votePercentage).toFixed(1)}%)
                         </span>
                       </div>
-                      <Progress value={votePercentage} className="h-2" />
+                      <div className="relative h-2 w-full overflow-hidden rounded-full bg-white/10">
+                        <div 
+                          className="h-full bg-gradient-to-r from-green-500 to-emerald-500 transition-all duration-300 rounded-full"
+                          style={{ width: `${votePercentage}%` }}
+                        />
+                      </div>
                     </div>
 
                     <div className="flex items-center justify-between pt-4">
-                      <div className="text-sm text-gray-300">
+                      <div className="text-sm text-white/70">
                         {proposal.status === 'active' ? (
-                          <>Time remaining: <span className="text-yellow-400">{proposal.timeRemaining}</span></>
+                          <>Time remaining: <span className="text-blue-400">{proposal.timeRemaining}</span></>
                         ) : (
-                          <span className="text-gray-400">Voting ended</span>
+                          <span className="text-white/50">Voting ended</span>
                         )}
                       </div>
                       
