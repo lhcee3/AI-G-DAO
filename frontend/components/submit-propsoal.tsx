@@ -92,8 +92,8 @@ export function SubmitProposalPage() {
       <main className="relative z-10 flex-1 px-4 py-8">
         <div className="max-w-4xl mx-auto space-y-8">
           <div className="text-center space-y-4">
-            <h1 className="text-4xl font-bold tracking-tight text-black">Submit Your Climate Project</h1>
-            <p className="text-gray-800 text-lg max-w-2xl mx-auto">
+            <h1 className="text-4xl font-bold tracking-tight text-blue-400">Submit Your Climate Project</h1>
+            <p className="text-blue-500 text-lg max-w-2xl mx-auto">
               Share your innovative climate solution with our DAO community. Our AI will evaluate your proposal for
               environmental impact and feasibility.
             </p>

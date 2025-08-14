@@ -108,10 +108,6 @@ export function DashboardPage() {
 
             {/* Desktop Navigation */}
             <div className="hidden md:flex items-center space-x-4">
-              <Button variant="ghost" size="sm" className="text-white/80 hover:text-white hover:bg-white/10 rounded-xl">
-                <SearchIcon className="w-4 h-4 mr-2" />
-                Search
-              </Button>
             </div>
 
             {/* Wallet Status */}
@@ -315,7 +311,7 @@ export function DashboardPage() {
 
                 {/* View All Votes */}
                 <Link href="/vote">
-                  <Button variant="outline" className="w-full border-white/20 text-white hover:bg-white/10 rounded-2xl py-3">
+                  <Button variant="outline" className="w-full border-white/20 text-black hover:bg-white/10 rounded-2xl py-3">
                     View All Active Votes
                   </Button>
                 </Link>
