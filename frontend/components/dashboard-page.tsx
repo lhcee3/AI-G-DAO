@@ -28,11 +28,14 @@ import { useWallet } from "@/hooks/use-wallet"
 
 export function DashboardPage() {
   const { isConnected, address, balance, walletType } = useWallet()
-  const [currentTime, setCurrentTime] = useState(new Date())
+  const [currentTime, setCurrentTime] = useState<Date | null>(null)
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
 
-  // Update time every minute
+  // Update time every minute, only on client side
   useEffect(() => {
+    // Set initial time on client side
+    setCurrentTime(new Date())
+    
     const timer = setInterval(() => setCurrentTime(new Date()), 60000)
     return () => clearInterval(timer)
   }, [])
@@ -101,7 +104,21 @@ export function DashboardPage() {
               <div>
                 <h1 className="text-white font-bold text-xl">Climate DAO</h1>
                 <p className="text-white/60 text-xs">
-                  {currentTime.toLocaleDateString()} • {currentTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                  {currentTime ? (
+                    <>
+                      {currentTime.toLocaleDateString('en-US', { 
+                        month: 'numeric', 
+                        day: 'numeric', 
+                        year: 'numeric' 
+                      })} • {currentTime.toLocaleTimeString('en-US', { 
+                        hour: '2-digit', 
+                        minute: '2-digit',
+                        hour12: false 
+                      })}
+                    </>
+                  ) : (
+                    'Loading...'
+                  )}
                 </p>
               </div>
             </div>
