@@ -182,7 +182,7 @@ export function DashboardPage() {
           <div className="mb-8">
             <div className="inline-flex items-center gap-2 px-4 py-2 bg-white/10 backdrop-blur-xl border border-white/20 rounded-full text-sm text-white/80 mb-4">
               <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
-              Welcome back to Climate DAO
+             Take One step Towards a Greener Future
             </div>
           </div>
 
@@ -360,11 +360,19 @@ export function DashboardPage() {
       </main>
 
       {/* Normal Footer */}
-      <footer className="relative z-10 border-t border-white/10 bg-white/5 backdrop-blur-xl mt-12">
+      <footer className="relative z-10 border-t border-white/10 bg-white/5 backdrop-blur-m mt-12">
         <div className="max-w-7xl mx-auto px-6 py-8">
           <div className="text-center">
-            <p className="text-white/60 text-sm mb-2">
-              Built with 💚 by <span className="text-white font-medium">Aneesh</span>
+            <p className="text-white/80 text-sm mb-2">
+              Built with 💚 by{" "}
+              <a
+              href="https://github.com/lhcee3"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-white font-medium underline hover:text-cyan-400 transition"
+              >
+              Aneesh
+              </a>
             </p>
             <p className="text-white/40 text-xs">
               Powered by Algorand & AI • &copy; {new Date().getFullYear()} Climate DAO
