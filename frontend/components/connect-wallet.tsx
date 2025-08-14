@@ -8,11 +8,12 @@ import { useWallet } from "@/hooks/use-wallet"
 import { useRouter } from "next/navigation"
 
 export function WalletConnectPage() {
-  const { isConnected, address, balance, connect, disconnect, loading, error, walletType } = useWallet()
+  const { isConnected, address, balance, connect, disconnect, loading, error, walletType, clearError } = useWallet()
   const router = useRouter()
 
   const handleConnectWallet = async (type: 'pera' | 'demo' = 'pera') => {
     try {
+      clearError() // Clear any previous errors
       await connect(type)
     } catch (err) {
       console.error('Failed to connect wallet:', err)
@@ -65,8 +66,27 @@ export function WalletConnectPage() {
 
             <CardContent className="space-y-6">
               {error && (
-                <div className="bg-red-500/10 border border-red-500/30 rounded-lg p-4">
+                <div className="bg-red-500/10 border border-red-500/30 rounded-lg p-4 space-y-3">
                   <p className="text-red-400 text-sm">{error}</p>
+                  {error.includes('install Pera Wallet') && (
+                    <div className="text-xs text-gray-400 space-y-1">
+                      <p>To install Pera Wallet:</p>
+                      <ul className="list-disc list-inside ml-2 space-y-1">
+                        <li>Visit <a href="https://perawallet.app" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:text-blue-300 underline">perawallet.app</a></li>
+                        <li>Download the browser extension or mobile app</li>
+                        <li>Create or import your wallet</li>
+                        <li>Refresh this page and try again</li>
+                      </ul>
+                    </div>
+                  )}
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    onClick={clearError}
+                    className="border-red-500/30 text-red-400 hover:bg-red-500/10"
+                  >
+                    Dismiss
+                  </Button>
                 </div>
               )}
 

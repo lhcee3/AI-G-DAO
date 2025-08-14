@@ -14,6 +14,7 @@ interface WalletContextType {
   loading: boolean;
   error: string | null;
   walletType: 'pera' | 'demo' | null;
+  clearError: () => void;
 }
 
 const WalletContext = createContext<WalletContextType | undefined>(undefined);
@@ -32,20 +33,25 @@ const initializePeraWallet = async () => {
   
   try {
     // Wait a bit to ensure the browser extension is ready
-    await new Promise(resolve => setTimeout(resolve, 2000));
+    await new Promise(resolve => setTimeout(resolve, 1000));
     
     const module = await import('@perawallet/connect');
     PeraWalletConnect = module.PeraWalletConnect;
     
     peraWallet = new PeraWalletConnect({
       shouldShowSignTxnToast: false,
-      compactMode: true
+      compactMode: true,
+      chainId: 416002 // TestNet chain ID
     });
+    
+    // Test if the wallet can be used
+    await new Promise(resolve => setTimeout(resolve, 500));
     
     console.log('Pera Wallet initialized successfully');
     return peraWallet;
   } catch (error) {
     console.warn('Pera Wallet initialization failed:', error);
+    peraWallet = null;
     return null;
   } finally {
     isInitializing = false;
@@ -164,9 +170,9 @@ export function WalletProvider({ children }: WalletProviderProps) {
         localStorage.setItem('algorand_address', accounts[0]);
         localStorage.setItem('wallet_type', 'pera');
         await fetchBalance(accounts[0]);
-        return true;
+        return { success: true };
       }
-      return false;
+      return { success: false, userCancelled: true };
     } catch (error) {
       // Handle different types of errors
       const errorMessage = error instanceof Error ? error.message : String(error);
@@ -183,17 +189,17 @@ export function WalletProvider({ children }: WalletProviderProps) {
           errorMessage?.includes('Could not establish connection')) {
         // User cancelled or extension issue - this is normal behavior, don't throw error
         console.log('Pera Wallet connection cancelled or extension not ready:', errorMessage);
-        return false;
+        return { success: false, userCancelled: true };
       }
       
       // For actual errors, provide helpful messages
       if (errorMessage?.includes('No wallet') || errorMessage?.includes('not initialized')) {
-        throw new Error('Pera Wallet not found. Please install Pera Wallet first.');
+        return { success: false, error: 'Pera Wallet not found. Please install Pera Wallet first.' };
       }
       
       // Log the error for debugging but provide user-friendly message
       console.warn('Pera Wallet connection failed:', error);
-      throw new Error('Failed to connect to Pera Wallet. Please try again or use Demo Mode.');
+      return { success: false, error: 'Failed to connect to Pera Wallet. Please check if Pera Wallet is installed and try again.' };
     }
   };
 
@@ -213,23 +219,30 @@ export function WalletProvider({ children }: WalletProviderProps) {
     if (!isClient) return;
     
     setLoading(true);
-    setError(null);
+    setError(null); // Clear any previous errors
 
     try {
       if (preferredWallet === 'pera') {
-        const connected = await connectPeraWallet();
-        if (!connected) {
-          // User cancelled - this is normal, just reset loading state
-          setLoading(false);
-          return;
+        const result = await connectPeraWallet();
+        if (result.success) {
+          // Successfully connected
+          console.log('Successfully connected to Pera Wallet');
+        } else if (result.userCancelled) {
+          // User cancelled - this is normal, just reset loading state silently
+          console.log('User cancelled Pera Wallet connection');
+        } else if (result.error) {
+          // Actual error occurred
+          setError(result.error);
+          console.error('Pera Wallet connection error:', result.error);
         }
       } else {
         await connectDemoWallet();
       }
     } catch (err) {
+      // This should rarely happen now since we handle errors in connectPeraWallet
       const errorMessage = err instanceof Error ? err.message : 'Failed to connect wallet';
       setError(errorMessage);
-      console.error('Connection error:', err);
+      console.error('Unexpected connection error:', err);
     } finally {
       setLoading(false);
     }
@@ -250,8 +263,13 @@ export function WalletProvider({ children }: WalletProviderProps) {
     setIsConnected(false);
     setBalance(0);
     setWalletType(null);
+    setError(null);
     localStorage.removeItem('algorand_address');
     localStorage.removeItem('wallet_type');
+  };
+
+  const clearError = () => {
+    setError(null);
   };
 
   const signTransaction = async (txn: algosdk.Transaction): Promise<Uint8Array> => {
@@ -292,6 +310,7 @@ export function WalletProvider({ children }: WalletProviderProps) {
     loading,
     error,
     walletType,
+    clearError,
   };
 
   return <WalletContext.Provider value={value}>{children}</WalletContext.Provider>;
