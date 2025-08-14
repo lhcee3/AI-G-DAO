@@ -1,155 +1,380 @@
 "use client"
 
+import React, { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { PlusIcon, VoteIcon, CoinsIcon, BarChart3Icon, FileTextIcon, SettingsIcon, BrainCircuitIcon, WalletIcon } from "lucide-react"
+import { Badge } from "@/components/ui/badge"
+import { 
+  PlusIcon, 
+  VoteIcon, 
+  BarChart3Icon, 
+  FileTextIcon, 
+  SettingsIcon, 
+  BrainCircuitIcon, 
+  WalletIcon,
+  BellIcon,
+  SearchIcon,
+  TrendingUpIcon,
+  Users2Icon,
+  CoinsIcon,
+  CheckCircleIcon,
+  ClockIcon,
+  MenuIcon,
+  XIcon,
+  SparklesIcon
+} from "lucide-react"
 import Link from "next/link"
 import { useWallet } from "@/hooks/use-wallet"
 
 export function DashboardPage() {
-  const { isConnected, address, balance } = useWallet()
+  const { isConnected, address, balance, walletType } = useWallet()
+  const [currentTime, setCurrentTime] = useState(new Date())
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+
+  // Update time every minute
+  useEffect(() => {
+    const timer = setInterval(() => setCurrentTime(new Date()), 60000)
+    return () => clearInterval(timer)
+  }, [])
+
+  const quickActions = [
+    {
+      title: "Submit Proposal",
+      description: "Share your climate project idea",
+      icon: PlusIcon,
+      href: "/submit-proposal",
+      gradient: "from-blue-500 to-cyan-500",
+      shadow: "shadow-blue-500/25"
+    },
+    {
+      title: "AI Review",
+      description: "Get AI analysis for proposals", 
+      icon: BrainCircuitIcon,
+      href: "/proposal-review",
+      gradient: "from-purple-500 to-pink-500",
+      shadow: "shadow-purple-500/25"
+    },
+    {
+      title: "Vote on Proposals",
+      description: "Participate in DAO governance",
+      icon: VoteIcon,
+      href: "/vote",
+      gradient: "from-green-500 to-emerald-500", 
+      shadow: "shadow-green-500/25"
+    },
+    {
+      title: "Impact Analytics",
+      description: "Track environmental impact",
+      icon: BarChart3Icon,
+      href: "/impact-analytics",
+      gradient: "from-orange-500 to-red-500",
+      shadow: "shadow-orange-500/25"
+    }
+  ]
+
+  const stats = [
+    { label: "Active Proposals", value: "24", change: "+12%", icon: FileTextIcon, color: "blue" },
+    { label: "Total Votes Cast", value: "1,847", change: "+8%", icon: VoteIcon, color: "green" },
+    { label: "Climate Credits", value: "2,456", change: "+15%", icon: CoinsIcon, color: "yellow" },
+    { label: "Community Members", value: "892", change: "+5%", icon: Users2Icon, color: "purple" }
+  ]
   
   return (
-    <div className="relative flex flex-col min-h-[100dvh] text-white overflow-hidden">
-      {/* Enhanced Blue Gradient Background */}
-      <div className="fixed inset-0 z-0">
-        <div className="absolute inset-0 bg-gradient-to-br from-blue-600 via-blue-800 to-blue-900"></div>
-        <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent"></div>
-        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-blue-500/10 to-blue-400/20"></div>
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900 relative overflow-hidden">
+      {/* Animated Background Elements */}
+      <div className="absolute inset-0 overflow-hidden">
+        <div className="absolute -top-40 -right-40 w-80 h-80 bg-blue-500/10 rounded-full blur-3xl animate-pulse"></div>
+        <div className="absolute top-1/2 -left-40 w-80 h-80 bg-purple-500/10 rounded-full blur-3xl animate-pulse delay-1000"></div>
+        <div className="absolute -bottom-40 right-1/2 w-80 h-80 bg-cyan-500/10 rounded-full blur-3xl animate-pulse delay-2000"></div>
+        <div className="absolute top-1/4 right-1/4 w-40 h-40 bg-pink-500/5 rounded-full blur-2xl animate-bounce"></div>
       </div>
 
-      {/* Header */}
-      <header className="relative z-10 flex items-center justify-between p-6 border-b border-blue-500/20">
-        <div className="text-white font-bold text-xl">Climate DAO Dashboard</div>
-        <div className="flex items-center gap-4">
-          {isConnected ? (
-            <div className="flex items-center gap-3">
-              <div className="text-right">
-                <div className="text-sm text-blue-200">
-                  {address ? `${address.slice(0, 6)}...${address.slice(-4)}` : 'Connected'}
-                </div>
-                <div className="text-xs text-blue-300">{balance.toFixed(2)} ALGO</div>
+      {/* Floating Navigation */}
+      <nav className="fixed top-6 left-1/2 transform -translate-x-1/2 z-50 w-full max-w-6xl px-6">
+        <div className="bg-white/10 backdrop-blur-xl border border-white/20 rounded-3xl px-6 py-4 shadow-2xl hover:bg-white/15 transition-all duration-300">
+          <div className="flex items-center justify-between">
+            {/* Logo */}
+            <div className="flex items-center space-x-3">
+              <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-2xl flex items-center justify-center shadow-lg shadow-blue-500/25">
+                <SparklesIcon className="w-6 h-6 text-white" />
               </div>
-              <div className="w-2 h-2 bg-green-400 rounded-full"></div>
+              <div>
+                <h1 className="text-white font-bold text-xl">Climate DAO</h1>
+                <p className="text-white/60 text-xs">
+                  {currentTime.toLocaleDateString()} • {currentTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                </p>
+              </div>
             </div>
-          ) : (
-            <Link href="/connect-wallet">
-              <Button variant="outline" size="sm" className="border-blue-400 text-blue-400 hover:bg-blue-500/10 bg-transparent">
-                <WalletIcon className="w-4 h-4 mr-2" />
-                Connect Wallet
+
+            {/* Desktop Navigation */}
+            <div className="hidden md:flex items-center space-x-4">
+              <Button variant="ghost" size="sm" className="text-white/80 hover:text-white hover:bg-white/10 rounded-xl">
+                <SearchIcon className="w-4 h-4 mr-2" />
+                Search
               </Button>
-            </Link>
-          )}
-          <Button variant="outline" size="sm" className="border-blue-400 text-blue-400 hover:bg-blue-500/10 bg-transparent">
-            <SettingsIcon className="w-4 h-4 mr-2" />
-            Settings
-          </Button>
-        </div>
-      </header>
+            </div>
 
-      <main className="relative z-10 flex-1 px-6 py-8">
-        <div className="max-w-7xl mx-auto space-y-8">
-          {/* Quick Actions */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            <Card className="bg-black/80 border-blue-500/50 backdrop-blur-sm hover:bg-black/90 transition-all cursor-pointer">
-              <CardContent className="p-6 text-center">
-                <Link href="/submit-proposal" className="block">
-                  <PlusIcon className="w-12 h-12 text-blue-400 mx-auto mb-4" />
-                  <h3 className="text-blue-400 font-semibold text-lg mb-2">Submit Proposal</h3>
-                  <p className="text-gray-300 text-sm">Share your climate project idea</p>
+            {/* Wallet Status */}
+            <div className="hidden md:flex items-center space-x-4">
+              {isConnected ? (
+                <div className="flex items-center space-x-3 bg-white/5 rounded-2xl px-4 py-2 border border-white/10">
+                  <div className="text-right">
+                    <p className="text-white/90 font-medium text-sm">
+                      {address?.slice(0, 6)}...{address?.slice(-4)}
+                    </p>
+                    <p className="text-white/60 text-xs">{balance.toFixed(2)} ALGO</p>
+                  </div>
+                  <div className="w-3 h-3 bg-green-400 rounded-full animate-pulse"></div>
+                  <Badge variant="secondary" className="bg-green-500/20 text-green-400 border-green-500/30 rounded-full">
+                    {walletType === 'pera' ? 'Pera' : 'Demo'}
+                  </Badge>
+                </div>
+              ) : (
+                <Link href="/connect-wallet">
+                  <Button className="bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 text-white border-0 rounded-xl shadow-lg shadow-blue-500/25 hover:shadow-blue-500/40 transition-all duration-300">
+                    <WalletIcon className="w-4 h-4 mr-2" />
+                    Connect Wallet
+                  </Button>
                 </Link>
-              </CardContent>
-            </Card>
+              )}
+              <Button variant="ghost" size="sm" className="text-white/80 hover:text-white hover:bg-white/10 rounded-xl">
+                <SettingsIcon className="w-4 h-4" />
+              </Button>
+            </div>
 
-            <Card className="bg-black/80 border-blue-500/50 backdrop-blur-sm hover:bg-black/90 transition-all cursor-pointer">
-              <CardContent className="p-6 text-center">
-                <Link href="/proposal-review" className="block">
-                  <BrainCircuitIcon className="w-12 h-12 text-blue-400 mx-auto mb-4" />
-                  <h3 className="text-blue-400 font-semibold text-lg mb-2">AI Review</h3>
-                  <p className="text-gray-300 text-sm">Get AI analysis for proposals</p>
-                </Link>
-              </CardContent>
-            </Card>
-
-            <Card className="bg-black/80 border-blue-500/50 backdrop-blur-sm hover:bg-black/90 transition-all cursor-pointer">
-              <CardContent className="p-6 text-center">
-                <Link href="/vote" className="block">
-                  <VoteIcon className="w-12 h-12 text-blue-400 mx-auto mb-4" />
-                  <h3 className="text-blue-400 font-semibold text-lg mb-2">Vote on Proposals</h3>
-                  <p className="text-gray-300 text-sm">Participate in DAO governance</p>
-                </Link>
-              </CardContent>
-            </Card>
-
-            <Card className="bg-black/80 border-blue-500/50 backdrop-blur-sm hover:bg-black/90 transition-all cursor-pointer">
-              <CardContent className="p-6 text-center">
-                <Link href="/impact-analytics" className="block">
-                  <BarChart3Icon className="w-12 h-12 text-blue-400 mx-auto mb-4" />
-                  <h3 className="text-blue-400 font-semibold text-lg mb-2">Impact Analytics</h3>
-                  <p className="text-gray-300 text-sm">Track environmental impact</p>
-                </Link>
-              </CardContent>
-            </Card>
+            {/* Mobile Menu Button */}
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              className="md:hidden text-white hover:bg-white/10 rounded-xl"
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            >
+              {mobileMenuOpen ? <XIcon className="w-5 h-5" /> : <MenuIcon className="w-5 h-5" />}
+            </Button>
           </div>
 
-          {/* Recent Activity */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-            <Card className="bg-black/80 border-blue-500/50 backdrop-blur-sm">
-              <CardHeader>
-                <CardTitle className="text-blue-400 flex items-center gap-2">
-                  <FileTextIcon className="w-5 h-5" />
-                  My Proposals
-                </CardTitle>
-                <CardDescription className="text-gray-300">
+          {/* Mobile Menu */}
+          {mobileMenuOpen && (
+            <div className="md:hidden mt-6 pt-6 border-t border-white/20 space-y-4">
+              {isConnected ? (
+                <div className="flex items-center justify-between bg-white/5 rounded-xl p-3">
+                  <div>
+                    <p className="text-white font-medium">{address?.slice(0, 10)}...</p>
+                    <p className="text-white/60 text-sm">{balance.toFixed(2)} ALGO</p>
+                  </div>
+                  <Badge variant="secondary" className="bg-green-500/20 text-green-400 rounded-full">
+                    {walletType === 'pera' ? 'Pera' : 'Demo'}
+                  </Badge>
+                </div>
+              ) : (
+                <Link href="/connect-wallet">
+                  <Button className="w-full bg-gradient-to-r from-blue-500 to-cyan-500 text-white rounded-xl">
+                    Connect Wallet
+                  </Button>
+                </Link>
+              )}
+            </div>
+          )}
+        </div>
+      </nav>
+
+      {/* Main Content */}
+      <main className="relative z-10 pt-32 pb-20 px-6">
+        <div className="max-w-7xl mx-auto space-y-8">
+          
+          {/* Simple Welcome */}
+          <div className="mb-8">
+            <div className="inline-flex items-center gap-2 px-4 py-2 bg-white/10 backdrop-blur-xl border border-white/20 rounded-full text-sm text-white/80 mb-4">
+              <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
+              Welcome back to Climate DAO
+            </div>
+          </div>
+
+          {/* Stats Grid */}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-12">
+            {stats.map((stat, index) => (
+              <Card key={index} className="bg-white/5 backdrop-blur-xl border-white/10 rounded-3xl hover:bg-white/10 transition-all duration-500 group hover:scale-105">
+                <CardContent className="p-6">
+                  <div className="flex items-center justify-between mb-4">
+                    <div className={`w-12 h-12 bg-${stat.color}-500/20 rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300`}>
+                      <stat.icon className={`w-6 h-6 text-${stat.color}-400`} />
+                    </div>
+                    <span className="text-green-400 text-sm font-medium bg-green-500/10 px-2 py-1 rounded-full">
+                      {stat.change}
+                    </span>
+                  </div>
+                  <div>
+                    <p className="text-3xl font-bold text-white mb-2">{stat.value}</p>
+                    <p className="text-white/60 text-sm">{stat.label}</p>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+
+          {/* Quick Actions Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
+            {quickActions.map((action, index) => (
+              <Link key={index} href={action.href} className="group">
+                <Card className={`bg-white/5 backdrop-blur-xl border-white/10 rounded-3xl hover:bg-white/10 transition-all duration-500 group-hover:scale-105 ${action.shadow} hover:shadow-2xl`}>
+                  <CardContent className="p-8 text-center space-y-6">
+                    <div className={`w-20 h-20 bg-gradient-to-br ${action.gradient} rounded-3xl flex items-center justify-center mx-auto group-hover:scale-110 transition-transform duration-300 shadow-lg`}>
+                      <action.icon className="w-10 h-10 text-white" />
+                    </div>
+                    <div>
+                      <h3 className="text-white font-semibold text-lg mb-2">{action.title}</h3>
+                      <p className="text-white/60 text-sm leading-relaxed">{action.description}</p>
+                    </div>
+                  </CardContent>
+                </Card>
+              </Link>
+            ))}
+          </div>
+
+          {/* Dashboard Content Grid */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12">
+            
+            {/* My Proposals Card */}
+            <Card className="bg-white/5 backdrop-blur-xl border-white/10 rounded-3xl hover:bg-white/10 transition-all duration-300">
+              <CardHeader className="pb-6">
+                <div className="flex items-center justify-between">
+                  <CardTitle className="text-white text-xl flex items-center gap-3">
+                    <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-2xl flex items-center justify-center shadow-lg shadow-blue-500/25">
+                      <FileTextIcon className="w-6 h-6 text-white" />
+                    </div>
+                    My Proposals
+                  </CardTitle>
+                  <Badge variant="secondary" className="bg-blue-500/20 text-blue-400 border-blue-500/30 rounded-full">
+                    Active
+                  </Badge>
+                </div>
+                <CardDescription className="text-white/60 text-base">
                   Track the status of your submitted proposals
                 </CardDescription>
               </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="text-center py-8">
-                  <p className="text-gray-400">No proposals submitted yet</p>
-                  <Button className="mt-4 bg-blue-500 hover:bg-blue-600 text-white">
-                    <Link href="/submit-proposal">Submit Your First Proposal</Link>
-                  </Button>
+              <CardContent className="space-y-6">
+                <div className="text-center py-12">
+                  <div className="w-24 h-24 bg-white/5 rounded-3xl flex items-center justify-center mx-auto mb-6">
+                    <PlusIcon className="w-12 h-12 text-white/40" />
+                  </div>
+                  <p className="text-white/60 mb-6 text-lg">No proposals submitted yet</p>
+                  <Link href="/submit-proposal">
+                    <Button className="bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 text-white border-0 rounded-2xl px-8 py-3 text-base shadow-lg shadow-blue-500/25 hover:shadow-blue-500/40 transition-all duration-300">
+                      Submit Your First Proposal
+                    </Button>
+                  </Link>
                 </div>
               </CardContent>
             </Card>
 
-            <Card className="bg-black/80 border-blue-500/50 backdrop-blur-sm">
-              <CardHeader>
-                <CardTitle className="text-blue-400 flex items-center gap-2">
-                  <VoteIcon className="w-5 h-5" />
-                  Active Votes
-                </CardTitle>
-                <CardDescription className="text-gray-300">Proposals awaiting your vote</CardDescription>
+            {/* Active Votes Card */}
+            <Card className="bg-white/5 backdrop-blur-xl border-white/10 rounded-3xl hover:bg-white/10 transition-all duration-300">
+              <CardHeader className="pb-6">
+                <div className="flex items-center justify-between">
+                  <CardTitle className="text-white text-xl flex items-center gap-3">
+                    <div className="w-12 h-12 bg-gradient-to-br from-green-500 to-emerald-500 rounded-2xl flex items-center justify-center shadow-lg shadow-green-500/25">
+                      <VoteIcon className="w-6 h-6 text-white" />
+                    </div>
+                    Active Votes
+                  </CardTitle>
+                  <Badge variant="secondary" className="bg-green-500/20 text-green-400 border-green-500/30 rounded-full">
+                    3 Pending
+                  </Badge>
+                </div>
+                <CardDescription className="text-white/60 text-base">
+                  Proposals awaiting your vote
+                </CardDescription>
               </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="space-y-3">
-                  <div className="p-4 bg-blue-500/10 border border-blue-500/30 rounded-lg">
-                    <h4 className="text-white font-medium mb-2">Solar Farm Initiative - Kenya</h4>
-                    <p className="text-gray-300 text-sm mb-3">AI Impact Score: 8.7/10</p>
-                    <div className="flex gap-2">
-                      <Button size="sm" className="bg-green-600 hover:bg-green-700 text-white">
-                        Vote Yes
-                      </Button>
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        className="border-red-500/50 text-red-400 hover:bg-red-500/10 bg-transparent"
-                      >
-                        Vote No
-                      </Button>
+              <CardContent className="space-y-6">
+                
+                {/* Sample Proposal */}
+                <div className="bg-white/5 rounded-2xl p-6 border border-white/10 hover:bg-white/10 transition-all duration-300">
+                  <div className="flex items-center justify-between mb-4">
+                    <h4 className="text-white font-medium text-lg">Solar Farm Initiative - Kenya</h4>
+                    <Badge className="bg-yellow-500/20 text-yellow-400 border-yellow-500/30 rounded-full">
+                      <ClockIcon className="w-3 h-3 mr-1" />
+                      2d left
+                    </Badge>
+                  </div>
+                  <div className="flex items-center justify-between mb-4">
+                    <span className="text-white/60">AI Impact Score: 8.7/10</span>
+                    <div className="flex items-center gap-1 text-green-400">
+                      <TrendingUpIcon className="w-4 h-4" />
+                      High Impact
                     </div>
                   </div>
+                  <div className="grid grid-cols-2 gap-3">
+                    <Button size="sm" className="bg-green-500/20 hover:bg-green-500/30 text-green-400 border border-green-500/30 rounded-xl">
+                      Vote Yes
+                    </Button>
+                    <Button size="sm" variant="outline" className="border-red-500/30 text-red-400 hover:bg-red-500/10 rounded-xl">
+                      Vote No
+                    </Button>
+                  </div>
                 </div>
+
+                {/* View All Votes */}
+                <Link href="/vote">
+                  <Button variant="outline" className="w-full border-white/20 text-white hover:bg-white/10 rounded-2xl py-3">
+                    View All Active Votes
+                  </Button>
+                </Link>
               </CardContent>
             </Card>
+
           </div>
+
+          {/* Recent Activity */}
+          <Card className="bg-white/5 backdrop-blur-xl border-white/10 rounded-3xl hover:bg-white/10 transition-all duration-300">
+            <CardHeader className="pb-6">
+              <CardTitle className="text-white text-xl flex items-center gap-3">
+                <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-pink-500 rounded-2xl flex items-center justify-center shadow-lg shadow-purple-500/25">
+                  <BarChart3Icon className="w-6 h-6 text-white" />
+                </div>
+                Recent Activity
+              </CardTitle>
+              <CardDescription className="text-white/60 text-base">
+                Latest updates from the Climate DAO community
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              
+              {/* Activity Items */}
+              {[
+                { action: "New proposal submitted", item: "Wind Energy Project - Brazil", time: "2 hours ago", icon: PlusIcon, color: "blue" },
+                { action: "Voting completed", item: "Reforestation Initiative - Indonesia", time: "5 hours ago", icon: CheckCircleIcon, color: "green" },
+                { action: "AI analysis completed", item: "Carbon Capture Technology", time: "1 day ago", icon: BrainCircuitIcon, color: "purple" }
+              ].map((activity, index) => (
+                <div key={index} className="flex items-center gap-4 p-4 bg-white/5 rounded-2xl border border-white/10 hover:bg-white/10 transition-all duration-300">
+                  <div className={`w-12 h-12 bg-${activity.color}-500/20 rounded-2xl flex items-center justify-center`}>
+                    <activity.icon className={`w-6 h-6 text-${activity.color}-400`} />
+                  </div>
+                  <div className="flex-1">
+                    <p className="text-white font-medium text-base">{activity.action}</p>
+                    <p className="text-white/60">{activity.item}</p>
+                  </div>
+                  <span className="text-white/40">{activity.time}</span>
+                </div>
+              ))}
+
+            </CardContent>
+          </Card>
+
         </div>
       </main>
 
-      {/* Footer */}
-      <footer className="relative z-10 text-center py-6 text-gray-300 text-sm border-t border-blue-500/20 bg-black/20 backdrop-blur-sm">
-        <p>&copy; {new Date().getFullYear()} Climate DAO. Building a sustainable future together.</p>
+      {/* Normal Footer */}
+      <footer className="relative z-10 border-t border-white/10 bg-white/5 backdrop-blur-xl mt-12">
+        <div className="max-w-7xl mx-auto px-6 py-8">
+          <div className="text-center">
+            <p className="text-white/60 text-sm mb-2">
+              Built with 💚 by <span className="text-white font-medium">Aneesh</span>
+            </p>
+            <p className="text-white/40 text-xs">
+              Powered by Algorand & AI • &copy; {new Date().getFullYear()} Climate DAO
+            </p>
+          </div>
+        </div>
       </footer>
     </div>
   )

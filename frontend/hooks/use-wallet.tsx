@@ -21,25 +21,36 @@ const WalletContext = createContext<WalletContextType | undefined>(undefined);
 // Dynamic import for Pera Wallet to avoid SSR issues
 let PeraWalletConnect: any = null;
 let peraWallet: any = null;
+let isInitializing = false;
 
-if (typeof window !== 'undefined') {
-  // Add a delay to ensure the browser extension is ready
-  setTimeout(() => {
-    import('@perawallet/connect').then((module) => {
-      PeraWalletConnect = module.PeraWalletConnect;
-      try {
-        peraWallet = new PeraWalletConnect({
-          // Add bridge URL explicitly
-          bridge: 'https://bridge.walletconnect.org'
-        });
-      } catch (error) {
-        console.warn('Pera Wallet initialization failed:', error);
-      }
-    }).catch((err) => {
-      console.warn('Pera Wallet not available:', err);
+const initializePeraWallet = async () => {
+  if (peraWallet || isInitializing || typeof window === 'undefined') {
+    return peraWallet;
+  }
+
+  isInitializing = true;
+  
+  try {
+    // Wait a bit to ensure the browser extension is ready
+    await new Promise(resolve => setTimeout(resolve, 2000));
+    
+    const module = await import('@perawallet/connect');
+    PeraWalletConnect = module.PeraWalletConnect;
+    
+    peraWallet = new PeraWalletConnect({
+      shouldShowSignTxnToast: false,
+      compactMode: true
     });
-  }, 1000); // Wait 1 second for browser extension to load
-}
+    
+    console.log('Pera Wallet initialized successfully');
+    return peraWallet;
+  } catch (error) {
+    console.warn('Pera Wallet initialization failed:', error);
+    return null;
+  } finally {
+    isInitializing = false;
+  }
+};
 
 interface WalletProviderProps {
   children: ReactNode;
@@ -131,23 +142,22 @@ export function WalletProvider({ children }: WalletProviderProps) {
 
   const connectPeraWallet = async () => {
     try {
-      // Check if Pera Wallet is available
+      // Check if browser environment
       if (typeof window === 'undefined') {
         throw new Error('Window not available');
       }
 
-      if (!peraWallet) {
-        throw new Error('Pera Wallet not initialized. Please install Pera Wallet and refresh the page.');
+      // Initialize Pera Wallet if not already done
+      const wallet = await initializePeraWallet();
+      
+      if (!wallet) {
+        throw new Error('Pera Wallet could not be initialized. Please install Pera Wallet and refresh the page.');
       }
 
-      // Check if Pera Wallet extension is available
-      if (typeof window !== 'undefined') {
-        // Try to detect if Pera Wallet mobile app is available
-        console.log('Attempting Pera Wallet connection...');
-      }
-
-      const accounts = await peraWallet.connect();
-      if (accounts.length > 0) {
+      console.log('Attempting to connect to Pera Wallet...');
+      const accounts = await wallet.connect();
+      
+      if (accounts && accounts.length > 0) {
         setAddress(accounts[0]);
         setIsConnected(true);
         setWalletType('pera');
@@ -168,9 +178,11 @@ export function WalletProvider({ children }: WalletProviderProps) {
           errorMessage?.includes('User denied') ||
           errorMessage?.includes('Modal closed by user') ||
           errorMessage?.includes('Connection request reset') ||
-          errorMessage?.includes('Receiving end does not exist')) {
+          errorMessage?.includes('Receiving end does not exist') ||
+          errorMessage?.includes('Extension context invalidated') ||
+          errorMessage?.includes('Could not establish connection')) {
         // User cancelled or extension issue - this is normal behavior, don't throw error
-        console.log('Pera Wallet connection cancelled or extension not ready');
+        console.log('Pera Wallet connection cancelled or extension not ready:', errorMessage);
         return false;
       }
       
