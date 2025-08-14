@@ -48,26 +48,26 @@ export default function ProposalReviewPage() {
   }
 
   return (
-    <div className="relative flex flex-col min-h-[100dvh] text-black overflow-hidden">
-      {/* Yellow/Black Gradient Background */}
+    <div className="relative flex flex-col min-h-[100dvh] text-white overflow-hidden">
+      {/* Blue Gradient Background */}
       <div className="fixed inset-0 z-0">
-        <div className="absolute inset-0 bg-gradient-to-br from-yellow-400 via-yellow-500 to-amber-600"></div>
+        <div className="absolute inset-0 bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900"></div>
         <div className="absolute inset-0 bg-black/20"></div>
       </div>
 
       {/* Header */}
-      <header className="relative z-10 flex items-center justify-between p-6 border-b border-black/20">
-        <Link href="/dashboard" className="flex items-center gap-2 text-black hover:text-gray-800 transition-colors">
+      <header className="relative z-10 flex items-center justify-between p-6 border-b border-white/20">
+        <Link href="/dashboard" className="flex items-center gap-2 text-white hover:text-white/80 transition-colors">
           <ArrowLeftIcon className="w-5 h-5" />
           <span className="text-sm font-medium">Back to Dashboard</span>
         </Link>
-        <div className="text-black font-bold text-lg">AI Proposal Review</div>
+        <div className="text-white font-bold text-lg">AI Proposal Review</div>
         <div className="flex items-center gap-4">
           {isConnected ? (
             <div className="flex items-center gap-3">
               <div className="text-right">
-                <div className="text-sm text-gray-800">AI Analysis Ready</div>
-                <div className="text-xs text-gray-700">
+                <div className="text-sm text-white/90">AI Analysis Ready</div>
+                <div className="text-xs text-white/70">
                   {address ? `${address.slice(0, 6)}...${address.slice(-4)}` : 'Connected'}
                 </div>
               </div>
@@ -75,7 +75,7 @@ export default function ProposalReviewPage() {
             </div>
           ) : (
             <Link href="/connect-wallet">
-              <Button variant="outline" size="sm" className="border-black/30 text-black hover:bg-black/10 bg-transparent">
+              <Button variant="outline" size="sm" className="border-white/30 text-white hover:bg-white/10 bg-transparent">
                 <WalletIcon className="w-4 h-4 mr-2" />
                 Connect Wallet
               </Button>
@@ -87,13 +87,13 @@ export default function ProposalReviewPage() {
       <main className="relative z-10 flex-1 flex flex-col lg:flex-row gap-8 px-6 pb-6">
         {/* Proposal Input Form */}
         <div className="flex-1 max-w-2xl">
-          <Card className="bg-black/80 border-yellow-500/50 backdrop-blur-sm">
+          <Card className="bg-white/5 backdrop-blur-xl border-white/10 rounded-3xl">
             <CardHeader>
-              <CardTitle className="text-2xl text-yellow-400 flex items-center gap-2">
+              <CardTitle className="text-2xl text-white flex items-center gap-2">
                 <SparklesIcon className="w-6 h-6" />
                 Analyze Climate Proposal
               </CardTitle>
-              <CardDescription className="text-gray-300">
+              <CardDescription className="text-white/60">
                 Enter proposal details to get AI-powered analysis and recommendations
               </CardDescription>
             </CardHeader>
@@ -101,21 +101,21 @@ export default function ProposalReviewPage() {
             <CardContent className="space-y-6">
               {/* Project Title */}
               <div className="space-y-2">
-                <Label htmlFor="title" className="text-yellow-400">Project Title</Label>
+                <Label htmlFor="title" className="text-white">Project Title</Label>
                 <Input
                   id="title"
                   value={formData.projectTitle}
                   onChange={(e) => handleInputChange("projectTitle", e.target.value)}
                   placeholder="e.g., Solar Panel Installation for Rural Schools"
-                  className="bg-black/50 border-yellow-500/30 text-white placeholder-gray-400"
+                  className="bg-white/5 border-white/20 text-white placeholder-white/40"
                 />
               </div>
 
               {/* Category */}
               <div className="space-y-2">
-                <Label htmlFor="category" className="text-yellow-400">Project Category</Label>
+                <Label htmlFor="category" className="text-white">Project Category</Label>
                 <Select value={formData.category} onValueChange={(value) => handleInputChange("category", value)}>
-                  <SelectTrigger className="bg-black/50 border-yellow-500/30 text-white">
+                  <SelectTrigger className="bg-white/5 border-white/20 text-white">
                     <SelectValue placeholder="Select category" />
                   </SelectTrigger>
                   <SelectContent>
@@ -132,52 +132,52 @@ export default function ProposalReviewPage() {
 
               {/* Location */}
               <div className="space-y-2">
-                <Label htmlFor="location" className="text-yellow-400">Location</Label>
+                <Label htmlFor="location" className="text-white">Location</Label>
                 <Input
                   id="location"
                   value={formData.location}
                   onChange={(e) => handleInputChange("location", e.target.value)}
                   placeholder="e.g., Kenya, East Africa"
-                  className="bg-black/50 border-yellow-500/30 text-white placeholder-gray-400"
+                  className="bg-white/5 border-white/20 text-white placeholder-white/40"
                 />
               </div>
 
               {/* Funding Amount */}
               <div className="space-y-2">
-                <Label htmlFor="funding" className="text-yellow-400">Funding Amount (ALGO)</Label>
+                <Label htmlFor="funding" className="text-white">Funding Amount (ALGO)</Label>
                 <Input
                   id="funding"
                   type="number"
                   value={formData.fundingAmount}
                   onChange={(e) => handleInputChange("fundingAmount", e.target.value)}
                   placeholder="e.g., 50000"
-                  className="bg-black/50 border-yellow-500/30 text-white placeholder-gray-400"
+                  className="bg-white/5 border-white/20 text-white placeholder-white/40"
                 />
               </div>
 
               {/* Description */}
               <div className="space-y-2">
-                <Label htmlFor="description" className="text-yellow-400">Project Description</Label>
+                <Label htmlFor="description" className="text-white">Project Description</Label>
                 <Textarea
                   id="description"
                   rows={6}
                   value={formData.description}
                   onChange={(e) => handleInputChange("description", e.target.value)}
                   placeholder="Describe your climate project in detail..."
-                  className="bg-black/50 border-yellow-500/30 text-white placeholder-gray-400 resize-none"
+                  className="bg-white/5 border-white/20 text-white placeholder-white/40 resize-none"
                 />
               </div>
 
               {/* Expected Impact */}
               <div className="space-y-2">
-                <Label htmlFor="impact" className="text-yellow-400">Expected Impact</Label>
+                <Label htmlFor="impact" className="text-white">Expected Impact</Label>
                 <Textarea
                   id="impact"
                   rows={3}
                   value={formData.expectedImpact}
                   onChange={(e) => handleInputChange("expectedImpact", e.target.value)}
                   placeholder="e.g., Reduce CO2 emissions by 1000 tons annually"
-                  className="bg-black/50 border-yellow-500/30 text-white placeholder-gray-400 resize-none"
+                  className="bg-white/5 border-white/20 text-white placeholder-white/40 resize-none"
                 />
               </div>
 
@@ -185,11 +185,11 @@ export default function ProposalReviewPage() {
               <Button
                 onClick={handleAnalyze}
                 disabled={isAnalyzing || !formData.projectTitle || !formData.description}
-                className="w-full bg-yellow-500 hover:bg-yellow-600 text-black font-semibold py-3 rounded-lg transition-all duration-300 transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="w-full bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 text-white font-semibold py-3 rounded-lg transition-all duration-300 transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {isAnalyzing ? (
                   <div className="flex items-center space-x-2">
-                    <div className="w-4 h-4 border-2 border-black/30 border-t-black rounded-full animate-spin"></div>
+                    <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
                     <span>Analyzing with AI...</span>
                   </div>
                 ) : (
@@ -211,11 +211,11 @@ export default function ProposalReviewPage() {
           {reviewResult ? (
             <AIReviewDisplay review={reviewResult} />
           ) : (
-            <Card className="bg-black/80 border-yellow-500/50 backdrop-blur-sm">
+            <Card className="bg-white/5 backdrop-blur-xl border-white/10 rounded-3xl">
               <CardContent className="flex flex-col items-center justify-center py-12 text-center">
-                <SparklesIcon className="w-16 h-16 text-yellow-400 mb-4" />
-                <h3 className="text-xl font-semibold text-yellow-400 mb-2">AI Analysis Ready</h3>
-                <p className="text-gray-300">
+                <SparklesIcon className="w-16 h-16 text-blue-400 mb-4" />
+                <h3 className="text-xl font-semibold text-white mb-2">AI Analysis Ready</h3>
+                <p className="text-white/60">
                   Fill in the proposal details and click "Analyze Proposal" to get AI-powered insights
                 </p>
               </CardContent>
