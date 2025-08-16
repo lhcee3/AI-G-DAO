@@ -6,17 +6,27 @@ import { WalletIcon, ArrowLeftIcon, CheckCircleIcon } from "lucide-react"
 import Link from "next/link"
 import { useWallet } from "@/hooks/use-wallet"
 import { useRouter } from "next/navigation"
+import { useLoading } from "@/hooks/use-loading"
+import { LoadingSpinner } from "@/components/ui/loading-spinner"
 
 export function WalletConnectPage() {
   const { isConnected, address, balance, connect, disconnect, loading, error, walletType, clearError } = useWallet()
+  const { setLoading } = useLoading()
   const router = useRouter()
 
   const handleConnectWallet = async (type: 'pera' | 'demo' = 'pera') => {
     try {
       clearError() // Clear any previous errors
+      if (type === 'pera') {
+        setLoading(true, "Connecting to Pera Wallet...")
+      } else {
+        setLoading(true, "Setting up demo wallet...")
+      }
       await connect(type)
     } catch (err) {
       console.error('Failed to connect wallet:', err)
+    } finally {
+      setLoading(false)
     }
   }
 

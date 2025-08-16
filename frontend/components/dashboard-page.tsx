@@ -25,11 +25,21 @@ import {
 } from "lucide-react"
 import Link from "next/link"
 import { useWallet } from "@/hooks/use-wallet"
+import { StatsSkeleton, CardSkeleton } from "@/components/ui/skeleton"
 
 export function DashboardPage() {
   const { isConnected, address, balance, walletType } = useWallet()
   const [currentTime, setCurrentTime] = useState<Date | null>(null)
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+  const [isLoading, setIsLoading] = useState(true)
+
+  // Simulate loading time for dashboard content
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setIsLoading(false)
+    }, 1500)
+    return () => clearTimeout(timer)
+  }, [])
 
   // Update time every minute, only on client side
   useEffect(() => {
@@ -204,45 +214,57 @@ export function DashboardPage() {
           </div>
 
           {/* Stats Grid */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-12">
-            {stats.map((stat, index) => (
-              <Card key={index} className="bg-white/5 backdrop-blur-xl border-white/10 rounded-3xl">
-                <CardContent className="p-6">
-                  <div className="flex items-center justify-between mb-4">
-                    <div className={`w-12 h-12 bg-${stat.color}-500/20 rounded-2xl flex items-center justify-center`}>
-                      <stat.icon className={`w-6 h-6 text-${stat.color}-400`} />
-                    </div>
-                    <span className="text-green-400 text-sm font-medium bg-green-500/10 px-2 py-1 rounded-full">
-                      {stat.change}
-                    </span>
-                  </div>
-                  <div>
-                    <p className="text-3xl font-bold text-white mb-2">{stat.value}</p>
-                    <p className="text-white/60 text-sm">{stat.label}</p>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-
-          {/* Quick Actions Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
-            {quickActions.map((action, index) => (
-              <Link key={index} href={action.href} className="group">
-                <Card className={`bg-white/5 backdrop-blur-xl border-white/10 rounded-3xl hover:bg-white/10 transition-all duration-500 group-hover:scale-105 ${action.shadow} hover:shadow-2xl`}>
-                  <CardContent className="p-8 text-center space-y-6">
-                    <div className={`w-20 h-20 bg-gradient-to-br ${action.gradient} rounded-3xl flex items-center justify-center mx-auto group-hover:scale-110 transition-transform duration-300 shadow-lg`}>
-                      <action.icon className="w-10 h-10 text-white" />
+          {isLoading ? (
+            <StatsSkeleton />
+          ) : (
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-12">
+              {stats.map((stat, index) => (
+                <Card key={index} className="bg-white/5 backdrop-blur-xl border-white/10 rounded-3xl">
+                  <CardContent className="p-6">
+                    <div className="flex items-center justify-between mb-4">
+                      <div className={`w-12 h-12 bg-${stat.color}-500/20 rounded-2xl flex items-center justify-center`}>
+                        <stat.icon className={`w-6 h-6 text-${stat.color}-400`} />
+                      </div>
+                      <span className="text-green-400 text-sm font-medium bg-green-500/10 px-2 py-1 rounded-full">
+                        {stat.change}
+                      </span>
                     </div>
                     <div>
-                      <h3 className="text-white font-semibold text-lg mb-2">{action.title}</h3>
-                      <p className="text-white/60 text-sm leading-relaxed">{action.description}</p>
+                      <p className="text-3xl font-bold text-white mb-2">{stat.value}</p>
+                      <p className="text-white/60 text-sm">{stat.label}</p>
                     </div>
                   </CardContent>
                 </Card>
-              </Link>
-            ))}
-          </div>
+              ))}
+            </div>
+          )}
+
+          {/* Quick Actions Grid */}
+          {isLoading ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
+              {Array.from({ length: 4 }).map((_, i) => (
+                <CardSkeleton key={i} showHeader={false} lines={2} />
+              ))}
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
+              {quickActions.map((action, index) => (
+                <Link key={index} href={action.href} className="group">
+                  <Card className={`bg-white/5 backdrop-blur-xl border-white/10 rounded-3xl hover:bg-white/10 transition-all duration-500 group-hover:scale-105 ${action.shadow} hover:shadow-2xl`}>
+                    <CardContent className="p-8 text-center space-y-6">
+                      <div className={`w-20 h-20 bg-gradient-to-br ${action.gradient} rounded-3xl flex items-center justify-center mx-auto group-hover:scale-110 transition-transform duration-300 shadow-lg`}>
+                        <action.icon className="w-10 h-10 text-white" />
+                      </div>
+                      <div>
+                        <h3 className="text-white font-semibold text-lg mb-2">{action.title}</h3>
+                        <p className="text-white/60 text-sm leading-relaxed">{action.description}</p>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </Link>
+              ))}
+            </div>
+          )}
 
           {/* Dashboard Content Grid */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12">

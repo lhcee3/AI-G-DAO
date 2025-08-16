@@ -13,10 +13,12 @@ import Link from "next/link"
 import { useWallet } from "@/hooks/use-wallet"
 import { useClimateDAO } from "@/hooks/use-climate-dao"
 import { useRouter } from "next/navigation"
+import { useLoading } from "@/hooks/use-loading"
 
 export function SubmitProposalPage() {
   const { isConnected, address } = useWallet()
   const { submitProposal, loading, error } = useClimateDAO()
+  const { setLoading } = useLoading()
   const router = useRouter()
   
   const [formData, setFormData] = useState({
@@ -37,6 +39,8 @@ export function SubmitProposalPage() {
       router.push('/connect-wallet')
       return
     }
+
+    setLoading(true, "Submitting your proposal...")
 
     try {
       const fundingAmountNum = parseInt(formData.fundingAmount) || 0
@@ -65,6 +69,8 @@ export function SubmitProposalPage() {
     } catch (err) {
       console.error('Failed to submit proposal:', err)
       alert(`Failed to submit proposal: ${err instanceof Error ? err.message : 'Unknown error'}`)
+    } finally {
+      setLoading(false)
     }
   }
 

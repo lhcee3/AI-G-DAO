@@ -1,6 +1,8 @@
 import type { Metadata } from 'next'
 import './globals.css'
 import { WalletProvider } from '@/hooks/use-wallet'
+import { LoadingProvider } from '@/hooks/use-loading'
+import { PageTransitionLoader } from '@/components/page-transition-loader'
 
 export const metadata: Metadata = {
   title: 'Climate DAO ',
@@ -16,9 +18,12 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body>
-        <WalletProvider>
-          {children}
-        </WalletProvider>
+        <LoadingProvider>
+          <WalletProvider>
+            <PageTransitionLoader />
+            {children}
+          </WalletProvider>
+        </LoadingProvider>
       </body>
     </html>
   )
