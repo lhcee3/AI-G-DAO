@@ -158,7 +158,7 @@ export function WalletConnectPage() {
 
                   <Button
                     variant="outline"
-                    className="w-full border-gray-600 text-gray-300 hover:bg-gray-800 hover:text-white font-semibold py-4 rounded-lg transition-all duration-300"
+                    className="w-full border-blue-600 text-blue-800 hover:bg-gray-800 hover:text-white font-semibold py-4 rounded-lg transition-all duration-300"
                     onClick={() => handleConnectWallet('demo')}
                     disabled={loading}
                   >
