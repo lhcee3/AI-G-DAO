@@ -13,7 +13,8 @@ import {
   TreesIcon,
   DropletIcon,
   ThermometerIcon,
-  WalletIcon
+  WalletIcon,
+  ArrowLeftIcon
 } from 'lucide-react';
 import { useWallet } from '@/hooks/use-wallet';
 import Link from 'next/link';
@@ -188,6 +189,11 @@ export default function ImpactAnalyticsPage() {
       {/* Header */}
       <header className="relative z-10 flex items-center justify-between p-6 border-b border-white/20">
         <div className="flex items-center gap-4">
+          <Link href="/dashboard" className="flex items-center gap-2 text-white hover:text-blue-200 transition-colors">
+            <ArrowLeftIcon className="w-5 h-5" />
+            <span className="text-sm font-medium">Back to Dashboard</span>
+          </Link>
+          <div className="h-6 w-px bg-white/20"></div>
           <BarChart3Icon className="w-8 h-8 text-white" />
           <div className="text-white font-bold text-xl">Impact Analytics</div>
         </div>

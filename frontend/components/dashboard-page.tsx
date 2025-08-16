@@ -206,10 +206,10 @@ export function DashboardPage() {
           {/* Stats Grid */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-12">
             {stats.map((stat, index) => (
-              <Card key={index} className="bg-white/5 backdrop-blur-xl border-white/10 rounded-3xl hover:bg-white/10 transition-all duration-500 group hover:scale-105">
+              <Card key={index} className="bg-white/5 backdrop-blur-xl border-white/10 rounded-3xl">
                 <CardContent className="p-6">
                   <div className="flex items-center justify-between mb-4">
-                    <div className={`w-12 h-12 bg-${stat.color}-500/20 rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300`}>
+                    <div className={`w-12 h-12 bg-${stat.color}-500/20 rounded-2xl flex items-center justify-center`}>
                       <stat.icon className={`w-6 h-6 text-${stat.color}-400`} />
                     </div>
                     <span className="text-green-400 text-sm font-medium bg-green-500/10 px-2 py-1 rounded-full">
@@ -377,7 +377,7 @@ export function DashboardPage() {
       </main>
 
       {/* Normal Footer */}
-      <footer className="relative z-10 border-t border-white/10 bg-white/5 backdrop-blur-m mt-12">
+      <footer className="relative z-10 border-t border-white/10 bg-white/5 backdrop-blur-md mt-12">
         <div className="max-w-7xl mx-auto px-6 py-8">
           <div className="text-center">
             <p className="text-white/80 text-sm mb-2">

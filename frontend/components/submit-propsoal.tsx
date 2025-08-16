@@ -82,11 +82,11 @@ export function SubmitProposalPage() {
 
       {/* Header */}
       <header className="relative z-10 flex items-center justify-between p-6">
-        <Link href="/dashboard" className="flex items-center gap-2 text-black hover:text-gray-800 transition-colors">
+        <Link href="/dashboard" className="flex items-center gap-2 text-white hover:text-blue-200 transition-colors">
           <ArrowLeftIcon className="w-5 h-5" />
           <span className="text-sm font-medium">Back to Dashboard</span>
         </Link>
-        <div className="text-black font-bold text-lg">Climate DAO - Submit Proposal</div>
+        <div className="text-white font-bold text-lg">Climate DAO - Submit Proposal</div>
       </header>
 
       <main className="relative z-10 flex-1 px-4 py-8">

@@ -2,7 +2,7 @@
 
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { BotIcon, CoinsIcon, HandshakeIcon, LeafIcon, LightbulbIcon, VoteIcon, ArrowRightIcon, CheckCircleIcon } from "lucide-react"
+import { BotIcon, CoinsIcon, HandshakeIcon, LeafIcon, LightbulbIcon, VoteIcon, ArrowRightIcon, CheckCircleIcon, GithubIcon, StarIcon } from "lucide-react"
 import Link from "next/link"
 import Image from "next/image"
 import StarBorder from "@/components/ui/star-border"
@@ -18,11 +18,22 @@ export function LandingPage() {
       {/* Header */}
       <header className="relative z-10 flex items-center justify-between p-6">
         <div className="text-teal-400 font-bold text-xl">Climate DAO</div>
-        <Link href="/connect-wallet">
-          <Button variant="outline" className="border-teal-500/50 text-teal-400 hover:bg-teal-500/10 bg-transparent">
-            Connect Wallet
-          </Button>
-        </Link>
+        <div className="flex items-center gap-3">
+          <a 
+            href="https://github.com/lhcee3/AI-G-DAO" 
+            target="_blank" 
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-2 px-4 py-2 border border-gray-500/50 text-gray-300 hover:text-white hover:border-gray-400/70 bg-transparent rounded-md transition-all duration-200 hover:bg-gray-800/30"
+          >
+            <StarIcon className="w-4 h-4" />
+            <span className="text-sm font-medium">Star on GitHub</span>
+          </a>
+          <Link href="/connect-wallet">
+            <Button variant="outline" className="border-teal-500/50 text-teal-400 hover:bg-teal-500/10 bg-transparent">
+              Connect Wallet
+            </Button>
+          </Link>
+        </div>
       </header>
 
       <main className="relative z-10 flex-1">

@@ -5,7 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
-import { VoteIcon, CheckCircleIcon, XCircleIcon, ClockIcon, TrendingUpIcon, LeafIcon, WalletIcon } from 'lucide-react';
+import { VoteIcon, CheckCircleIcon, XCircleIcon, ClockIcon, TrendingUpIcon, LeafIcon, WalletIcon, ArrowLeftIcon } from 'lucide-react';
 import { useWallet } from '@/hooks/use-wallet';
 import Link from 'next/link';
 
@@ -113,6 +113,11 @@ export default function VotePage() {
       {/* Header */}
       <header className="relative z-10 flex items-center justify-between p-6 border-b border-white/20">
         <div className="flex items-center gap-4">
+          <Link href="/dashboard" className="flex items-center gap-2 text-white hover:text-blue-200 transition-colors">
+            <ArrowLeftIcon className="w-5 h-5" />
+            <span className="text-sm font-medium">Back to Dashboard</span>
+          </Link>
+          <div className="h-6 w-px bg-white/20"></div>
           <VoteIcon className="w-8 h-8 text-white" />
           <div className="text-white font-bold text-xl">Vote on Proposals</div>
         </div>
