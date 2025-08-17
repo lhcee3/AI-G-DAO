@@ -18,7 +18,7 @@ export async function analyzeProposal(
   location: string
 ): Promise<AIReviewResult> {
   try {
-    const apiKey = process.env.GOOGLE_GEMINI_API_KEY;
+    const apiKey = process.env.NEXT_PUBLIC_GOOGLE_GEMINI_API_KEY;
     if (!apiKey) {
       throw new Error('Gemini API key not configured');
     }
@@ -55,11 +55,12 @@ Provide response in JSON format:
 `;
 
     const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${apiKey}`,
+      "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent",
       {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'X-goog-api-key': apiKey,
         },
         body: JSON.stringify({
           contents: [{
@@ -72,26 +73,23 @@ Provide response in JSON format:
     );
 
     if (!response.ok) {
-      throw new Error(`Gemini API error: ${response.statusText}`);
+      const errorText = await response.text();
+      throw new Error(`Gemini API error: ${response.statusText} - ${errorText}`);
     }
 
     const data = await response.json();
-    const aiResponse = data.candidates[0]?.content?.parts[0]?.text;
-    
+    const aiResponse = data.candidates?.[0]?.content?.parts?.[0]?.text;
     if (!aiResponse) {
       throw new Error('No response from Gemini API');
     }
-
     // Extract JSON from response
     const jsonMatch = aiResponse.match(/\{[\s\S]*\}/);
     if (!jsonMatch) {
       throw new Error('Invalid JSON response from AI');
     }
-
     return JSON.parse(jsonMatch[0]);
   } catch (error) {
     console.error('AI analysis error:', error);
-    
     // Return fallback analysis
     return {
       score: 75,
