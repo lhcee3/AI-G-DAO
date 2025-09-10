@@ -1,325 +1,163 @@
-'use client';
+"use client"
 
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import algosdk from 'algosdk';
-import { algodClient } from '@/lib/algorand';
+import { useState, useEffect, useCallback, createContext, useContext, ReactNode } from 'react'
+import { PeraWalletConnect } from '@perawallet/connect'
+import algosdk from 'algosdk'
 
-interface WalletContextType {
-  isConnected: boolean;
-  address: string | null;
-  balance: number;
-  connect: (preferredWallet?: 'pera' | 'demo') => Promise<void>;
-  disconnect: () => void;
-  signTransaction: (txn: algosdk.Transaction) => Promise<Uint8Array>;
-  loading: boolean;
-  error: string | null;
-  walletType: 'pera' | 'demo' | null;
-  clearError: () => void;
+const peraWallet = new PeraWalletConnect()
+
+// Algorand TestNet configuration
+const algodClient = new algosdk.Algodv2('', 'https://testnet-api.algonode.cloud', '')
+
+interface WalletState {
+  isConnected: boolean
+  address: string | null
+  balance: number
+  loading: boolean
+  error: string | null
+  connect: () => Promise<void>
+  disconnect: () => void
+  clearError: () => void
 }
 
-const WalletContext = createContext<WalletContextType | undefined>(undefined);
+// Create context for wallet state
+const WalletContext = createContext<WalletState | null>(null)
 
-// Dynamic import for Pera Wallet to avoid SSR issues
-let PeraWalletConnect: any = null;
-let peraWallet: any = null;
-let isInitializing = false;
-
-const initializePeraWallet = async () => {
-  if (peraWallet || isInitializing || typeof window === 'undefined') {
-    return peraWallet;
-  }
-
-  isInitializing = true;
-  
-  try {
-    // Wait a bit to ensure the browser extension is ready
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    
-    const module = await import('@perawallet/connect');
-    PeraWalletConnect = module.PeraWalletConnect;
-    
-    peraWallet = new PeraWalletConnect({
-      shouldShowSignTxnToast: false,
-      compactMode: true,
-      chainId: 416002 // TestNet chain ID
-    });
-    
-    // Test if the wallet can be used
-    await new Promise(resolve => setTimeout(resolve, 500));
-    
-    console.log('Pera Wallet initialized successfully');
-    return peraWallet;
-  } catch (error) {
-    console.warn('Pera Wallet initialization failed:', error);
-    peraWallet = null;
-    return null;
-  } finally {
-    isInitializing = false;
-  }
-};
-
-interface WalletProviderProps {
-  children: ReactNode;
+// Provider component
+export function WalletProvider({ children }: { children: ReactNode }) {
+  const wallet = useWallet()
+  return (
+    <WalletContext.Provider value={wallet}>
+      {children}
+    </WalletContext.Provider>
+  )
 }
 
-export function WalletProvider({ children }: WalletProviderProps) {
-  const [isConnected, setIsConnected] = useState(false);
-  const [address, setAddress] = useState<string | null>(null);
-  const [balance, setBalance] = useState(0);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [walletType, setWalletType] = useState<'pera' | 'demo' | null>(null);
-  const [isClient, setIsClient] = useState(false);
+// Hook to use wallet context
+export function useWalletContext(): WalletState {
+  const context = useContext(WalletContext)
+  if (!context) {
+    throw new Error('useWalletContext must be used within a WalletProvider')
+  }
+  return context
+}
 
-  useEffect(() => {
-    setIsClient(true);
-    
-    // Check for existing Pera Wallet connection
-    if (peraWallet) {
-      peraWallet.reconnectSession()
-        .then((accounts: string[]) => {
-          if (accounts.length > 0) {
-            setAddress(accounts[0]);
-            setIsConnected(true);
-            setWalletType('pera');
-            fetchBalance(accounts[0]);
-          }
-        })
-        .catch((error: any) => {
-          console.log('No existing Pera Wallet session:', error);
-          
-          // Check for demo connection fallback
-          const savedAddress = localStorage.getItem('algorand_address');
-          const savedWalletType = localStorage.getItem('wallet_type');
-          
-          if (savedAddress && savedWalletType === 'demo') {
-            setAddress(savedAddress);
-            setIsConnected(true);
-            setWalletType('demo');
-            fetchBalance(savedAddress);
-          }
-        });
-    } else {
-      // If Pera Wallet not available, check for demo connection
-      const savedAddress = localStorage.getItem('algorand_address');
-      const savedWalletType = localStorage.getItem('wallet_type');
-      
-      if (savedAddress && savedWalletType === 'demo') {
-        setAddress(savedAddress);
-        setIsConnected(true);
-        setWalletType('demo');
-        fetchBalance(savedAddress);
-      }
-    }
-      
-    // Listen for Pera Wallet disconnect
-    if (peraWallet && peraWallet.connector) {
-      peraWallet.connector.on('disconnect', () => disconnect());
-    }
-    
-    return () => {
-      if (peraWallet && peraWallet.connector) {
-        try {
-          peraWallet.connector.off('disconnect');
-        } catch (error) {
-          console.warn('Error removing Pera Wallet listener:', error);
-        }
-      }
-    };
-  }, []);
+function useWallet(): WalletState {
+  const [isConnected, setIsConnected] = useState(false)
+  const [address, setAddress] = useState<string | null>(null)
+  const [balance, setBalance] = useState(0)
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
 
-  const fetchBalance = async (addr: string) => {
-    if (!isClient) return;
-    
+  const fetchBalance = useCallback(async (addr: string) => {
     try {
-      if (!addr || addr.length !== 58) {
-        console.warn('Invalid address format, skipping balance fetch');
-        setBalance(0);
-        return;
-      }
-      
-      const accountInfo = await algodClient.accountInformation(addr).do();
-      setBalance(Number(accountInfo.amount) / 1000000); // Convert microAlgos to Algos
+      const accountInfo = await algodClient.accountInformation(addr).do()
+      setBalance(Number(accountInfo.amount) / 1000000) // Convert microAlgos to Algos
     } catch (err) {
-      console.error('Failed to fetch balance:', err);
-      setBalance(0);
+      console.error('Failed to fetch balance:', err)
+      setBalance(0)
     }
-  };
+  }, [])
 
-  const connectPeraWallet = async () => {
+  const connect = useCallback(async () => {
     try {
-      // Check if browser environment
-      if (typeof window === 'undefined') {
-        throw new Error('Window not available');
+      setLoading(true)
+      setError(null)
+
+      // Try to connect to Pera Wallet
+      const accounts = await peraWallet.connect()
+      
+      if (accounts.length === 0) {
+        throw new Error('No accounts found. Please create an account in Pera Wallet.')
       }
 
-      // Initialize Pera Wallet if not already done
-      const wallet = await initializePeraWallet();
+      const account = accounts[0]
+      setAddress(account)
+      setIsConnected(true)
       
-      if (!wallet) {
-        throw new Error('Pera Wallet could not be initialized. Please install Pera Wallet and refresh the page.');
-      }
-
-      console.log('Attempting to connect to Pera Wallet...');
-      const accounts = await wallet.connect();
+      // Save to localStorage for persistence
+      localStorage.setItem('wallet_address', account)
       
-      if (accounts && accounts.length > 0) {
-        setAddress(accounts[0]);
-        setIsConnected(true);
-        setWalletType('pera');
-        localStorage.setItem('algorand_address', accounts[0]);
-        localStorage.setItem('wallet_type', 'pera');
-        await fetchBalance(accounts[0]);
-        return { success: true };
-      }
-      return { success: false, userCancelled: true };
-    } catch (error) {
-      // Handle different types of errors
-      const errorMessage = error instanceof Error ? error.message : String(error);
+      // Fetch balance
+      await fetchBalance(account)
       
-      // Check if user cancelled - these should be silent
-      if (errorMessage?.includes('User rejected') || 
-          errorMessage?.includes('rejected') ||
-          errorMessage?.includes('cancelled') ||
-          errorMessage?.includes('User denied') ||
-          errorMessage?.includes('Modal closed by user') ||
-          errorMessage?.includes('Connection request reset') ||
-          errorMessage?.includes('Receiving end does not exist') ||
-          errorMessage?.includes('Extension context invalidated') ||
-          errorMessage?.includes('Could not establish connection')) {
-        // User cancelled or extension issue - this is normal behavior, don't throw error
-        console.log('Pera Wallet connection cancelled or extension not ready:', errorMessage);
-        return { success: false, userCancelled: true };
-      }
+    } catch (err: any) {
+      console.error('Wallet connection failed:', err)
       
-      // For actual errors, provide helpful messages
-      if (errorMessage?.includes('No wallet') || errorMessage?.includes('not initialized')) {
-        return { success: false, error: 'Pera Wallet not found. Please install Pera Wallet first.' };
-      }
-      
-      // Log the error for debugging but provide user-friendly message
-      console.warn('Pera Wallet connection failed:', error);
-      return { success: false, error: 'Failed to connect to Pera Wallet. Please check if Pera Wallet is installed and try again.' };
-    }
-  };
-
-  const connectDemoWallet = async () => {
-    // Use your actual TestNet address for demo
-    const demoAddress = "33FPGTKRHHYWOZQWNQB6EOA67O3UTIZKMXM7JUJDXPMHVWTWBL4L4HDBUU";
-    
-    setAddress(demoAddress);
-    setIsConnected(true);
-    setWalletType('demo');
-    localStorage.setItem('algorand_address', demoAddress);
-    localStorage.setItem('wallet_type', 'demo');
-    await fetchBalance(demoAddress);
-  };
-
-  const connect = async (preferredWallet: 'pera' | 'demo' = 'pera') => {
-    if (!isClient) return;
-    
-    setLoading(true);
-    setError(null); // Clear any previous errors
-
-    try {
-      if (preferredWallet === 'pera') {
-        const result = await connectPeraWallet();
-        if (result.success) {
-          // Successfully connected
-          console.log('Successfully connected to Pera Wallet');
-        } else if (result.userCancelled) {
-          // User cancelled - this is normal, just reset loading state silently
-          console.log('User cancelled Pera Wallet connection');
-        } else if (result.error) {
-          // Actual error occurred
-          setError(result.error);
-          console.error('Pera Wallet connection error:', result.error);
-        }
+      // Check if error is due to Pera Wallet not being available
+      if (err.message && (
+        err.message.includes('not defined') || 
+        err.message.includes('undefined') ||
+        err.message.includes('not found') ||
+        err.code === 4001 // User rejected
+      )) {
+        setError('Pera Wallet not detected. Please install Pera Wallet extension or mobile app.')
       } else {
-        await connectDemoWallet();
+        setError(err.message || 'Failed to connect wallet')
       }
-    } catch (err) {
-      // This should rarely happen now since we handle errors in connectPeraWallet
-      const errorMessage = err instanceof Error ? err.message : 'Failed to connect wallet';
-      setError(errorMessage);
-      console.error('Unexpected connection error:', err);
+      
+      setIsConnected(false)
+      setAddress(null)
     } finally {
-      setLoading(false);
+      setLoading(false)
     }
-  };
+  }, [fetchBalance])
 
-  const disconnect = () => {
-    if (!isClient) return;
-    
-    if (walletType === 'pera' && peraWallet) {
-      try {
-        peraWallet.disconnect();
-      } catch (error) {
-        console.warn('Error disconnecting Pera Wallet:', error);
-      }
-    }
-    
-    setAddress(null);
-    setIsConnected(false);
-    setBalance(0);
-    setWalletType(null);
-    setError(null);
-    localStorage.removeItem('algorand_address');
-    localStorage.removeItem('wallet_type');
-  };
-
-  const clearError = () => {
-    setError(null);
-  };
-
-  const signTransaction = async (txn: algosdk.Transaction): Promise<Uint8Array> => {
-    if (!address || !isConnected) {
-      throw new Error('No wallet connected');
-    }
-
+  const disconnect = useCallback(() => {
     try {
-      if (walletType === 'pera') {
-        if (!peraWallet) {
-          throw new Error('Pera Wallet not available');
-        }
-        // Use Pera Wallet to sign
-        const signedTxns = await peraWallet.signTransaction([
-          [{ txn, signers: [address] }]
-        ]);
-        return signedTxns[0];
-      } else if (walletType === 'demo') {
-        // For demo mode, we'll create a mock signature
-        // In production, this would prompt the user to use a real wallet
-        throw new Error('Demo wallet cannot sign transactions. Please connect Pera Wallet for real transactions.');
-      } else {
-        throw new Error('No wallet type selected');
-      }
+      peraWallet.disconnect()
+      setIsConnected(false)
+      setAddress(null)
+      setBalance(0)
+      setError(null)
+      
+      // Clear localStorage
+      localStorage.removeItem('wallet_address')
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : String(err);
-      throw new Error(`Failed to sign transaction: ${errorMessage}`);
+      console.error('Disconnect failed:', err)
     }
-  };
+  }, [])
 
-  const value: WalletContextType = {
+  const clearError = useCallback(() => {
+    setError(null)
+  }, [])
+
+  // Check for existing connection on mount
+  useEffect(() => {
+    const checkConnection = async () => {
+      try {
+        // Try to reconnect to Pera Wallet
+        const accounts = await peraWallet.reconnectSession()
+        if (accounts.length > 0) {
+          const account = accounts[0]
+          setAddress(account)
+          setIsConnected(true)
+          await fetchBalance(account)
+        }
+      } catch (err) {
+        console.error('Failed to reconnect wallet:', err)
+        // Clear any invalid stored data
+        localStorage.removeItem('wallet_address')
+      }
+    }
+
+    checkConnection()
+  }, [fetchBalance])
+
+  // Listen for account changes
+  useEffect(() => {
+    // Note: Pera Wallet event handling simplified for MVP
+    // Real implementation would handle account changes properly
+  }, [disconnect, fetchBalance])
+
+  return {
     isConnected,
     address,
     balance,
-    connect,
-    disconnect,
-    signTransaction,
     loading,
     error,
-    walletType,
-    clearError,
-  };
-
-  return <WalletContext.Provider value={value}>{children}</WalletContext.Provider>;
-}
-
-export function useWallet() {
-  const context = useContext(WalletContext);
-  if (context === undefined) {
-    throw new Error('useWallet must be used within a WalletProvider');
+    connect,
+    disconnect,
+    clearError
   }
-  return context;
 }

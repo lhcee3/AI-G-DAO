@@ -24,11 +24,11 @@ import {
   SparklesIcon
 } from "lucide-react"
 import Link from "next/link"
-import { useWallet } from "@/hooks/use-wallet"
+import { useWalletContext } from "@/hooks/use-wallet"
 import { StatsSkeleton, CardSkeleton } from "@/components/ui/skeleton"
 
 export function DashboardPage() {
-  const { isConnected, address, balance, walletType } = useWallet()
+  const { isConnected, address, balance } = useWalletContext()
   const [currentTime, setCurrentTime] = useState<Date | null>(null)
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
@@ -149,7 +149,7 @@ export function DashboardPage() {
                   </div>
                   <div className="w-3 h-3 bg-green-400 rounded-full animate-pulse"></div>
                   <Badge variant="secondary" className="bg-green-500/20 text-green-400 border-green-500/30 rounded-full">
-                    {walletType === 'pera' ? 'Pera' : 'Demo'}
+                    Pera
                   </Badge>
                 </div>
               ) : (
@@ -186,7 +186,7 @@ export function DashboardPage() {
                     <p className="text-white/60 text-sm">{balance.toFixed(2)} ALGO</p>
                   </div>
                   <Badge variant="secondary" className="bg-green-500/20 text-green-400 rounded-full">
-                    {walletType === 'pera' ? 'Pera' : 'Demo'}
+                    Pera
                   </Badge>
                 </div>
               ) : (

@@ -2,27 +2,22 @@
 
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { WalletIcon, ArrowLeftIcon, CheckCircleIcon } from "lucide-react"
+import { WalletIcon, ArrowLeftIcon, CheckCircleIcon, ExternalLinkIcon } from "lucide-react"
 import Link from "next/link"
-import { useWallet } from "@/hooks/use-wallet"
+import { useWalletContext } from "@/hooks/use-wallet"
 import { useRouter } from "next/navigation"
 import { useLoading } from "@/hooks/use-loading"
-import { LoadingSpinner } from "@/components/ui/loading-spinner"
 
 export function WalletConnectPage() {
-  const { isConnected, address, balance, connect, disconnect, loading, error, walletType, clearError } = useWallet()
+  const { isConnected, address, balance, connect, disconnect, loading, error, clearError } = useWalletContext()
   const { setLoading } = useLoading()
   const router = useRouter()
 
-  const handleConnectWallet = async (type: 'pera' | 'demo' = 'pera') => {
+  const handleConnectWallet = async () => {
     try {
-      clearError() // Clear any previous errors
-      if (type === 'pera') {
-        setLoading(true, "Connecting to Pera Wallet...")
-      } else {
-        setLoading(true, "Setting up demo wallet...")
-      }
-      await connect(type)
+      clearError()
+      setLoading(true, "Connecting to Pera Wallet...")
+      await connect()
     } catch (err) {
       console.error('Failed to connect wallet:', err)
     } finally {
@@ -40,9 +35,9 @@ export function WalletConnectPage() {
 
   return (
     <div className="relative flex flex-col min-h-[100dvh] text-white overflow-hidden">
-      {/* Black/Blue Moving Gradient Background - Same as landing page */}
+      {/* Blue Gradient Background */}
       <div className="fixed inset-0 z-0">
-        <div className="absolute inset-0 animate-moving-gradient"></div>
+        <div className="absolute inset-0 bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900"></div>
       </div>
 
       {/* Header with Back Button */}
@@ -58,19 +53,19 @@ export function WalletConnectPage() {
         <div className="max-w-md w-full space-y-8">
           <div className="text-center space-y-4">
             <h1 className="text-4xl font-bold tracking-tight text-white">Connect Your Wallet</h1>
-            <p className="text-gray-300 text-lg">
-              Connect your Algorand wallet to access the DAO dashboard and start participating in climate governance.
+            <p className="text-blue-300 text-lg">
+              Connect your Pera Wallet to participate in the Climate DAO
             </p>
           </div>
 
-          <Card className="bg-black/60 border-blue-500/30 backdrop-blur-sm shadow-2xl">
+          <Card className="bg-white/5 backdrop-blur-xl border-white/10 rounded-3xl shadow-2xl">
             <CardHeader className="text-center space-y-4">
               <div className="mx-auto w-16 h-16 bg-blue-500/20 rounded-full flex items-center justify-center">
                 <WalletIcon className="w-8 h-8 text-blue-400" />
               </div>
-              <CardTitle className="text-2xl text-white">Algorand Wallet</CardTitle>
-              <CardDescription className="text-gray-300">
-                Securely connect your wallet to participate in DAO governance
+              <CardTitle className="text-2xl text-white">Pera Wallet</CardTitle>
+              <CardDescription className="text-white/70">
+                Securely connect your Algorand wallet to participate in DAO governance
               </CardDescription>
             </CardHeader>
 
@@ -79,7 +74,7 @@ export function WalletConnectPage() {
                 <div className="bg-red-500/10 border border-red-500/30 rounded-lg p-4 space-y-3">
                   <p className="text-red-400 text-sm">{error}</p>
                   {error.includes('install Pera Wallet') && (
-                    <div className="text-xs text-gray-400 space-y-1">
+                    <div className="text-xs text-white/60 space-y-1">
                       <p>To install Pera Wallet:</p>
                       <ul className="list-disc list-inside ml-2 space-y-1">
                         <li>Visit <a href="https://perawallet.app" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:text-blue-300 underline">perawallet.app</a></li>
@@ -93,7 +88,7 @@ export function WalletConnectPage() {
                     variant="outline" 
                     size="sm" 
                     onClick={clearError}
-                    className="border-red-500/30 text-red-400 hover:bg-red-500/10"
+                    className="border-red-500/30 text-red-400 hover:bg-red-500/10 bg-transparent"
                   >
                     Dismiss
                   </Button>
@@ -104,27 +99,19 @@ export function WalletConnectPage() {
                 <div className="space-y-4">
                   <div className="flex items-center justify-center space-x-2 text-green-400">
                     <CheckCircleIcon className="w-5 h-5" />
-                    <span className="font-semibold">
-                      {walletType === 'pera' ? 'Pera Wallet Connected!' : 'Demo Mode Active'}
-                    </span>
+                    <span className="font-semibold">Pera Wallet Connected!</span>
                   </div>
 
                   <div className="bg-blue-500/10 border border-blue-500/30 rounded-lg p-4">
-                    <p className="text-xs text-gray-400 mb-1">
-                      {walletType === 'pera' ? 'Connected Address:' : 'Demo Address:'}
-                    </p>
+                    <p className="text-xs text-white/60 mb-1">Connected Address:</p>
                     <p className="text-sm text-blue-400 font-mono break-all">{address}</p>
-                    <p className="text-xs text-gray-400 mt-2">Balance: {balance.toFixed(2)} ALGO</p>
-                    {walletType === 'demo' && (
-                      <p className="text-xs text-yellow-400 mt-1">
-                        ⚠️ Demo mode - cannot submit real transactions
-                      </p>
-                    )}
+                    <p className="text-xs text-white/60 mt-2">Balance: {balance.toFixed(2)} ALGO</p>
+                    <p className="text-xs text-green-400 mt-1">✅ Ready for transactions</p>
                   </div>
 
                   <div className="space-y-3">
                     <Button
-                      className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 rounded-lg transition-all duration-300 transform hover:scale-105"
+                      className="w-full bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 text-white font-semibold py-3 rounded-lg transition-all duration-300 transform hover:scale-105"
                       onClick={handleEnterDashboard}
                     >
                       Enter DAO Dashboard
@@ -140,10 +127,10 @@ export function WalletConnectPage() {
                   </div>
                 </div>
               ) : (
-                <div className="space-y-4">
+                <div className="space-y-6">
                   <Button
-                    className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-4 rounded-lg transition-all duration-300 transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed"
-                    onClick={() => handleConnectWallet('pera')}
+                    className="w-full bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 text-white font-semibold py-4 rounded-lg transition-all duration-300 transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed"
+                    onClick={handleConnectWallet}
                     disabled={loading}
                   >
                     {loading ? (
@@ -156,18 +143,12 @@ export function WalletConnectPage() {
                     )}
                   </Button>
 
-                  <Button
-                    variant="outline"
-                    className="w-full border-blue-600 text-blue-800 hover:bg-gray-800 hover:text-white font-semibold py-4 rounded-lg transition-all duration-300"
-                    onClick={() => handleConnectWallet('demo')}
-                    disabled={loading}
-                  >
-                    Demo Mode (View Only)
-                  </Button>
-
-                  <div className="text-center">
-                    <p className="text-xs text-gray-400">
+                  <div className="text-center space-y-2">
+                    <p className="text-xs text-white/60">
                       By connecting, you agree to our Terms of Service and Privacy Policy
+                    </p>
+                    <p className="text-xs text-yellow-400">
+                      ⚠️ MVP Version: Real wallet required for all transactions
                     </p>
                   </div>
                 </div>
@@ -175,39 +156,26 @@ export function WalletConnectPage() {
             </CardContent>
           </Card>
 
-          <div className="text-center space-y-2">
-            <p className="text-sm text-gray-400">Don't have an Algorand wallet?</p>
+          <div className="text-center space-y-3">
+            <p className="text-sm text-white/60">Don't have an Algorand wallet?</p>
             <a
               href="https://perawallet.app/"
               target="_blank"
               rel="noopener noreferrer"
-              className="text-blue-400 hover:text-blue-300 text-sm font-medium underline underline-offset-2"
+              className="inline-flex items-center gap-2 text-blue-400 hover:text-blue-300 text-sm font-medium underline underline-offset-2"
             >
               Download Pera Wallet
+              <ExternalLinkIcon className="w-4 h-4" />
             </a>
+            <div className="bg-blue-500/10 border border-blue-500/30 rounded-lg p-3 mt-4">
+              <p className="text-xs text-white/70 leading-relaxed">
+                <strong>Need TestNet ALGOs?</strong><br/>
+                Visit the <a href="https://testnet.algoexplorer.io/dispenser" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:text-blue-300 underline">Algorand TestNet Dispenser</a> to get free test tokens for trying the DAO.
+              </p>
+            </div>
           </div>
         </div>
       </main>
-
-      {/* CSS for black/blue moving gradient - same as landing page */}
-      <style jsx>{`
-        @keyframes moving-gradient {
-          0% {
-            background-position: 0% 50%;
-          }
-          50% {
-            background-position: 100% 50%;
-          }
-          100% {
-            background-position: 0% 50%;
-          }
-        }
-        .animate-moving-gradient {
-          background: linear-gradient(270deg, #000000, #000080, #000000); /* Black to Navy Blue */
-          background-size: 400% 400%;
-          animation: moving-gradient 15s ease infinite;
-        }
-      `}</style>
     </div>
   )
 }
