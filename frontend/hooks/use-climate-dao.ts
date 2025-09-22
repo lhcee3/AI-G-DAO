@@ -3,10 +3,10 @@
 import { useState } from 'react';
 import algosdk from 'algosdk';
 import { algodClient, getSuggestedParams, waitForConfirmation, CONTRACT_IDS } from '@/lib/algorand';
-import { useWallet } from './use-wallet';
+import { useWalletContext } from './use-wallet';
 
 export function useClimateDAO() {
-  const { address, signTransaction, isConnected } = useWallet();
+  const { address, signTransaction, isConnected } = useWalletContext();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
