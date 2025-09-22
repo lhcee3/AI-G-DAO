@@ -6,8 +6,9 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { VoteIcon, CheckCircleIcon, XCircleIcon, ClockIcon, TrendingUpIcon, LeafIcon, WalletIcon, ArrowLeftIcon } from 'lucide-react';
-import { useWallet } from '@/hooks/use-wallet';
+import { useWalletContext } from '@/hooks/use-wallet';
 import Link from 'next/link';
+import { WalletGuard } from '@/components/wallet-guard';
 
 interface Proposal {
   id: string;
@@ -90,7 +91,7 @@ const getStatusColor = (status: string) => {
 
 export default function VotePage() {
   const [votedProposals, setVotedProposals] = useState<Set<string>>(new Set());
-  const { isConnected, address, balance } = useWallet();
+  const { isConnected, address, balance } = useWalletContext();
 
   const handleVote = (proposalId: string, voteType: 'for' | 'against') => {
     if (!isConnected) {
@@ -103,7 +104,8 @@ export default function VotePage() {
   };
 
   return (
-    <div className="relative flex flex-col min-h-[100dvh] text-white overflow-hidden">
+    <WalletGuard requireBalance={0.05}>
+      <div className="relative flex flex-col min-h-[100dvh] text-white overflow-hidden">
       {/* Blue Gradient Background */}
       <div className="fixed inset-0 z-0">
         <div className="absolute inset-0 bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900"></div>
@@ -278,5 +280,6 @@ export default function VotePage() {
         </div>
       </main>
     </div>
+    </WalletGuard>
   );
 }

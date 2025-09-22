@@ -18,6 +18,7 @@ interface WalletState {
   connect: () => Promise<void>
   disconnect: () => void
   clearError: () => void
+  signTransaction: (txn: algosdk.Transaction) => Promise<Uint8Array>
 }
 
 // Create context for wallet state
@@ -122,6 +123,25 @@ function useWallet(): WalletState {
     setError(null)
   }, [])
 
+  const signTransaction = useCallback(async (txn: algosdk.Transaction): Promise<Uint8Array> => {
+    if (!isConnected || !address) {
+      throw new Error('Wallet not connected')
+    }
+
+    try {
+      const txnsToSign = [{
+        txn: txn,
+        signers: [address]
+      }]
+
+      const signedTxns = await peraWallet.signTransaction([txnsToSign])
+      return signedTxns[0]
+    } catch (err: any) {
+      console.error('Transaction signing failed:', err)
+      throw new Error(err.message || 'Failed to sign transaction')
+    }
+  }, [isConnected, address])
+
   // Check for existing connection on mount
   useEffect(() => {
     const checkConnection = async () => {
@@ -158,6 +178,7 @@ function useWallet(): WalletState {
     error,
     connect,
     disconnect,
-    clearError
+    clearError,
+    signTransaction
   }
 }

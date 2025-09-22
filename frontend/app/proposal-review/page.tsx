@@ -11,11 +11,12 @@ import { ArrowLeftIcon, SparklesIcon, WalletIcon } from "lucide-react"
 import Link from "next/link"
 import { useAIReview } from "@/hooks/use-ai-review"
 import { AIReviewDisplay } from "@/components/ai-review-display"
-import { useWallet } from "@/hooks/use-wallet"
+import { useWalletContext } from "@/hooks/use-wallet"
+import { WalletGuard } from "@/components/wallet-guard"
 
 export default function ProposalReviewPage() {
   const { isAnalyzing, reviewResult, error, analyzeProposalData, clearReview } = useAIReview()
-  const { isConnected, address } = useWallet()
+  const { isConnected, address } = useWalletContext()
   
   const [formData, setFormData] = useState({
     projectTitle: "",
@@ -48,7 +49,8 @@ export default function ProposalReviewPage() {
   }
 
   return (
-    <div className="relative flex flex-col min-h-[100dvh] text-white overflow-hidden">
+    <WalletGuard requireBalance={0.05}>
+      <div className="relative flex flex-col min-h-[100dvh] text-white overflow-hidden">
       {/* Blue Gradient Background */}
       <div className="fixed inset-0 z-0">
         <div className="absolute inset-0 bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900"></div>
@@ -224,5 +226,6 @@ export default function ProposalReviewPage() {
         </div>
       </main>
     </div>
+    </WalletGuard>
   )
 }

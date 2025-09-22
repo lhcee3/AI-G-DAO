@@ -106,7 +106,6 @@ export function WalletConnectPage() {
                     <p className="text-xs text-white/60 mb-1">Connected Address:</p>
                     <p className="text-sm text-blue-400 font-mono break-all">{address}</p>
                     <p className="text-xs text-white/60 mt-2">Balance: {balance.toFixed(2)} ALGO</p>
-                    <p className="text-xs text-green-400 mt-1">✅ Ready for transactions</p>
                   </div>
 
                   <div className="space-y-3">
@@ -146,9 +145,6 @@ export function WalletConnectPage() {
                   <div className="text-center space-y-2">
                     <p className="text-xs text-white/60">
                       By connecting, you agree to our Terms of Service and Privacy Policy
-                    </p>
-                    <p className="text-xs text-yellow-400">
-                      ⚠️ MVP Version: Real wallet required for all transactions
                     </p>
                   </div>
                 </div>

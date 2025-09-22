@@ -10,13 +10,13 @@ import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { ArrowLeftIcon, UploadIcon, FileTextIcon, DollarSignIcon, CalendarIcon } from "lucide-react"
 import Link from "next/link"
-import { useWallet } from "@/hooks/use-wallet"
+import { useWalletContext } from "@/hooks/use-wallet"
 import { useClimateDAO } from "@/hooks/use-climate-dao"
 import { useRouter } from "next/navigation"
 import { useLoading } from "@/hooks/use-loading"
 
 export function SubmitProposalPage() {
-  const { isConnected, address } = useWallet()
+  const { isConnected, address } = useWalletContext()
   const { submitProposal, loading, error } = useClimateDAO()
   const { setLoading } = useLoading()
   const router = useRouter()

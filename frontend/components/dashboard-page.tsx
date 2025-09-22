@@ -26,6 +26,7 @@ import {
 import Link from "next/link"
 import { useWalletContext } from "@/hooks/use-wallet"
 import { StatsSkeleton, CardSkeleton } from "@/components/ui/skeleton"
+import { WalletInfo } from "@/components/wallet-guard"
 
 export function DashboardPage() {
   const { isConnected, address, balance } = useWalletContext()
@@ -139,27 +140,7 @@ export function DashboardPage() {
 
             {/* Wallet Status */}
             <div className="hidden md:flex items-center space-x-4">
-              {isConnected ? (
-                <div className="flex items-center space-x-3 bg-white/5 rounded-2xl px-4 py-2 border border-white/10">
-                  <div className="text-right">
-                    <p className="text-white/90 font-medium text-sm">
-                      {address?.slice(0, 6)}...{address?.slice(-4)}
-                    </p>
-                    <p className="text-white/60 text-xs">{balance.toFixed(2)} ALGO</p>
-                  </div>
-                  <div className="w-3 h-3 bg-green-400 rounded-full animate-pulse"></div>
-                  <Badge variant="secondary" className="bg-green-500/20 text-green-400 border-green-500/30 rounded-full">
-                    Pera
-                  </Badge>
-                </div>
-              ) : (
-                <Link href="/connect-wallet">
-                  <Button className="bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 text-white border-0 rounded-xl shadow-lg shadow-blue-500/25 hover:shadow-blue-500/40 transition-all duration-300">
-                    <WalletIcon className="w-4 h-4 mr-2" />
-                    Connect Wallet
-                  </Button>
-                </Link>
-              )}
+              <WalletInfo />
               <Button variant="ghost" size="sm" className="text-white/80 hover:text-white hover:bg-white/10 rounded-xl">
                 <SettingsIcon className="w-4 h-4" />
               </Button>

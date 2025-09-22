@@ -16,8 +16,9 @@ import {
   WalletIcon,
   ArrowLeftIcon
 } from 'lucide-react';
-import { useWallet } from '@/hooks/use-wallet';
+import { useWalletContext } from '@/hooks/use-wallet';
 import Link from 'next/link';
+import { WalletGuard } from '@/components/wallet-guard';
 
 interface ImpactMetric {
   id: string;
@@ -176,10 +177,11 @@ const getStatusColor = (status: string) => {
 };
 
 export default function ImpactAnalyticsPage() {
-  const { isConnected, address, balance } = useWallet();
+  const { isConnected, address, balance } = useWalletContext();
   
   return (
-    <div className="relative flex flex-col min-h-[100dvh] text-white overflow-hidden">
+    <WalletGuard requireBalance={0.05}>
+      <div className="relative flex flex-col min-h-[100dvh] text-white overflow-hidden">
       {/* Blue Gradient Background */}
       <div className="fixed inset-0 z-0">
         <div className="absolute inset-0 bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900"></div>
@@ -377,5 +379,6 @@ export default function ImpactAnalyticsPage() {
         </div>
       </main>
     </div>
+    </WalletGuard>
   );
 }
