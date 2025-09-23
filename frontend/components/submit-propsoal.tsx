@@ -44,14 +44,16 @@ export function SubmitProposalPage() {
 
     try {
       const fundingAmountNum = parseInt(formData.fundingAmount) || 0
-      const impactScore = parseInt(formData.expectedImpact) || 0
+      const impactScore = formData.expectedImpact
       
-      const txId = await submitProposal(
-        formData.projectTitle,
-        formData.description,
-        fundingAmountNum,
-        impactScore
-      )
+      const txId = await submitProposal({
+        title: formData.projectTitle,
+        description: formData.description,
+        fundingAmount: fundingAmountNum,
+        expectedImpact: impactScore,
+        category: formData.category,
+        location: formData.location,
+      })
       
       alert(`Proposal submitted successfully! Transaction ID: ${txId}`)
       
