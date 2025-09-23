@@ -1,285 +1,333 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { VoteIcon, CheckCircleIcon, XCircleIcon, ClockIcon, TrendingUpIcon, LeafIcon, WalletIcon, ArrowLeftIcon } from 'lucide-react';
 import { useWalletContext } from '@/hooks/use-wallet';
+import { useClimateDAO } from '@/hooks/use-climate-dao';
+import { TransactionStatus } from '@/components/transaction-status';
+import { TransactionResult } from '@/lib/transaction-builder';
 import Link from 'next/link';
 import { WalletGuard } from '@/components/wallet-guard';
 
 interface Proposal {
-  id: string;
+  id: number;
   title: string;
   description: string;
-  category: 'renewable-energy' | 'carbon-capture' | 'sustainable-agriculture' | 'waste-management';
-  aiScore: number;
-  votesFor: number;
-  votesAgainst: number;
-  totalVotes: number;
-  timeRemaining: string;
-  status: 'active' | 'passed' | 'rejected';
-  fundingRequested: number;
-  environmentalImpact: string;
+  category: string;
+  aiScore?: number;
+  voteYes: number;
+  voteNo: number;
+  status: 'active' | 'passed' | 'rejected' | 'expired';
+  fundingAmount: number;
+  endTime: number;
+  creator: string;
 }
 
-const mockProposals: Proposal[] = [
-  {
-    id: '1',
-    title: 'Solar Farm Initiative - Kenya',
-    description: 'Establish a 50MW solar farm in rural Kenya to provide clean energy to 10,000 households while creating 200 local jobs.',
-    category: 'renewable-energy',
-    aiScore: 87,
-    votesFor: 1250,
-    votesAgainst: 180,
-    totalVotes: 1430,
-    timeRemaining: '3 days',
-    status: 'active',
-    fundingRequested: 2500000,
-    environmentalImpact: '15,000 tons CO2 reduced annually'
-  },
-  {
-    id: '2',
-    title: 'Ocean Plastic Collection Network',
-    description: 'Deploy autonomous collection systems in the Pacific to remove 1000 tons of plastic waste annually.',
-    category: 'waste-management',
-    aiScore: 92,
-    votesFor: 890,
-    votesAgainst: 45,
-    totalVotes: 935,
-    timeRemaining: '5 days',
-    status: 'active',
-    fundingRequested: 1800000,
-    environmentalImpact: '1000 tons plastic waste removed'
-  },
-  {
-    id: '3',
-    title: 'Vertical Forest Urban Project',
-    description: 'Create vertical gardens on 50 buildings in major cities to improve air quality and biodiversity.',
-    category: 'carbon-capture',
-    aiScore: 78,
-    votesFor: 2100,
-    votesAgainst: 400,
-    totalVotes: 2500,
-    timeRemaining: 'Ended',
-    status: 'passed',
-    fundingRequested: 3200000,
-    environmentalImpact: '500 tons CO2 captured annually'
-  }
-];
-
-const getCategoryColor = (category: string) => {
-  switch (category) {
-    case 'renewable-energy': return 'bg-yellow-500/20 text-yellow-400 border-yellow-500/50';
-    case 'carbon-capture': return 'bg-green-500/20 text-green-400 border-green-500/50';
-    case 'sustainable-agriculture': return 'bg-blue-500/20 text-blue-400 border-blue-500/50';
-    case 'waste-management': return 'bg-purple-500/20 text-purple-400 border-purple-500/50';
-    default: return 'bg-gray-500/20 text-gray-400 border-gray-500/50';
-  }
-};
-
-const getStatusColor = (status: string) => {
-  switch (status) {
-    case 'active': return 'bg-yellow-500/20 text-yellow-400';
-    case 'passed': return 'bg-green-500/20 text-green-400';
-    case 'rejected': return 'bg-red-500/20 text-red-400';
-    default: return 'bg-gray-500/20 text-gray-400';
-  }
-};
-
 export default function VotePage() {
-  const [votedProposals, setVotedProposals] = useState<Set<string>>(new Set());
   const { isConnected, address, balance } = useWalletContext();
+  const { getProposals, voteOnProposal } = useClimateDAO();
+  const [proposals, setProposals] = useState<Proposal[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [votingState, setVotingState] = useState<{
+    proposalId: number | null;
+    status: 'idle' | 'pending' | 'confirmed' | 'failed';
+    txId?: string;
+    result?: TransactionResult;
+    error?: string;
+  }>({ proposalId: null, status: 'idle' });
 
-  const handleVote = (proposalId: string, voteType: 'for' | 'against') => {
-    if (!isConnected) {
-      alert('Please connect your wallet to vote');
-      return;
+  // Fetch proposals
+  useEffect(() => {
+    const fetchProposals = async () => {
+      try {
+        const allProposals = await getProposals();
+        setProposals(allProposals);
+      } catch (error) {
+        console.error('Failed to fetch proposals:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (isConnected) {
+      fetchProposals();
     }
-    setVotedProposals(prev => new Set([...prev, proposalId]));
-    // Here you would integrate with smart contract for actual voting
-    console.log(`Voted ${voteType} on proposal ${proposalId}`);
+  }, [isConnected]); // Remove function dependencies to prevent infinite loops
+
+  const handleVote = async (proposalId: number, vote: 'for' | 'against') => {
+    setVotingState({ proposalId, status: 'pending' });
+    
+    try {
+      const result = await voteOnProposal(proposalId, vote);
+      setVotingState({
+        proposalId,
+        status: 'confirmed',
+        txId: result.txId,
+        result
+      });
+      
+      // Refresh proposals after successful vote
+      setTimeout(async () => {
+        const updatedProposals = await getProposals();
+        setProposals(updatedProposals);
+        setVotingState({ proposalId: null, status: 'idle' });
+      }, 3000);
+      
+    } catch (error) {
+      setVotingState({
+        proposalId,
+        status: 'failed',
+        error: error instanceof Error ? error.message : 'Vote failed'
+      });
+    }
+  };
+
+  const getCategoryColor = (category: string) => {
+    const categoryMap: { [key: string]: string } = {
+      'renewable-energy': 'bg-yellow-500/20 text-yellow-400 border-yellow-500/50',
+      'carbon-capture': 'bg-green-500/20 text-green-400 border-green-500/50',
+      'reforestation': 'bg-blue-500/20 text-blue-400 border-blue-500/50',
+      'ocean-cleanup': 'bg-purple-500/20 text-purple-400 border-purple-500/50',
+      'clean-energy': 'bg-orange-500/20 text-orange-400 border-orange-500/50'
+    };
+    return categoryMap[category] || 'bg-gray-500/20 text-gray-400 border-gray-500/50';
   };
 
   return (
     <WalletGuard requireBalance={0.05}>
       <div className="relative flex flex-col min-h-[100dvh] text-white overflow-hidden">
-      {/* Blue Gradient Background */}
-      <div className="fixed inset-0 z-0">
-        <div className="absolute inset-0 bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900"></div>
-        <div className="absolute inset-0 bg-black/20"></div>
-      </div>
-
-      {/* Header */}
-      <header className="relative z-10 flex items-center justify-between p-6 border-b border-white/20">
-        <div className="flex items-center gap-4">
-          <Link href="/dashboard" className="flex items-center gap-2 text-white hover:text-blue-200 transition-colors">
-            <ArrowLeftIcon className="w-5 h-5" />
-            <span className="text-sm font-medium">Back to Dashboard</span>
-          </Link>
-          <div className="h-6 w-px bg-white/20"></div>
-          <VoteIcon className="w-8 h-8 text-white" />
-          <div className="text-white font-bold text-xl">Vote on Proposals</div>
+        {/* Background */}
+        <div className="fixed inset-0 z-0">
+          <div className="absolute inset-0 bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900"></div>
+          <div className="absolute inset-0 bg-black/20"></div>
         </div>
-        <div className="flex items-center gap-4">
-          {isConnected ? (
-            <div className="flex items-center gap-3">
-              <div className="text-right">
-                <div className="text-sm text-white/90">Voting power: {balance.toFixed(0)} tokens</div>
-                <div className="text-xs text-white/70">
-                  {address ? `${address.slice(0, 6)}...${address.slice(-4)}` : 'Connected'}
-                </div>
-              </div>
-              <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-            </div>
-          ) : (
-            <Link href="/connect-wallet">
-              <Button variant="outline" size="sm" className="border-white/30 text-white hover:bg-white/10 bg-transparent">
-                <WalletIcon className="w-4 h-4 mr-2" />
-                Connect to Vote
-              </Button>
+
+        {/* Header */}
+        <header className="relative z-10 flex items-center justify-between p-6 border-b border-white/20">
+          <div className="flex items-center gap-4">
+            <Link href="/dashboard" className="flex items-center gap-2 text-white hover:text-blue-200 transition-colors">
+              <ArrowLeftIcon className="w-5 h-5" />
+              <span className="text-sm font-medium">Back to Dashboard</span>
             </Link>
-          )}
-        </div>
-      </header>
-
-      <main className="relative z-10 flex-1 px-6 py-8">
-        <div className="max-w-6xl mx-auto space-y-8">
-          {/* Statistics */}
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-            <Card className="bg-white/5 backdrop-blur-xl border-white/10 rounded-3xl">
-              <CardContent className="p-4 text-center">
-                <TrendingUpIcon className="w-8 h-8 text-blue-400 mx-auto mb-2" />
-                <div className="text-2xl font-bold text-white">12</div>
-                <div className="text-sm text-white/60">Active Proposals</div>
-              </CardContent>
-            </Card>
-            <Card className="bg-white/5 backdrop-blur-xl border-white/10 rounded-3xl">
-              <CardContent className="p-4 text-center">
-                <CheckCircleIcon className="w-8 h-8 text-green-400 mx-auto mb-2" />
-                <div className="text-2xl font-bold text-white">28</div>
-                <div className="text-sm text-white/60">Passed Proposals</div>
-              </CardContent>
-            </Card>
-            <Card className="bg-white/5 backdrop-blur-xl border-white/10 rounded-3xl">
-              <CardContent className="p-4 text-center">
-                <LeafIcon className="w-8 h-8 text-cyan-400 mx-auto mb-2" />
-                <div className="text-2xl font-bold text-white">85%</div>
-                <div className="text-sm text-white/60">Avg AI Score</div>
-              </CardContent>
-            </Card>
-            <Card className="bg-white/5 backdrop-blur-xl border-white/10 rounded-3xl">
-              <CardContent className="p-4 text-center">
-                <ClockIcon className="w-8 h-8 text-purple-400 mx-auto mb-2" />
-                <div className="text-2xl font-bold text-white">5.2M</div>
-                <div className="text-sm text-white/60">Total Funding</div>
-              </CardContent>
-            </Card>
+            <div className="h-6 w-px bg-white/20"></div>
+            <VoteIcon className="w-8 h-8 text-white" />
+            <div className="text-white font-bold text-xl">Vote on Proposals</div>
           </div>
+          <div className="flex items-center gap-4">
+            {isConnected ? (
+              <div className="flex items-center gap-3">
+                <div className="text-right">
+                  <div className="text-sm text-white/90">Balance: {balance.toFixed(3)} ALGO</div>
+                  <div className="text-xs text-white/70">
+                    {address ? `${address.slice(0, 6)}...${address.slice(-4)}` : 'Connected'}
+                  </div>
+                </div>
+                <WalletIcon className="w-8 h-8 text-green-400" />
+              </div>
+            ) : null}
+          </div>
+        </header>
 
-          {/* Proposals List */}
-          <div className="space-y-6">
-            <h2 className="text-2xl font-bold text-white">Active Proposals</h2>
-            {mockProposals.map((proposal) => {
-              const votePercentage = (proposal.votesFor / proposal.totalVotes) * 100;
-              const hasVoted = votedProposals.has(proposal.id);
+        <main className="relative z-10 flex-1 px-6 py-8">
+          <div className="max-w-6xl mx-auto space-y-8">
+            
+            {/* Transaction Status */}
+            {votingState.status !== 'idle' && (
+              <div className="mb-6">
+                <TransactionStatus
+                  txId={votingState.txId}
+                  result={votingState.result}
+                  status={votingState.status}
+                  error={votingState.error}
+                  onClose={votingState.status !== 'pending' ? () => setVotingState({ proposalId: null, status: 'idle' }) : undefined}
+                  estimatedTime={5}
+                />
+              </div>
+            )}
+
+            {/* Stats */}
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+              <Card className="bg-white/5 backdrop-blur-xl border-white/10 rounded-3xl">
+                <CardContent className="p-4 text-center">
+                  <VoteIcon className="w-8 h-8 text-blue-400 mx-auto mb-2" />
+                  <div className="text-2xl font-bold text-white">{proposals.filter(p => p.status === 'active').length}</div>
+                  <div className="text-sm text-white/60">Active Votes</div>
+                </CardContent>
+              </Card>
               
-              return (
-                <Card key={proposal.id} className="bg-white/5 backdrop-blur-xl border-white/10 rounded-3xl hover:bg-white/10 transition-all duration-300">
-                  <CardHeader>
-                    <div className="flex items-start justify-between">
-                      <div className="space-y-2">
-                        <CardTitle className="text-white text-xl">{proposal.title}</CardTitle>
-                        <div className="flex items-center gap-2">
-                          <Badge className={getCategoryColor(proposal.category)}>
-                            {proposal.category.replace('-', ' ').toUpperCase()}
-                          </Badge>
-                          <Badge className={getStatusColor(proposal.status)}>
-                            {proposal.status.toUpperCase()}
-                          </Badge>
-                          <Badge className="bg-blue-500/20 text-blue-400 border-blue-500/50">
-                            AI Score: {proposal.aiScore}/100
-                          </Badge>
-                        </div>
-                      </div>
-                      <div className="text-right">
-                        <div className="text-white font-bold text-lg">
-                          ${proposal.fundingRequested.toLocaleString()}
-                        </div>
-                        <div className="text-sm text-white/60">Requested</div>
-                      </div>
-                    </div>
-                  </CardHeader>
+              <Card className="bg-white/5 backdrop-blur-xl border-white/10 rounded-3xl">
+                <CardContent className="p-4 text-center">
+                  <CheckCircleIcon className="w-8 h-8 text-green-400 mx-auto mb-2" />
+                  <div className="text-2xl font-bold text-white">{proposals.filter(p => p.status === 'passed').length}</div>
+                  <div className="text-sm text-white/60">Passed</div>
+                </CardContent>
+              </Card>
+              
+              <Card className="bg-white/5 backdrop-blur-xl border-white/10 rounded-3xl">
+                <CardContent className="p-4 text-center">
+                  <XCircleIcon className="w-8 h-8 text-red-400 mx-auto mb-2" />
+                  <div className="text-2xl font-bold text-white">{proposals.filter(p => p.status === 'rejected').length}</div>
+                  <div className="text-sm text-white/60">Rejected</div>
+                </CardContent>
+              </Card>
+              
+              <Card className="bg-white/5 backdrop-blur-xl border-white/10 rounded-3xl">
+                <CardContent className="p-4 text-center">
+                  <LeafIcon className="w-8 h-8 text-purple-400 mx-auto mb-2" />
+                  <div className="text-2xl font-bold text-white">
+                    ${proposals.reduce((sum, p) => sum + p.fundingAmount, 0).toLocaleString()}
+                  </div>
+                  <div className="text-sm text-white/60">Total Funding</div>
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* Proposals List */}
+            <div className="space-y-6">
+              <h2 className="text-2xl font-bold text-white">
+                All Proposals ({proposals.length})
+              </h2>
+              
+              {loading ? (
+                <div className="text-center py-12">
+                  <div className="w-8 h-8 border-2 border-blue-500/30 border-t-blue-500 rounded-full animate-spin mx-auto mb-4"></div>
+                  <p className="text-white/60">Loading proposals...</p>
+                </div>
+              ) : proposals.length > 0 ? (
+                proposals.map((proposal) => {
+                  const totalVotes = proposal.voteYes + proposal.voteNo;
+                  const yesPercentage = totalVotes > 0 ? (proposal.voteYes / totalVotes) * 100 : 0;
+                  const timeLeft = Math.ceil((proposal.endTime - Date.now()) / (24 * 60 * 60 * 1000));
+                  const timeText = timeLeft > 0 ? `${timeLeft}d left` : 'Expired';
+                  const isVoting = votingState.proposalId === proposal.id && votingState.status === 'pending';
                   
-                  <CardContent className="space-y-4">
-                    <p className="text-white/80">{proposal.description}</p>
-                    
-                    <div className="bg-blue-500/10 border border-blue-500/30 rounded-lg p-3">
-                      <div className="text-sm text-blue-400 font-medium mb-1">Environmental Impact</div>
-                      <div className="text-white/80">{proposal.environmentalImpact}</div>
-                    </div>
-
-                    {/* Voting Progress */}
-                    <div className="space-y-2">
-                      <div className="flex justify-between text-sm">
-                        <span className="text-white/70">
-                          For: {proposal.votesFor} ({votePercentage.toFixed(1)}%)
-                        </span>
-                        <span className="text-white/70">
-                          Against: {proposal.votesAgainst} ({(100 - votePercentage).toFixed(1)}%)
-                        </span>
-                      </div>
-                      <div className="relative h-2 w-full overflow-hidden rounded-full bg-white/10">
-                        <div 
-                          className="h-full bg-gradient-to-r from-green-500 to-emerald-500 transition-all duration-300 rounded-full"
-                          style={{ width: `${votePercentage}%` }}
-                        />
-                      </div>
-                    </div>
-
-                    <div className="flex items-center justify-between pt-4">
-                      <div className="text-sm text-white/70">
-                        {proposal.status === 'active' ? (
-                          <>Time remaining: <span className="text-blue-400">{proposal.timeRemaining}</span></>
-                        ) : (
-                          <span className="text-white/50">Voting ended</span>
-                        )}
-                      </div>
-                      
-                      {proposal.status === 'active' && (
-                        <div className="flex gap-2">
-                          <Button
-                            size="sm"
-                            onClick={() => handleVote(proposal.id, 'for')}
-                            disabled={hasVoted || !isConnected}
-                            className="bg-green-600 hover:bg-green-700 text-white disabled:opacity-50"
-                          >
-                            <CheckCircleIcon className="w-4 h-4 mr-1" />
-                            {hasVoted ? 'Voted' : isConnected ? 'Vote Yes' : 'Connect Wallet'}
-                          </Button>
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={() => handleVote(proposal.id, 'against')}
-                            disabled={hasVoted || !isConnected}
-                            className="border-red-500/50 text-red-400 hover:bg-red-500/10 bg-transparent disabled:opacity-50"
-                          >
-                            <XCircleIcon className="w-4 h-4 mr-1" />
-                            {hasVoted ? 'Voted' : isConnected ? 'Vote No' : 'Connect Wallet'}
-                          </Button>
+                  return (
+                    <Card key={proposal.id} className="bg-white/5 backdrop-blur-xl border-white/10 rounded-3xl hover:bg-white/10 transition-all duration-300">
+                      <CardHeader>
+                        <div className="flex items-start justify-between">
+                          <div className="space-y-2">
+                            <CardTitle className="text-white text-xl">{proposal.title}</CardTitle>
+                            <div className="flex items-center gap-2">
+                              <Badge className={getCategoryColor(proposal.category)}>
+                                {proposal.category.replace('-', ' ').toUpperCase()}
+                              </Badge>
+                              <Badge className={
+                                proposal.status === 'active' ? 'bg-green-500/20 text-green-400 border-green-500/50' : 
+                                proposal.status === 'passed' ? 'bg-blue-500/20 text-blue-400 border-blue-500/50' :
+                                'bg-red-500/20 text-red-400 border-red-500/50'
+                              }>
+                                {proposal.status.toUpperCase()}
+                              </Badge>
+                              {proposal.aiScore && (
+                                <Badge className="bg-blue-500/20 text-blue-400 border-blue-500/50">
+                                  AI Score: {proposal.aiScore}/10
+                                </Badge>
+                              )}
+                            </div>
+                          </div>
+                          <div className="text-right space-y-1">
+                            <div className="text-white font-semibold">
+                              ${proposal.fundingAmount.toLocaleString()}
+                            </div>
+                            <Badge className={timeLeft > 0 ? 'bg-yellow-500/20 text-yellow-400 border-yellow-500/50' : 'bg-red-500/20 text-red-400 border-red-500/50'}>
+                              <ClockIcon className="w-3 h-3 mr-1" />
+                              {timeText}
+                            </Badge>
+                          </div>
                         </div>
-                      )}
-                    </div>
-                  </CardContent>
-                </Card>
-              );
-            })}
+                      </CardHeader>
+                      
+                      <CardContent className="space-y-4">
+                        <CardDescription className="text-white/80 text-base">
+                          {proposal.description}
+                        </CardDescription>
+                        
+                        <div className="space-y-2">
+                          <div className="flex items-center justify-between text-sm">
+                            <span className="text-white/60">
+                              Yes: {proposal.voteYes} ({yesPercentage.toFixed(1)}%)
+                            </span>
+                            <span className="text-white/60">
+                              No: {proposal.voteNo} ({(100 - yesPercentage).toFixed(1)}%)
+                            </span>
+                          </div>
+                          <Progress 
+                            value={yesPercentage} 
+                            className="w-full h-2 bg-white/10"
+                          />
+                          <div className="text-center text-xs text-white/60">
+                            Total votes: {totalVotes}
+                          </div>
+                        </div>
+                        
+                        {proposal.status === 'active' && (
+                          <div className="flex gap-3 pt-2">
+                            <Button
+                              size="sm"
+                              disabled={isVoting}
+                              onClick={() => handleVote(proposal.id, 'for')}
+                              className="flex-1 bg-green-500/20 hover:bg-green-500/30 text-green-400 border border-green-500/30 rounded-xl"
+                            >
+                              {isVoting ? (
+                                <div className="flex items-center gap-2">
+                                  <div className="w-3 h-3 border border-green-400/50 border-t-green-400 rounded-full animate-spin"></div>
+                                  Voting...
+                                </div>
+                              ) : (
+                                <>Vote Yes (0.001 ALGO)</>
+                              )}
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              disabled={isVoting}
+                              onClick={() => handleVote(proposal.id, 'against')}
+                              className="flex-1 border-red-500/30 text-red-400 hover:bg-red-500/10 rounded-xl"
+                            >
+                              {isVoting ? (
+                                <div className="flex items-center gap-2">
+                                  <div className="w-3 h-3 border border-red-400/50 border-t-red-400 rounded-full animate-spin"></div>
+                                  Voting...
+                                </div>
+                              ) : (
+                                <>Vote No (0.001 ALGO)</>
+                              )}
+                            </Button>
+                          </div>
+                        )}
+                        
+                        <div className="text-xs text-white/40 pt-2">
+                          Created by: {proposal.creator}
+                        </div>
+                      </CardContent>
+                    </Card>
+                  );
+                })
+              ) : (
+                <div className="text-center py-12">
+                  <VoteIcon className="w-16 h-16 text-white/20 mx-auto mb-4" />
+                  <p className="text-white/60 mb-2">No proposals found</p>
+                  <p className="text-white/40 text-sm">Proposals will appear here when submitted to the DAO</p>
+                  <Link href="/submit-proposal" className="mt-4 inline-block">
+                    <Button className="bg-blue-500 hover:bg-blue-600 text-white">
+                      Submit First Proposal
+                    </Button>
+                  </Link>
+                </div>
+              )}
+            </div>
           </div>
-        </div>
-      </main>
-    </div>
+        </main>
+
+        {/* Footer */}
+        <footer className="relative z-10 text-center py-6 text-white/60 text-sm border-t border-white/10">
+          <p>&copy; {new Date().getFullYear()} Climate DAO. Decentralized climate action through blockchain governance.</p>
+        </footer>
+      </div>
     </WalletGuard>
   );
 }

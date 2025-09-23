@@ -25,14 +25,19 @@ import {
 } from "lucide-react"
 import Link from "next/link"
 import { useWalletContext } from "@/hooks/use-wallet"
+import { useClimateDAO } from "@/hooks/use-climate-dao"
 import { StatsSkeleton, CardSkeleton } from "@/components/ui/skeleton"
 import { WalletInfo } from "@/components/wallet-guard"
 
 export function DashboardPage() {
   const { isConnected, address, balance } = useWalletContext()
+  const { getProposals, getTotalProposals } = useClimateDAO()
   const [currentTime, setCurrentTime] = useState<Date | null>(null)
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
+  const [proposals, setProposals] = useState<any[]>([])
+  const [activeProposals, setActiveProposals] = useState<any[]>([])
+  const [totalProposalsCount, setTotalProposalsCount] = useState(0)
 
   // Simulate loading time for dashboard content
   useEffect(() => {
@@ -41,6 +46,31 @@ export function DashboardPage() {
     }, 1500)
     return () => clearTimeout(timer)
   }, [])
+
+  // Fetch proposals data
+  useEffect(() => {
+    const fetchProposalData = async () => {
+      try {
+        // Get all proposals
+        const allProposals = await getProposals()
+        setProposals(allProposals)
+        
+        // Filter active proposals for voting section
+        const active = await getProposals({ status: 'active' })
+        setActiveProposals(active)
+        
+        // Get total count
+        const total = await getTotalProposals()
+        setTotalProposalsCount(total)
+      } catch (error) {
+        console.error('Failed to fetch proposal data:', error)
+      }
+    }
+
+    if (isConnected) {
+      fetchProposalData()
+    }
+  }, [isConnected]) // Remove function dependencies to prevent infinite loops
 
   // Update time every minute, only on client side
   useEffect(() => {
@@ -87,8 +117,8 @@ export function DashboardPage() {
   ]
 
   const stats = [
-    { label: "Active Proposals", value: "24", change: "+12%", icon: FileTextIcon, color: "blue" },
-    { label: "Total Votes Cast", value: "1,847", change: "+8%", icon: VoteIcon, color: "green" },
+    { label: "Active Proposals", value: activeProposals.length.toString(), change: "+12%", icon: FileTextIcon, color: "blue" },
+    { label: "Total Proposals", value: totalProposalsCount.toString(), change: "+8%", icon: VoteIcon, color: "green" },
     { label: "Climate Credits", value: "2,456", change: "+15%", icon: CoinsIcon, color: "yellow" },
     { label: "Community Members", value: "892", change: "+5%", icon: Users2Icon, color: "purple" }
   ]
@@ -294,7 +324,7 @@ export function DashboardPage() {
                     Active Votes
                   </CardTitle>
                   <Badge variant="secondary" className="bg-green-500/20 text-green-400 border-green-500/30 rounded-full">
-                    3 Pending
+                    {activeProposals.length} Pending
                   </Badge>
                 </div>
                 <CardDescription className="text-white/60 text-base">
@@ -303,31 +333,69 @@ export function DashboardPage() {
               </CardHeader>
               <CardContent className="space-y-6">
                 
-                {/* Sample Proposal */}
-                <div className="bg-white/5 rounded-2xl p-6 border border-white/10 hover:bg-white/10 transition-all duration-300">
-                  <div className="flex items-center justify-between mb-4">
-                    <h4 className="text-white font-medium text-lg">Solar Farm Initiative - Kenya</h4>
-                    <Badge className="bg-yellow-500/20 text-yellow-400 border-yellow-500/30 rounded-full">
-                      <ClockIcon className="w-3 h-3 mr-1" />
-                      2d left
-                    </Badge>
+                {/* Active Proposals */}
+                {activeProposals.length > 0 ? (
+                  activeProposals.slice(0, 3).map((proposal) => {
+                    const timeLeft = Math.ceil((proposal.endTime - Date.now()) / (24 * 60 * 60 * 1000));
+                    const timeText = timeLeft > 0 ? `${timeLeft}d left` : 'Expired';
+                    const totalVotes = proposal.voteYes + proposal.voteNo;
+                    const yesPercentage = totalVotes > 0 ? Math.round((proposal.voteYes / totalVotes) * 100) : 0;
+                    
+                    return (
+                      <div key={proposal.id} className="bg-white/5 rounded-2xl p-6 border border-white/10 hover:bg-white/10 transition-all duration-300">
+                        <div className="flex items-center justify-between mb-4">
+                          <h4 className="text-white font-medium text-lg">{proposal.title}</h4>
+                          <Badge className={`${timeLeft > 0 ? 'bg-yellow-500/20 text-yellow-400 border-yellow-500/30' : 'bg-red-500/20 text-red-400 border-red-500/30'} rounded-full`}>
+                            <ClockIcon className="w-3 h-3 mr-1" />
+                            {timeText}
+                          </Badge>
+                        </div>
+                        <div className="flex items-center justify-between mb-4">
+                          <span className="text-white/60">
+                            AI Impact Score: {proposal.aiScore ? `${proposal.aiScore}/10` : 'N/A'}
+                          </span>
+                          <div className="flex items-center gap-1 text-green-400">
+                            <TrendingUpIcon className="w-4 h-4" />
+                            {proposal.aiScore && proposal.aiScore >= 8 ? 'High Impact' : 
+                             proposal.aiScore && proposal.aiScore >= 6 ? 'Medium Impact' : 'Low Impact'}
+                          </div>
+                        </div>
+                        <div className="flex items-center justify-between mb-4">
+                          <span className="text-white/60">
+                            Funding: ${proposal.fundingAmount.toLocaleString()}
+                          </span>
+                          <span className="text-white/60">
+                            Votes: {yesPercentage}% yes ({totalVotes} total)
+                          </span>
+                        </div>
+                        <div className="grid grid-cols-2 gap-3">
+                          <Button size="sm" className="bg-green-500/20 hover:bg-green-500/30 text-green-400 border border-green-500/30 rounded-xl">
+                            Vote Yes (0.001 ALGO)
+                          </Button>
+                          <Button size="sm" variant="outline" className="border-red-500/30 text-red-400 hover:bg-red-500/10 rounded-xl">
+                            Vote No (0.001 ALGO)
+                          </Button>
+                        </div>
+                      </div>
+                    );
+                  })
+                ) : (
+                  <div className="text-center py-8">
+                    <VoteIcon className="w-16 h-16 text-white/20 mx-auto mb-4" />
+                    <p className="text-white/60 mb-2">No active proposals to vote on</p>
+                    <p className="text-white/40 text-sm">New proposals will appear here when submitted</p>
                   </div>
-                  <div className="flex items-center justify-between mb-4">
-                    <span className="text-white/60">AI Impact Score: 8.7/10</span>
-                    <div className="flex items-center gap-1 text-green-400">
-                      <TrendingUpIcon className="w-4 h-4" />
-                      High Impact
-                    </div>
+                )}
+                
+                {activeProposals.length > 3 && (
+                  <div className="text-center pt-4">
+                    <Link href="/vote">
+                      <Button variant="outline" size="sm" className="border-blue-500/30 text-blue-400 hover:bg-blue-500/10">
+                        View All {activeProposals.length} Active Proposals
+                      </Button>
+                    </Link>
                   </div>
-                  <div className="grid grid-cols-2 gap-3">
-                    <Button size="sm" className="bg-green-500/20 hover:bg-green-500/30 text-green-400 border border-green-500/30 rounded-xl">
-                      Vote Yes
-                    </Button>
-                    <Button size="sm" variant="outline" className="border-red-500/30 text-red-400 hover:bg-red-500/10 rounded-xl">
-                      Vote No
-                    </Button>
-                  </div>
-                </div>
+                )}
 
                 {/* View All Votes */}
                 <Link href="/vote">
@@ -356,22 +424,54 @@ export function DashboardPage() {
             <CardContent className="space-y-4">
               
               {/* Activity Items */}
-              {[
-                { action: "New proposal submitted", item: "Wind Energy Project - Brazil", time: "2 hours ago", icon: PlusIcon, color: "blue" },
-                { action: "Voting completed", item: "Reforestation Initiative - Indonesia", time: "5 hours ago", icon: CheckCircleIcon, color: "green" },
-                { action: "AI analysis completed", item: "Carbon Capture Technology", time: "1 day ago", icon: BrainCircuitIcon, color: "purple" }
-              ].map((activity, index) => (
-                <div key={index} className="flex items-center gap-4 p-4 bg-white/5 rounded-2xl border border-white/10 hover:bg-white/10 transition-all duration-300">
-                  <div className={`w-12 h-12 bg-${activity.color}-500/20 rounded-2xl flex items-center justify-center`}>
-                    <activity.icon className={`w-6 h-6 text-${activity.color}-400`} />
+              {proposals.slice(0, 3).map((proposal, index) => {
+                const activities = [
+                  {
+                    action: proposal.status === 'active' ? "Proposal active" : 
+                           proposal.status === 'passed' ? "Proposal passed" :
+                           proposal.status === 'rejected' ? "Proposal rejected" : "Proposal expired",
+                    item: proposal.title,
+                    time: proposal.status === 'active' ? "Active now" : "Recently completed",
+                    icon: proposal.status === 'active' ? ClockIcon :
+                          proposal.status === 'passed' ? CheckCircleIcon :
+                          proposal.status === 'rejected' ? XIcon : ClockIcon,
+                    color: proposal.status === 'active' ? "yellow" :
+                           proposal.status === 'passed' ? "green" :
+                           proposal.status === 'rejected' ? "red" : "gray"
+                  }
+                ];
+                const activity = activities[0];
+                
+                return (
+                  <div key={proposal.id} className="flex items-center gap-4 p-4 bg-white/5 rounded-2xl border border-white/10 hover:bg-white/10 transition-all duration-300">
+                    <div className={`w-12 h-12 bg-${activity.color}-500/20 rounded-2xl flex items-center justify-center`}>
+                      <activity.icon className={`w-6 h-6 text-${activity.color}-400`} />
+                    </div>
+                    <div className="flex-1">
+                      <p className="text-white font-medium text-base">{activity.action}</p>
+                      <p className="text-white/60 truncate">{activity.item}</p>
+                      <p className="text-white/40 text-sm">
+                        Funding: ${proposal.fundingAmount.toLocaleString()} | 
+                        Votes: {proposal.voteYes + proposal.voteNo} total
+                      </p>
+                    </div>
+                    <div className="text-right">
+                      <span className="text-white/40 text-sm">{activity.time}</span>
+                      {proposal.aiScore && (
+                        <p className="text-white/60 text-xs">AI Score: {proposal.aiScore}/10</p>
+                      )}
+                    </div>
                   </div>
-                  <div className="flex-1">
-                    <p className="text-white font-medium text-base">{activity.action}</p>
-                    <p className="text-white/60">{activity.item}</p>
-                  </div>
-                  <span className="text-white/40">{activity.time}</span>
+                );
+              })}
+              
+              {proposals.length === 0 && (
+                <div className="text-center py-8">
+                  <BarChart3Icon className="w-16 h-16 text-white/20 mx-auto mb-4" />
+                  <p className="text-white/60 mb-2">No recent activity</p>
+                  <p className="text-white/40 text-sm">Activity will appear here as proposals are submitted</p>
                 </div>
-              ))}
+              )}
 
             </CardContent>
           </Card>

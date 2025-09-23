@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import algosdk from 'algosdk';
 import { algodClient, getSuggestedParams, waitForConfirmation, CONTRACT_IDS } from '@/lib/algorand';
 import { TransactionBuilder, confirmTransaction, calculateTransactionCosts, TransactionResult } from '@/lib/transaction-builder';
@@ -197,7 +197,7 @@ export function useClimateDAO() {
     }
   };
 
-  const getTotalProposals = async () => {
+  const getTotalProposals = useCallback(async () => {
     try {
       // This would call the get_total_proposals method
       // For now, returning mock data
@@ -206,7 +206,214 @@ export function useClimateDAO() {
       console.error('Failed to get total proposals:', err);
       return 0;
     }
+  }, []);
+
+  /**
+   * Get proposal details from blockchain by ID
+   */
+  const getProposal = async (proposalId: number): Promise<{
+    id: number;
+    title: string;
+    description: string;
+    creator: string;
+    fundingAmount: number;
+    voteYes: number;
+    voteNo: number;
+    status: 'active' | 'passed' | 'rejected' | 'expired';
+    endTime: number;
+    category: string;
+    aiScore?: number;
+  } | null> => {
+    try {
+      // This would call the get_proposal method from smart contract
+      // For now, returning mock data based on proposalId
+      const mockProposals = [
+        {
+          id: 1,
+          title: "Solar Farm Initiative - Kenya",
+          description: "Large-scale solar installation to provide clean energy to rural communities in Kenya. This project aims to install 50MW of solar capacity across multiple villages.",
+          creator: "KENYASOLXYZ...ABC123",
+          fundingAmount: 500000,
+          voteYes: 85,
+          voteNo: 12,
+          status: 'active' as const,
+          endTime: Date.now() + (2 * 24 * 60 * 60 * 1000), // 2 days from now
+          category: "renewable-energy",
+          aiScore: 8.7
+        },
+        {
+          id: 2,
+          title: "Ocean Cleanup Technology - Pacific",
+          description: "Deploy advanced cleanup technology to remove plastic waste from the Pacific Ocean. Targeting 1000 tons of plastic removal annually.",
+          creator: "OCEANCLNXYZ...DEF456",
+          fundingAmount: 750000,
+          voteYes: 120,
+          voteNo: 8,
+          status: 'active' as const,
+          endTime: Date.now() + (5 * 24 * 60 * 60 * 1000), // 5 days from now
+          category: "ocean-cleanup",
+          aiScore: 9.2
+        },
+        {
+          id: 3,
+          title: "Urban Forest Expansion - São Paulo",
+          description: "Plant 10,000 native trees across São Paulo to improve air quality and urban biodiversity. Includes maintenance and monitoring systems.",
+          creator: "FORESTSPXYZ...GHI789",
+          fundingAmount: 125000,
+          voteYes: 95,
+          voteNo: 15,
+          status: 'active' as const,
+          endTime: Date.now() + (1 * 24 * 60 * 60 * 1000), // 1 day from now
+          category: "reforestation",
+          aiScore: 7.8
+        },
+        {
+          id: 4,
+          title: "Green Hydrogen Production - Chile",
+          description: "Establish green hydrogen production facility using renewable energy sources. Target production of 500 tons annually.",
+          creator: "HYDROGENXYZ...JKL012",
+          fundingAmount: 2000000,
+          voteYes: 145,
+          voteNo: 25,
+          status: 'passed' as const,
+          endTime: Date.now() - (1 * 24 * 60 * 60 * 1000), // 1 day ago
+          category: "clean-energy",
+          aiScore: 8.9
+        },
+        {
+          id: 5,
+          title: "Carbon Capture Research - Iceland",
+          description: "Research and develop direct air capture technology using geothermal energy. Pilot project for 100 tons CO2 annually.",
+          creator: "CARBONCPXYZ...MNO345",
+          fundingAmount: 300000,
+          voteYes: 65,
+          voteNo: 45,
+          status: 'rejected' as const,
+          endTime: Date.now() - (3 * 24 * 60 * 60 * 1000), // 3 days ago
+          category: "carbon-capture",
+          aiScore: 6.5
+        }
+      ];
+
+      const proposal = mockProposals.find(p => p.id === proposalId);
+      return proposal || null;
+    } catch (err) {
+      console.error('Failed to get proposal:', err);
+      return null;
+    }
   };
+
+  /**
+   * Get all proposals with optional filtering
+   */
+  const getProposals = useCallback(async (filters?: {
+    status?: 'active' | 'passed' | 'rejected' | 'expired';
+    category?: string;
+    creator?: string;
+  }): Promise<Array<{
+    id: number;
+    title: string;
+    description: string;
+    creator: string;
+    fundingAmount: number;
+    voteYes: number;
+    voteNo: number;
+    status: 'active' | 'passed' | 'rejected' | 'expired';
+    endTime: number;
+    category: string;
+    aiScore?: number;
+  }>> => {
+    try {
+      // This would call contract methods to get all proposals
+      // For now, using the same mock data from getProposal
+      const mockProposals = [
+        {
+          id: 1,
+          title: "Solar Farm Initiative - Kenya",
+          description: "Large-scale solar installation to provide clean energy to rural communities in Kenya. This project aims to install 50MW of solar capacity across multiple villages.",
+          creator: "KENYASOLXYZ...ABC123",
+          fundingAmount: 500000,
+          voteYes: 85,
+          voteNo: 12,
+          status: 'active' as const,
+          endTime: Date.now() + (2 * 24 * 60 * 60 * 1000),
+          category: "renewable-energy",
+          aiScore: 8.7
+        },
+        {
+          id: 2,
+          title: "Ocean Cleanup Technology - Pacific",
+          description: "Deploy advanced cleanup technology to remove plastic waste from the Pacific Ocean. Targeting 1000 tons of plastic removal annually.",
+          creator: "OCEANCLNXYZ...DEF456",
+          fundingAmount: 750000,
+          voteYes: 120,
+          voteNo: 8,
+          status: 'active' as const,
+          endTime: Date.now() + (5 * 24 * 60 * 60 * 1000),
+          category: "ocean-cleanup",
+          aiScore: 9.2
+        },
+        {
+          id: 3,
+          title: "Urban Forest Expansion - São Paulo",
+          description: "Plant 10,000 native trees across São Paulo to improve air quality and urban biodiversity. Includes maintenance and monitoring systems.",
+          creator: "FORESTSPXYZ...GHI789",
+          fundingAmount: 125000,
+          voteYes: 95,
+          voteNo: 15,
+          status: 'active' as const,
+          endTime: Date.now() + (1 * 24 * 60 * 60 * 1000),
+          category: "reforestation",
+          aiScore: 7.8
+        },
+        {
+          id: 4,
+          title: "Green Hydrogen Production - Chile",
+          description: "Establish green hydrogen production facility using renewable energy sources. Target production of 500 tons annually.",
+          creator: "HYDROGENXYZ...JKL012",
+          fundingAmount: 2000000,
+          voteYes: 145,
+          voteNo: 25,
+          status: 'passed' as const,
+          endTime: Date.now() - (1 * 24 * 60 * 60 * 1000),
+          category: "clean-energy",
+          aiScore: 8.9
+        },
+        {
+          id: 5,
+          title: "Carbon Capture Research - Iceland",
+          description: "Research and develop direct air capture technology using geothermal energy. Pilot project for 100 tons CO2 annually.",
+          creator: "CARBONCPXYZ...MNO345",
+          fundingAmount: 300000,
+          voteYes: 65,
+          voteNo: 45,
+          status: 'rejected' as const,
+          endTime: Date.now() - (3 * 24 * 60 * 60 * 1000),
+          category: "carbon-capture",
+          aiScore: 6.5
+        }
+      ];
+
+      // Apply filters if provided
+      let filteredProposals = mockProposals;
+      if (filters) {
+        if (filters.status) {
+          filteredProposals = filteredProposals.filter(p => p.status === filters.status);
+        }
+        if (filters.category) {
+          filteredProposals = filteredProposals.filter(p => p.category === filters.category);
+        }
+        if (filters.creator) {
+          filteredProposals = filteredProposals.filter(p => p.creator === filters.creator);
+        }
+      }
+
+      return filteredProposals;
+    } catch (err) {
+      console.error('Failed to get proposals:', err);
+      return [];
+    }
+  }, []);
 
   return {
     joinDAO,
@@ -214,6 +421,8 @@ export function useClimateDAO() {
     voteOnProposal,
     getMemberTokens,
     getTotalProposals,
+    getProposal,
+    getProposals,
     loading,
     error,
   };
