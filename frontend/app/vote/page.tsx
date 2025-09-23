@@ -9,6 +9,7 @@ import { VoteIcon, CheckCircleIcon, XCircleIcon, ClockIcon, TrendingUpIcon, Leaf
 import { useWalletContext } from '@/hooks/use-wallet';
 import { useClimateDAO } from '@/hooks/use-climate-dao';
 import { TransactionStatus } from '@/components/transaction-status';
+import { VoteConfirmationDialog } from '@/components/vote-confirmation-dialog';
 import { TransactionResult } from '@/lib/transaction-builder';
 import Link from 'next/link';
 import { WalletGuard } from '@/components/wallet-guard';
@@ -40,6 +41,19 @@ export default function VotePage() {
     error?: string;
   }>({ proposalId: null, status: 'idle' });
 
+  // Confirmation dialog state
+  const [confirmationDialog, setConfirmationDialog] = useState<{
+    isOpen: boolean;
+    proposalId: number | null;
+    proposal: Proposal | null;
+    voteType: 'for' | 'against' | null;
+  }>({
+    isOpen: false,
+    proposalId: null,
+    proposal: null,
+    voteType: null
+  });
+
   // Fetch proposals
   useEffect(() => {
     const fetchProposals = async () => {
@@ -58,16 +72,38 @@ export default function VotePage() {
     }
   }, [isConnected]); // Remove function dependencies to prevent infinite loops
 
-  const handleVote = async (proposalId: number, vote: 'for' | 'against') => {
-    setVotingState({ proposalId, status: 'pending' });
+  const handleVoteClick = (proposal: Proposal, voteType: 'for' | 'against') => {
+    setConfirmationDialog({
+      isOpen: true,
+      proposalId: proposal.id,
+      proposal,
+      voteType
+    });
+  };
+
+  const handleVoteConfirm = async () => {
+    if (!confirmationDialog.proposalId || !confirmationDialog.voteType) return;
+    
+    setVotingState({ 
+      proposalId: confirmationDialog.proposalId, 
+      status: 'pending' 
+    });
     
     try {
-      const result = await voteOnProposal(proposalId, vote);
+      const result = await voteOnProposal(confirmationDialog.proposalId, confirmationDialog.voteType);
       setVotingState({
-        proposalId,
+        proposalId: confirmationDialog.proposalId,
         status: 'confirmed',
         txId: result.txId,
         result
+      });
+      
+      // Close dialog
+      setConfirmationDialog({
+        isOpen: false,
+        proposalId: null,
+        proposal: null,
+        voteType: null
       });
       
       // Refresh proposals after successful vote
@@ -79,11 +115,25 @@ export default function VotePage() {
       
     } catch (error) {
       setVotingState({
-        proposalId,
+        proposalId: confirmationDialog.proposalId,
         status: 'failed',
         error: error instanceof Error ? error.message : 'Vote failed'
       });
+      
+      // Close dialog on error too
+      setConfirmationDialog({
+        isOpen: false,
+        proposalId: null,
+        proposal: null,
+        voteType: null
+      });
     }
+  };
+
+  const handleVote = async (proposalId: number, vote: 'for' | 'against') => {
+    // Legacy handler - replaced by handleVoteClick + handleVoteConfirm
+    // Keeping for compatibility, but not used anymore
+    console.warn('Legacy handleVote called - should use handleVoteClick instead');
   };
 
   const getCategoryColor = (category: string) => {
@@ -269,7 +319,7 @@ export default function VotePage() {
                             <Button
                               size="sm"
                               disabled={isVoting}
-                              onClick={() => handleVote(proposal.id, 'for')}
+                              onClick={() => handleVoteClick(proposal, 'for')}
                               className="flex-1 bg-green-500/20 hover:bg-green-500/30 text-green-400 border border-green-500/30 rounded-xl"
                             >
                               {isVoting ? (
@@ -285,7 +335,7 @@ export default function VotePage() {
                               size="sm"
                               variant="outline"
                               disabled={isVoting}
-                              onClick={() => handleVote(proposal.id, 'against')}
+                              onClick={() => handleVoteClick(proposal, 'against')}
                               className="flex-1 border-red-500/30 text-red-400 hover:bg-red-500/10 rounded-xl"
                             >
                               {isVoting ? (
@@ -327,6 +377,23 @@ export default function VotePage() {
         <footer className="relative z-10 text-center py-6 text-white/60 text-sm border-t border-white/10">
           <p>&copy; {new Date().getFullYear()} Climate DAO. Decentralized climate action through blockchain governance.</p>
         </footer>
+
+        {/* Vote Confirmation Dialog */}
+        {confirmationDialog.isOpen && confirmationDialog.proposal && (
+          <VoteConfirmationDialog
+            isOpen={confirmationDialog.isOpen}
+            onClose={() => setConfirmationDialog({
+              isOpen: false,
+              proposalId: null,
+              proposal: null,
+              voteType: null
+            })}
+            onConfirm={handleVoteConfirm}
+            proposal={confirmationDialog.proposal}
+            voteType={confirmationDialog.voteType!}
+            isLoading={votingState.status === 'pending'}
+          />
+        )}
       </div>
     </WalletGuard>
   );

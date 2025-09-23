@@ -28,6 +28,7 @@ import { useWalletContext } from "@/hooks/use-wallet"
 import { useClimateDAO } from "@/hooks/use-climate-dao"
 import { StatsSkeleton, CardSkeleton } from "@/components/ui/skeleton"
 import { WalletInfo } from "@/components/wallet-guard"
+import { VotingHistory } from "@/components/voting-history"
 
 export function DashboardPage() {
   const { isConnected, address, balance } = useWalletContext()
@@ -407,6 +408,9 @@ export function DashboardPage() {
             </Card>
 
           </div>
+
+          {/* Voting History - Full Width */}
+          <VotingHistory />
 
           {/* Recent Activity */}
           <Card className="bg-white/5 backdrop-blur-xl border-white/10 rounded-3xl hover:bg-white/10 transition-all duration-300">
