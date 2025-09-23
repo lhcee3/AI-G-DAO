@@ -2,7 +2,7 @@
 
 import type React from "react"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
@@ -14,6 +14,8 @@ import { useWalletContext } from "@/hooks/use-wallet"
 import { useClimateDAO } from "@/hooks/use-climate-dao"
 import { useRouter } from "next/navigation"
 import { useLoading } from "@/hooks/use-loading"
+import { TransactionStatus, TransactionCostEstimate } from "@/components/transaction-status"
+import { TransactionResult } from "@/lib/transaction-builder"
 
 export function SubmitProposalPage() {
   const { isConnected, address } = useWalletContext()
@@ -31,6 +33,33 @@ export function SubmitProposalPage() {
     location: "",
   })
 
+  // Transaction state
+  const [transactionState, setTransactionState] = useState<{
+    status: 'idle' | 'pending' | 'confirmed' | 'failed'
+    txId?: string
+    result?: TransactionResult
+    error?: string
+  }>({ status: 'idle' })
+
+  // Reset form on successful transaction
+  useEffect(() => {
+    if (transactionState.status === 'confirmed') {
+      // Reset form after 3 seconds
+      setTimeout(() => {
+        setFormData({
+          projectTitle: "",
+          description: "",
+          fundingAmount: "",
+          duration: "",
+          expectedImpact: "",
+          category: "",
+          location: "",
+        })
+        setTransactionState({ status: 'idle' })
+      }, 3000)
+    }
+  }, [transactionState.status])
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     
@@ -40,24 +69,33 @@ export function SubmitProposalPage() {
       return
     }
 
-    setLoading(true, "Submitting your proposal...")
+    // Reset transaction state
+    setTransactionState({ status: 'pending' })
+    setLoading(true, "Submitting your proposal to the blockchain...")
 
     try {
       const fundingAmountNum = parseInt(formData.fundingAmount) || 0
-      const impactScore = formData.expectedImpact
       
-      const txId = await submitProposal({
+      // Submit proposal to blockchain
+      const result = await submitProposal({
         title: formData.projectTitle,
         description: formData.description,
         fundingAmount: fundingAmountNum,
-        expectedImpact: impactScore,
+        expectedImpact: formData.expectedImpact,
         category: formData.category,
         location: formData.location,
       })
       
-      alert(`Proposal submitted successfully! Transaction ID: ${txId}`)
+      // Update transaction state with success
+      setTransactionState({
+        status: 'confirmed',
+        txId: result.txId,
+        result: result
+      })
       
-      // Reset form
+      console.log('Proposal submitted successfully:', result)
+      
+      // Reset form after successful submission
       setFormData({
         projectTitle: "",
         description: "",
@@ -70,7 +108,13 @@ export function SubmitProposalPage() {
       
     } catch (err) {
       console.error('Failed to submit proposal:', err)
-      alert(`Failed to submit proposal: ${err instanceof Error ? err.message : 'Unknown error'}`)
+      const errorMessage = err instanceof Error ? err.message : 'Unknown error occurred'
+      
+      // Update transaction state with error
+      setTransactionState({
+        status: 'failed',
+        error: errorMessage
+      })
     } finally {
       setLoading(false)
     }
@@ -78,6 +122,10 @@ export function SubmitProposalPage() {
 
   const handleInputChange = (field: string, value: string) => {
     setFormData((prev) => ({ ...prev, [field]: value }))
+  }
+
+  const closeTransactionStatus = () => {
+    setTransactionState({ status: 'idle' })
   }
 
   return (
@@ -107,6 +155,50 @@ export function SubmitProposalPage() {
             </p>
           </div>
 
+          {/* Success Banner */}
+          {transactionState.status === 'confirmed' && (
+            <div className="bg-green-500/20 border border-green-500/50 rounded-lg p-4 text-center">
+              <div className="flex items-center justify-center space-x-2 text-green-400">
+                <div className="w-6 h-6 text-green-400">✅</div>
+                <div>
+                  <h3 className="font-semibold text-lg">Proposal Submitted Successfully!</h3>
+                  <p className="text-sm text-green-300 mt-1">
+                    Your climate project proposal has been submitted to the blockchain. The form will reset in a few seconds.
+                  </p>
+                  {transactionState.txId && (
+                    <p className="text-xs text-green-200 mt-2">
+                      Transaction ID: {transactionState.txId}
+                    </p>
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Error Banner */}
+          {transactionState.status === 'failed' && (
+            <div className="bg-red-500/20 border border-red-500/50 rounded-lg p-4 text-center">
+              <div className="flex items-center justify-center space-x-2 text-red-400">
+                <div className="w-6 h-6 text-red-400">❌</div>
+                <div>
+                  <h3 className="font-semibold text-lg">Transaction Failed</h3>
+                  <p className="text-sm text-red-300 mt-1">
+                    {transactionState.error || "Unable to submit proposal to blockchain. Please try again."}
+                  </p>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    className="mt-2 border-red-500/50 text-red-400 hover:bg-red-500/10"
+                    onClick={() => setTransactionState({ status: 'idle' })}
+                  >
+                    Dismiss
+                  </Button>
+                </div>
+              </div>
+            </div>
+          )}
+
           <Card className="bg-black/80 border-blue-500/50 backdrop-blur-sm shadow-2xl">
             <CardHeader className="text-center space-y-4">
               <div className="mx-auto w-16 h-16 bg-blue-500/20 rounded-full flex items-center justify-center">
@@ -119,6 +211,30 @@ export function SubmitProposalPage() {
             </CardHeader>
 
             <CardContent className="space-y-6">
+              {/* Transaction Status Display */}
+              {transactionState.status !== 'idle' && (
+                <div className="mb-6">
+                  <TransactionStatus
+                    txId={transactionState.txId}
+                    result={transactionState.result}
+                    status={transactionState.status}
+                    error={transactionState.error}
+                    onClose={transactionState.status !== 'pending' ? closeTransactionStatus : undefined}
+                    estimatedTime={8}
+                  />
+                </div>
+              )}
+
+              {/* Cost Estimation */}
+              {transactionState.status === 'idle' && (
+                <TransactionCostEstimate
+                  numTransactions={2}
+                  depositAmount={0.1}
+                  className="mb-6"
+                />
+              )}
+
+              {/* Form Fields */}
               <form onSubmit={handleSubmit} className="space-y-6">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div className="space-y-2">
@@ -272,16 +388,26 @@ export function SubmitProposalPage() {
                   
                   <Button
                     type="submit"
-                    disabled={loading || !isConnected}
+                    disabled={loading || !isConnected || transactionState.status === 'pending'}
                     className="flex-1 bg-blue-500 hover:bg-blue-600 text-black font-semibold py-3 rounded-lg transition-all duration-300 transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed"
                   >
-                    {loading ? (
+                    {transactionState.status === 'pending' ? (
                       <div className="flex items-center space-x-2">
                         <div className="w-4 h-4 border-2 border-black/30 border-t-black rounded-full animate-spin"></div>
-                        <span>Submitting to Blockchain...</span>
+                        <span>Processing Transaction...</span>
+                      </div>
+                    ) : loading ? (
+                      <div className="flex items-center space-x-2">
+                        <div className="w-4 h-4 border-2 border-black/30 border-t-black rounded-full animate-spin"></div>
+                        <span>Preparing...</span>
+                      </div>
+                    ) : transactionState.status === 'confirmed' ? (
+                      <div className="flex items-center space-x-2">
+                        <div className="w-4 h-4 text-green-600">✓</div>
+                        <span>Submitted Successfully</span>
                       </div>
                     ) : (
-                      "Submit Proposal to DAO"
+                      "Submit Proposal (0.1 ALGO)"
                     )}
                   </Button>
 
