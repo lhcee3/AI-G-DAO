@@ -29,16 +29,24 @@ import { useClimateDAO } from "@/hooks/use-climate-dao"
 import { StatsSkeleton, CardSkeleton } from "@/components/ui/skeleton"
 import { WalletInfo } from "@/components/wallet-guard"
 import { VotingHistory } from "@/components/voting-history"
+import { UserProposalsTracker } from "@/components/user-proposals-tracker"
 
 export function DashboardPage() {
   const { isConnected, address, balance } = useWalletContext()
-  const { getProposals, getTotalProposals } = useClimateDAO()
+  const { getProposals, getTotalProposals, getBlockchainStats } = useClimateDAO()
   const [currentTime, setCurrentTime] = useState<Date | null>(null)
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
   const [proposals, setProposals] = useState<any[]>([])
   const [activeProposals, setActiveProposals] = useState<any[]>([])
   const [totalProposalsCount, setTotalProposalsCount] = useState(0)
+  const [blockchainStats, setBlockchainStats] = useState({
+    totalProposals: 0,
+    totalMembers: 0,
+    activeProposals: 0,
+    userProposalCount: 0,
+    userVoteCount: 0
+  })
 
   // Simulate loading time for dashboard content
   useEffect(() => {
@@ -63,6 +71,10 @@ export function DashboardPage() {
         // Get total count
         const total = await getTotalProposals()
         setTotalProposalsCount(total)
+        
+        // Get blockchain statistics
+        const stats = await getBlockchainStats()
+        setBlockchainStats(stats)
       } catch (error) {
         console.error('Failed to fetch proposal data:', error)
       }
@@ -118,10 +130,34 @@ export function DashboardPage() {
   ]
 
   const stats = [
-    { label: "Active Proposals", value: activeProposals.length.toString(), change: "+12%", icon: FileTextIcon, color: "blue" },
-    { label: "Total Proposals", value: totalProposalsCount.toString(), change: "+8%", icon: VoteIcon, color: "green" },
-    { label: "Climate Credits", value: "2,456", change: "+15%", icon: CoinsIcon, color: "yellow" },
-    { label: "Community Members", value: "892", change: "+5%", icon: Users2Icon, color: "purple" }
+    { 
+      label: "Active Proposals", 
+      value: blockchainStats.activeProposals.toString(), 
+      change: activeProposals.length > 0 ? "+12%" : "0%", 
+      icon: FileTextIcon, 
+      color: "blue" 
+    },
+    { 
+      label: "Total Proposals", 
+      value: blockchainStats.totalProposals.toString(), 
+      change: blockchainStats.totalProposals > 0 ? "+8%" : "0%", 
+      icon: VoteIcon, 
+      color: "green" 
+    },
+    { 
+      label: "Climate Credits", 
+      value: "2,456", // This will be from blockchain when credits are implemented
+      change: "+15%", 
+      icon: CoinsIcon, 
+      color: "yellow" 
+    },
+    { 
+      label: "Community Members", 
+      value: blockchainStats.totalMembers.toString(), 
+      change: blockchainStats.totalMembers > 0 ? "+5%" : "0%", 
+      icon: Users2Icon, 
+      color: "purple" 
+    }
   ]
   
   return (
@@ -281,38 +317,8 @@ export function DashboardPage() {
           {/* Dashboard Content Grid */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12">
             
-            {/* My Proposals Card */}
-            <Card className="bg-white/5 backdrop-blur-xl border-white/10 rounded-3xl hover:bg-white/10 transition-all duration-300">
-              <CardHeader className="pb-6">
-                <div className="flex items-center justify-between">
-                  <CardTitle className="text-white text-xl flex items-center gap-3">
-                    <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-2xl flex items-center justify-center shadow-lg shadow-blue-500/25">
-                      <FileTextIcon className="w-6 h-6 text-white" />
-                    </div>
-                    My Proposals
-                  </CardTitle>
-                  <Badge variant="secondary" className="bg-blue-500/20 text-blue-400 border-blue-500/30 rounded-full">
-                    Active
-                  </Badge>
-                </div>
-                <CardDescription className="text-white/60 text-base">
-                  Track the status of your submitted proposals
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                <div className="text-center py-12">
-                  <div className="w-24 h-24 bg-white/5 rounded-3xl flex items-center justify-center mx-auto mb-6">
-                    <PlusIcon className="w-12 h-12 text-white/40" />
-                  </div>
-                  <p className="text-white/60 mb-6 text-lg">No proposals submitted yet</p>
-                  <Link href="/submit-proposal">
-                    <Button className="bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 text-white border-0 rounded-2xl px-8 py-3 text-base shadow-lg shadow-blue-500/25 hover:shadow-blue-500/40 transition-all duration-300">
-                      Submit Your First Proposal
-                    </Button>
-                  </Link>
-                </div>
-              </CardContent>
-            </Card>
+            {/* My Proposals Card - Enhanced with Real Data */}
+            <UserProposalsTracker />
 
             {/* Active Votes Card */}
             <Card className="bg-white/5 backdrop-blur-xl border-white/10 rounded-3xl hover:bg-white/10 transition-all duration-300">

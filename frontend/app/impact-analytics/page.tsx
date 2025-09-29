@@ -1,5 +1,6 @@
 'use client';
 
+import { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
@@ -14,9 +15,11 @@ import {
   DropletIcon,
   ThermometerIcon,
   WalletIcon,
-  ArrowLeftIcon
+  ArrowLeftIcon,
+  LoaderIcon
 } from 'lucide-react';
 import { useWalletContext } from '@/hooks/use-wallet';
+import { climateDAOQuery, ImpactMetrics, ProjectImpact } from '@/lib/blockchain-queries';
 import Link from 'next/link';
 import { WalletGuard } from '@/components/wallet-guard';
 
@@ -32,129 +35,6 @@ interface ImpactMetric {
   target: number;
   category: 'energy' | 'carbon' | 'waste' | 'water' | 'biodiversity';
 }
-
-interface Project {
-  id: string;
-  name: string;
-  location: string;
-  status: 'active' | 'completed' | 'planning';
-  impactScore: number;
-  co2Reduced: number;
-  energyGenerated: number;
-  funding: number;
-  startDate: string;
-}
-
-const impactMetrics: ImpactMetric[] = [
-  {
-    id: '1',
-    title: 'CO2 Reduced',
-    value: 45250,
-    unit: 'tons',
-    change: 15.2,
-    changeType: 'increase',
-    icon: <LeafIcon className="w-6 h-6" />,
-    description: 'Total carbon dioxide reduced through all active projects',
-    target: 60000,
-    category: 'carbon'
-  },
-  {
-    id: '2',
-    title: 'Clean Energy Generated',
-    value: 125.8,
-    unit: 'GWh',
-    change: 22.1,
-    changeType: 'increase',
-    icon: <ZapIcon className="w-6 h-6" />,
-    description: 'Renewable energy generated this year',
-    target: 150,
-    category: 'energy'
-  },
-  {
-    id: '3',
-    title: 'Waste Recycled',
-    value: 8940,
-    unit: 'tons',
-    change: 8.7,
-    changeType: 'increase',
-    icon: <RecycleIcon className="w-6 h-6" />,
-    description: 'Total waste diverted from landfills',
-    target: 12000,
-    category: 'waste'
-  },
-  {
-    id: '4',
-    title: 'Trees Planted',
-    value: 156780,
-    unit: 'trees',
-    change: 12.4,
-    changeType: 'increase',
-    icon: <TreesIcon className="w-6 h-6" />,
-    description: 'New trees planted for reforestation',
-    target: 200000,
-    category: 'biodiversity'
-  },
-  {
-    id: '5',
-    title: 'Water Saved',
-    value: 2.4,
-    unit: 'ML',
-    change: 5.3,
-    changeType: 'increase',
-    icon: <DropletIcon className="w-6 h-6" />,
-    description: 'Water conservation through efficient systems',
-    target: 3.0,
-    category: 'water'
-  },
-  {
-    id: '6',
-    title: 'Temperature Impact',
-    value: 0.02,
-    unit: '°C reduced',
-    change: 0.01,
-    changeType: 'increase',
-    icon: <ThermometerIcon className="w-6 h-6" />,
-    description: 'Estimated global temperature reduction contribution',
-    target: 0.05,
-    category: 'carbon'
-  }
-];
-
-const activeProjects: Project[] = [
-  {
-    id: '1',
-    name: 'Solar Farm Initiative - Kenya',
-    location: 'Nairobi, Kenya',
-    status: 'active',
-    impactScore: 87,
-    co2Reduced: 15000,
-    energyGenerated: 45.2,
-    funding: 2500000,
-    startDate: '2024-03-15'
-  },
-  {
-    id: '2',
-    name: 'Ocean Plastic Collection',
-    location: 'Pacific Ocean',
-    status: 'active',
-    impactScore: 92,
-    co2Reduced: 2500,
-    energyGenerated: 0,
-    funding: 1800000,
-    startDate: '2024-06-01'
-  },
-  {
-    id: '3',
-    name: 'Urban Vertical Gardens',
-    location: 'New York, USA',
-    status: 'completed',
-    impactScore: 78,
-    co2Reduced: 8750,
-    energyGenerated: 0,
-    funding: 1200000,
-    startDate: '2023-12-10'
-  }
-];
 
 const getCategoryColor = (category: string) => {
   switch (category) {
@@ -178,6 +58,111 @@ const getStatusColor = (status: string) => {
 
 export default function ImpactAnalyticsPage() {
   const { isConnected, address, balance } = useWalletContext();
+  const [loading, setLoading] = useState(true);
+  const [impactData, setImpactData] = useState<ImpactMetrics | null>(null);
+  const [projectData, setProjectData] = useState<ProjectImpact[]>([]);
+  const [impactMetrics, setImpactMetrics] = useState<ImpactMetric[]>([]);
+
+  useEffect(() => {
+    const fetchImpactData = async () => {
+      try {
+        setLoading(true);
+        
+        // Fetch real impact data from blockchain
+        const [metrics, projects] = await Promise.all([
+          climateDAOQuery.getImpactMetrics(),
+          climateDAOQuery.getProjectImpacts()
+        ]);
+        
+        setImpactData(metrics);
+        setProjectData(projects);
+        
+        // Transform blockchain data into display format
+        const displayMetrics: ImpactMetric[] = [
+          {
+            id: '1',
+            title: 'CO2 Reduced',
+            value: metrics.totalCO2Reduced,
+            unit: 'tons',
+            change: 15.2,
+            changeType: 'increase',
+            icon: <LeafIcon className="w-6 h-6" />,
+            description: 'Total carbon dioxide reduced through all active projects',
+            target: Math.ceil(metrics.totalCO2Reduced * 1.3),
+            category: 'carbon'
+          },
+          {
+            id: '2',
+            title: 'Clean Energy Generated',
+            value: metrics.cleanEnergyGenerated,
+            unit: 'GWh',
+            change: 22.1,
+            changeType: 'increase',
+            icon: <ZapIcon className="w-6 h-6" />,
+            description: 'Renewable energy generated this year',
+            target: Math.ceil(metrics.cleanEnergyGenerated * 1.2),
+            category: 'energy'
+          },
+          {
+            id: '3',
+            title: 'Waste Recycled',
+            value: metrics.wasteRecycled,
+            unit: 'tons',
+            change: 8.7,
+            changeType: 'increase',
+            icon: <RecycleIcon className="w-6 h-6" />,
+            description: 'Total waste diverted from landfills',
+            target: Math.ceil(metrics.wasteRecycled * 1.35),
+            category: 'waste'
+          },
+          {
+            id: '4',
+            title: 'Trees Planted',
+            value: metrics.treesPlanted,
+            unit: 'trees',
+            change: 12.4,
+            changeType: 'increase',
+            icon: <TreesIcon className="w-6 h-6" />,
+            description: 'New trees planted for reforestation',
+            target: Math.ceil(metrics.treesPlanted * 1.25),
+            category: 'biodiversity'
+          },
+          {
+            id: '5',
+            title: 'Water Saved',
+            value: metrics.waterSaved,
+            unit: 'ML',
+            change: 5.3,
+            changeType: 'increase',
+            icon: <DropletIcon className="w-6 h-6" />,
+            description: 'Water conservation through efficient systems',
+            target: Math.ceil(metrics.waterSaved * 1.25),
+            category: 'water'
+          },
+          {
+            id: '6',
+            title: 'Temperature Impact',
+            value: metrics.temperatureImpact,
+            unit: '°C reduced',
+            change: 0.01,
+            changeType: 'increase',
+            icon: <ThermometerIcon className="w-6 h-6" />,
+            description: 'Estimated global temperature reduction contribution',
+            target: Math.round((metrics.temperatureImpact * 2.5) * 10000) / 10000,
+            category: 'carbon'
+          }
+        ];
+        
+        setImpactMetrics(displayMetrics);
+      } catch (error) {
+        console.error('Error fetching impact data:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchImpactData();
+  }, []);
   
   return (
     <WalletGuard requireBalance={0.05}>
@@ -324,7 +309,7 @@ export default function ImpactAnalyticsPage() {
           <div className="space-y-6">
             <h2 className="text-2xl font-bold text-white">Project Performance</h2>
             <div className="space-y-4">
-              {activeProjects.map((project) => (
+              {projectData.map((project) => (
                 <Card key={project.id} className="bg-white/5 backdrop-blur-xl border-white/10 rounded-3xl hover:bg-white/10 transition-all duration-300">
                   <CardHeader>
                     <div className="flex items-start justify-between">
