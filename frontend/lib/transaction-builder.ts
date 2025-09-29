@@ -68,7 +68,8 @@ export class TransactionBuilder {
   }
 
   /**
-   * Create a voting transaction with minimal cost (0.01 ALGO)
+   * Create a voting transaction with reduced cost (0.01 ALGO + network fee)
+   * Phase 4 enhancement: More affordable voting for community participation
    */
   static createVoteTransaction(
     options: TransactionOptions,

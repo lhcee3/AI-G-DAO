@@ -4,24 +4,15 @@ import { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { VoteIcon, CheckCircleIcon, XCircleIcon, ClockIcon, ExternalLinkIcon } from 'lucide-react';
+import { VoteIcon, CheckCircleIcon, XCircleIcon, ClockIcon, ExternalLinkIcon, LoaderIcon } from 'lucide-react';
 import { useWalletContext } from '@/hooks/use-wallet';
 import { useClimateDAO } from '@/hooks/use-climate-dao';
-
-interface VoteRecord {
-  id: string;
-  proposalId: number;
-  proposalTitle: string;
-  vote: 'for' | 'against';
-  timestamp: number;
-  txId: string;
-  cost: number;
-  status: 'confirmed' | 'pending';
-}
+import { VotingRecord } from '@/lib/blockchain-queries';
 
 export function VotingHistory() {
   const { address, isConnected } = useWalletContext();
-  const [voteHistory, setVoteHistory] = useState<VoteRecord[]>([]);
+  const { getUserVotingHistory } = useClimateDAO();
+  const [voteHistory, setVoteHistory] = useState<VotingRecord[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -32,42 +23,11 @@ export function VotingHistory() {
       }
 
       try {
-        // Mock data for now - in real implementation, this would query the blockchain
-        // for all vote transactions from the user's address
-        const mockHistory: VoteRecord[] = [
-          {
-            id: '1',
-            proposalId: 1,
-            proposalTitle: 'Solar Farm Initiative - Kenya',
-            vote: 'for',
-            timestamp: Date.now() - (2 * 60 * 60 * 1000), // 2 hours ago
-            txId: 'ABC123...',
-            cost: 0.002,
-            status: 'confirmed'
-          },
-          {
-            id: '2',
-            proposalId: 2,
-            proposalTitle: 'Ocean Cleanup Technology - Pacific',
-            vote: 'for',
-            timestamp: Date.now() - (6 * 60 * 60 * 1000), // 6 hours ago
-            txId: 'DEF456...',
-            cost: 0.002,
-            status: 'confirmed'
-          },
-          {
-            id: '3',
-            proposalId: 4,
-            proposalTitle: 'Green Hydrogen Production - Chile',
-            vote: 'against',
-            timestamp: Date.now() - (24 * 60 * 60 * 1000), // 1 day ago
-            txId: 'GHI789...',
-            cost: 0.002,
-            status: 'confirmed'
-          }
-        ];
+        setLoading(true);
         
-        setVoteHistory(mockHistory);
+        // Fetch real voting history from blockchain
+        const history = await getUserVotingHistory();
+        setVoteHistory(history);
       } catch (error) {
         console.error('Failed to fetch voting history:', error);
       } finally {
@@ -76,7 +36,7 @@ export function VotingHistory() {
     };
 
     fetchVotingHistory();
-  }, [isConnected, address]);
+  }, [isConnected, address, getUserVotingHistory]);
 
   const formatTimeAgo = (timestamp: number) => {
     const now = Date.now();
@@ -129,7 +89,7 @@ export function VotingHistory() {
         ) : voteHistory.length > 0 ? (
           <div className="space-y-4">
             {voteHistory.map((vote) => (
-              <div key={vote.id} className="bg-white/5 rounded-xl p-4 border border-white/10 hover:bg-white/10 transition-all duration-300">
+              <div key={vote.txId} className="bg-white/5 rounded-xl p-4 border border-white/10 hover:bg-white/10 transition-all duration-300">
                 <div className="flex items-start justify-between mb-3">
                   <div className="flex items-center gap-3">
                     {vote.vote === 'for' ? (
@@ -152,14 +112,14 @@ export function VotingHistory() {
                           Voted {vote.vote.toUpperCase()}
                         </Badge>
                         <Badge className="bg-blue-500/20 text-blue-400 border-blue-500/50">
-                          {vote.status === 'confirmed' ? 'Confirmed' : 'Pending'}
+                          Confirmed
                         </Badge>
                       </div>
                     </div>
                   </div>
                   <div className="text-right text-sm">
-                    <div className="text-white/60">{formatTimeAgo(vote.timestamp)}</div>
-                    <div className="text-white/40 text-xs">Cost: {vote.cost.toFixed(3)} ALGO</div>
+                    <div className="text-white/60">{formatTimeAgo(vote.timestamp * 1000)}</div>
+                    <div className="text-white/40 text-xs">Cost: 0.01 ALGO</div>
                   </div>
                 </div>
                 

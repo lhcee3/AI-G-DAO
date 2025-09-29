@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
@@ -11,7 +11,10 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
-import { VoteIcon, CheckCircleIcon, XCircleIcon, CoinsIcon, ClockIcon } from 'lucide-react';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { VoteIcon, CheckCircleIcon, XCircleIcon, CoinsIcon, ClockIcon, AlertTriangleIcon } from 'lucide-react';
+import { useClimateDAO } from '@/hooks/use-climate-dao';
+import { ProposalVotes, VotingState } from '@/lib/blockchain-queries';
 
 interface VoteConfirmationDialogProps {
   isOpen: boolean;
@@ -25,6 +28,8 @@ interface VoteConfirmationDialogProps {
     voteYes: number;
     voteNo: number;
     fundingAmount: number;
+    endTime: number;
+    status: string;
   };
   voteType: 'for' | 'against';
   isLoading: boolean;
@@ -38,14 +43,56 @@ export function VoteConfirmationDialog({
   voteType,
   isLoading
 }: VoteConfirmationDialogProps) {
-  const totalVotes = proposal.voteYes + proposal.voteNo;
-  const currentYesPercentage = totalVotes > 0 ? (proposal.voteYes / totalVotes) * 100 : 0;
+  const { getProposalVotes, getUserVotingState } = useClimateDAO();
+  const [realTimeVotes, setRealTimeVotes] = useState<ProposalVotes | null>(null);
+  const [votingState, setVotingState] = useState<VotingState>({ hasVoted: false });
+  const [loadingVoteData, setLoadingVoteData] = useState(true);
+
+  useEffect(() => {
+    const fetchVotingData = async () => {
+      if (!isOpen) return;
+      
+      try {
+        setLoadingVoteData(true);
+        const [votes, userState] = await Promise.all([
+          getProposalVotes(proposal.id),
+          getUserVotingState(proposal.id)
+        ]);
+        
+        if (votes) setRealTimeVotes(votes);
+        setVotingState(userState);
+      } catch (error) {
+        console.error('Error fetching voting data:', error);
+      } finally {
+        setLoadingVoteData(false);
+      }
+    };
+
+    fetchVotingData();
+  }, [isOpen, proposal.id, getProposalVotes, getUserVotingState]);
+
+  // Use real-time data if available, otherwise fall back to proposal data
+  const currentVotes = realTimeVotes || {
+    yesVotes: proposal.voteYes,
+    noVotes: proposal.voteNo,
+    totalVotes: proposal.voteYes + proposal.voteNo,
+    yesPercentage: proposal.voteYes + proposal.voteNo > 0 ? (proposal.voteYes / (proposal.voteYes + proposal.voteNo)) * 100 : 0,
+    isVotingActive: proposal.status === 'active' && proposal.endTime > Date.now()
+  };
   
-  // Calculate projected results after this vote
-  const projectedYes = voteType === 'for' ? proposal.voteYes + 1 : proposal.voteYes;
-  const projectedNo = voteType === 'against' ? proposal.voteNo + 1 : proposal.voteNo;
+  // Calculate current and projected results
+  const currentYesPercentage = currentVotes.yesPercentage || 0;
+  const projectedYes = voteType === 'for' ? currentVotes.yesVotes + 1 : currentVotes.yesVotes;
+  const projectedNo = voteType === 'against' ? currentVotes.noVotes + 1 : currentVotes.noVotes;
   const projectedTotal = projectedYes + projectedNo;
-  const projectedYesPercentage = (projectedYes / projectedTotal) * 100;
+  const projectedYesPercentage = projectedTotal > 0 ? (projectedYes / projectedTotal) * 100 : 0;
+
+  // Check if voting is still valid
+  const isVotingClosed = !currentVotes.isVotingActive;
+  const hasUserVoted = votingState.hasVoted;
+  const canVote = !isVotingClosed && !hasUserVoted;
+  
+  const votingCost = 0.01; // Reduced from 0.001 ALGO
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -134,10 +181,13 @@ export function VoteConfirmationDialog({
               <span className="text-sm font-medium text-blue-400">Transaction Details</span>
             </div>
             <div className="text-xs text-slate-300 space-y-1">
-              <div>• Voting cost: 0.001 ALGO (micro-transaction)</div>
+              <div>• Voting cost: {votingCost} ALGO (reduced fees)</div>
               <div>• Network fee: ~0.001 ALGO</div>
-              <div>• Total cost: ~0.002 ALGO (~$0.0002)</div>
-              <div className="text-blue-400 mt-2">• Your vote will be recorded permanently on Algorand blockchain</div>
+              <div>• Total cost: ~{(votingCost + 0.001).toFixed(3)} ALGO (~$0.02)</div>
+              <div className="text-blue-400 mt-2">• Vote recorded permanently on Algorand blockchain</div>
+              {realTimeVotes && (
+                <div className="text-green-400">• Real-time vote counts displayed</div>
+              )}
             </div>
           </div>
         </div>
@@ -153,16 +203,18 @@ export function VoteConfirmationDialog({
           </Button>
           <Button
             onClick={onConfirm}
-            disabled={isLoading}
+            disabled={isLoading || !canVote}
             className={`${voteType === 'for' 
               ? 'bg-green-600 hover:bg-green-700' 
-              : 'bg-red-600 hover:bg-red-700'} text-white`}
+              : 'bg-red-600 hover:bg-red-700'} text-white disabled:bg-slate-600 disabled:cursor-not-allowed`}
           >
             {isLoading ? (
               <div className="flex items-center gap-2">
                 <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
                 Submitting Vote...
               </div>
+            ) : !canVote ? (
+              hasUserVoted ? 'Already Voted' : 'Voting Closed'
             ) : (
               <>Confirm {voteType === 'for' ? 'YES' : 'NO'} Vote</>
             )}

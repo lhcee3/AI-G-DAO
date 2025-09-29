@@ -26,6 +26,32 @@ export interface BlockchainStats {
   userVoteCount: number;
 }
 
+export interface VotingRecord {
+  proposalId: number;
+  proposalTitle: string;
+  vote: 'for' | 'against';
+  timestamp: number;
+  txId: string;
+  confirmedRound: number;
+}
+
+export interface VotingState {
+  hasVoted: boolean;
+  userVote?: 'for' | 'against';
+  votingRecord?: VotingRecord;
+}
+
+export interface ProposalVotes {
+  proposalId: number;
+  yesVotes: number;
+  noVotes: number;
+  totalVotes: number;
+  yesPercentage: number;
+  noPercentage: number;
+  votingDeadline: number;
+  isVotingActive: boolean;
+}
+
 export interface ImpactMetrics {
   totalCO2Reduced: number;
   cleanEnergyGenerated: number;
@@ -678,6 +704,173 @@ export class ClimateDAOQueryService {
       return Math.round((proposal.fundingAmount * 0.00003) * 100) / 100; // GWh
     }
     return 0;
+  }
+
+  /**
+   * Check if user has voted on a specific proposal
+   */
+  async getUserVotingState(proposalId: number, userAddress: string): Promise<VotingState> {
+    try {
+      // In real implementation, check if user has voted by querying the contract
+      // For now, simulate the check
+      
+      // Check if user has voted on this proposal by looking for vote records
+      const votingRecords = await this.getUserVotingHistory(userAddress);
+      const existingVote = votingRecords.find(record => record.proposalId === proposalId);
+      
+      return {
+        hasVoted: !!existingVote,
+        userVote: existingVote?.vote,
+        votingRecord: existingVote
+      };
+    } catch (error) {
+      console.error('Error checking voting state:', error);
+      return { hasVoted: false };
+    }
+  }
+
+  /**
+   * Get user's voting history
+   */
+  async getUserVotingHistory(userAddress: string): Promise<VotingRecord[]> {
+    try {
+      // In real implementation, query the blockchain for user's voting transactions
+      // For now, return mock data based on user address
+      
+      if (!userAddress) return [];
+      
+      // Mock voting history - in real implementation, query blockchain transaction history
+      const mockHistory: VotingRecord[] = [
+        {
+          proposalId: 1,
+          proposalTitle: "Solar Farm Initiative - Kenya",
+          vote: 'for',
+          timestamp: Date.now() - (2 * 60 * 60 * 1000), // 2 hours ago
+          txId: 'VOTE123ABC...DEF456',
+          confirmedRound: 12345678
+        },
+        {
+          proposalId: 2,
+          proposalTitle: "Ocean Cleanup Technology - Pacific",
+          vote: 'for',
+          timestamp: Date.now() - (6 * 60 * 60 * 1000), // 6 hours ago
+          txId: 'VOTE789GHI...JKL012',
+          confirmedRound: 12345670
+        },
+        {
+          proposalId: 4,
+          proposalTitle: "Green Hydrogen Production - Chile",
+          vote: 'against',
+          timestamp: Date.now() - (24 * 60 * 60 * 1000), // 1 day ago
+          txId: 'VOTE345MNO...PQR678',
+          confirmedRound: 12345650
+        }
+      ];
+      
+      return mockHistory;
+    } catch (error) {
+      console.error('Error fetching voting history:', error);
+      return [];
+    }
+  }
+
+  /**
+   * Get real-time vote counts for a proposal
+   */
+  async getProposalVotes(proposalId: number): Promise<ProposalVotes> {
+    try {
+      // In real implementation, read vote data from contract box storage
+      const boxKey = `votes_${proposalId}`;
+      const voteData = await this.readBox(boxKey);
+      
+      // Get proposal for voting deadline
+      const proposal = await this.getProposal(proposalId);
+      
+      if (!proposal) {
+        throw new Error('Proposal not found');
+      }
+      
+      let yesVotes = proposal.voteYes || 0;
+      let noVotes = proposal.voteNo || 0;
+      
+      // If we have real vote data, decode it
+      if (voteData) {
+        // In real implementation, decode the vote data from contract
+        // For now, use the proposal's vote counts
+      }
+      
+      const totalVotes = yesVotes + noVotes;
+      const yesPercentage = totalVotes > 0 ? Math.round((yesVotes / totalVotes) * 100) : 0;
+      const noPercentage = totalVotes > 0 ? Math.round((noVotes / totalVotes) * 100) : 0;
+      const isVotingActive = proposal.status === 'active' && proposal.endTime > Date.now();
+      
+      return {
+        proposalId,
+        yesVotes,
+        noVotes,
+        totalVotes,
+        yesPercentage,
+        noPercentage,
+        votingDeadline: proposal.endTime,
+        isVotingActive
+      };
+    } catch (error) {
+      console.error('Error fetching proposal votes:', error);
+      
+      // Return fallback data
+      const proposal = await this.getProposal(proposalId);
+      if (proposal) {
+        const totalVotes = proposal.voteYes + proposal.voteNo;
+        return {
+          proposalId,
+          yesVotes: proposal.voteYes,
+          noVotes: proposal.voteNo,
+          totalVotes,
+          yesPercentage: totalVotes > 0 ? Math.round((proposal.voteYes / totalVotes) * 100) : 0,
+          noPercentage: totalVotes > 0 ? Math.round((proposal.voteNo / totalVotes) * 100) : 0,
+          votingDeadline: proposal.endTime,
+          isVotingActive: proposal.status === 'active' && proposal.endTime > Date.now()
+        };
+      }
+      
+      return {
+        proposalId,
+        yesVotes: 0,
+        noVotes: 0,
+        totalVotes: 0,
+        yesPercentage: 0,
+        noPercentage: 0,
+        votingDeadline: Date.now(),
+        isVotingActive: false
+      };
+    }
+  }
+
+  /**
+   * Get voting states for multiple proposals for a user
+   */
+  async getBatchVotingStates(proposalIds: number[], userAddress: string): Promise<Map<number, VotingState>> {
+    try {
+      const votingStates = new Map<number, VotingState>();
+      
+      // Get user's voting history once
+      const votingHistory = await this.getUserVotingHistory(userAddress);
+      
+      // Check each proposal
+      for (const proposalId of proposalIds) {
+        const existingVote = votingHistory.find(record => record.proposalId === proposalId);
+        votingStates.set(proposalId, {
+          hasVoted: !!existingVote,
+          userVote: existingVote?.vote,
+          votingRecord: existingVote
+        });
+      }
+      
+      return votingStates;
+    } catch (error) {
+      console.error('Error fetching batch voting states:', error);
+      return new Map();
+    }
   }
 }
 

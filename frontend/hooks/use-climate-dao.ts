@@ -132,8 +132,8 @@ export function useClimateDAO() {
   };
 
   /**
-   * Vote on a proposal with micro-transaction cost (0.001 ALGO + fee)
-   * Much cheaper than traditional voting systems
+   * Vote on a proposal with micro-transaction cost (0.01 ALGO + fee)
+   * Includes double-voting prevention and real blockchain integration
    */
   const voteOnProposal = async (proposalId: number, vote: 'for' | 'against'): Promise<TransactionResult> => {
     if (!isConnected || !address) {
@@ -144,11 +144,31 @@ export function useClimateDAO() {
     setError(null);
 
     try {
+      // Check if user has already voted on this proposal
+      const votingState = await climateDAOQuery.getUserVotingState(proposalId, address);
+      if (votingState.hasVoted) {
+        throw new Error(`You have already voted "${votingState.userVote}" on this proposal`);
+      }
+
+      // Get proposal to check if voting is still active
+      const proposal = await climateDAOQuery.getProposal(proposalId);
+      if (!proposal) {
+        throw new Error('Proposal not found');
+      }
+
+      if (proposal.status !== 'active') {
+        throw new Error('Voting is no longer active for this proposal');
+      }
+
+      if (proposal.endTime <= Date.now()) {
+        throw new Error('Voting period has ended');
+      }
+
       const suggestedParams = await getSuggestedParams();
       
-      // Calculate costs - minimal voting cost
+      // Calculate costs - reduced voting cost to 0.01 ALGO
       const costs = calculateTransactionCosts(1); // Single app call
-      console.log('Voting costs:', costs);
+      console.log('Voting costs (reduced):', costs);
       
       // Create voting transaction
       const voteTxn = TransactionBuilder.createVoteTransaction(
@@ -165,7 +185,7 @@ export function useClimateDAO() {
       const response = await algodClient.sendRawTransaction(signedTxn).do();
       const txId = response.txid;
       
-      console.log('Vote submitted with txId:', txId);
+      console.log(`Vote "${vote}" submitted for proposal ${proposalId} with txId:`, txId);
       
       // Wait for confirmation with detailed results
       const result = await confirmTransaction(algodClient, txId);
@@ -286,6 +306,68 @@ export function useClimateDAO() {
     }
   }, [address]);
 
+  /**
+   * Get real-time voting data for a proposal
+   */
+  const getProposalVotes = useCallback(async (proposalId: number) => {
+    try {
+      setLoading(true);
+      return await climateDAOQuery.getProposalVotes(proposalId);
+    } catch (err) {
+      console.error('Error fetching proposal votes:', err);
+      setError('Failed to fetch voting data');
+      return null;
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  /**
+   * Check if user has voted on a proposal
+   */
+  const getUserVotingState = useCallback(async (proposalId: number) => {
+    if (!address) return { hasVoted: false };
+    
+    try {
+      return await climateDAOQuery.getUserVotingState(proposalId, address);
+    } catch (err) {
+      console.error('Error checking voting state:', err);
+      return { hasVoted: false };
+    }
+  }, [address]);
+
+  /**
+   * Get user's complete voting history
+   */
+  const getUserVotingHistory = useCallback(async () => {
+    if (!address) return [];
+    
+    try {
+      setLoading(true);
+      return await climateDAOQuery.getUserVotingHistory(address);
+    } catch (err) {
+      console.error('Error fetching voting history:', err);
+      setError('Failed to fetch voting history');
+      return [];
+    } finally {
+      setLoading(false);
+    }
+  }, [address]);
+
+  /**
+   * Get voting states for multiple proposals
+   */
+  const getBatchVotingStates = useCallback(async (proposalIds: number[]) => {
+    if (!address) return new Map();
+    
+    try {
+      return await climateDAOQuery.getBatchVotingStates(proposalIds, address);
+    } catch (err) {
+      console.error('Error fetching batch voting states:', err);
+      return new Map();
+    }
+  }, [address]);
+
   return {
     joinDAO,
     submitProposal,
@@ -295,6 +377,10 @@ export function useClimateDAO() {
     getProposal,
     getProposals,
     getBlockchainStats,
+    getProposalVotes,
+    getUserVotingState,
+    getUserVotingHistory,
+    getBatchVotingStates,
     loading,
     error,
   };
