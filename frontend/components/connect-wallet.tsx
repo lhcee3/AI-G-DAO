@@ -106,6 +106,23 @@ export function WalletConnectPage() {
                     <p className="text-xs text-white/60 mb-1">Connected Address:</p>
                     <p className="text-sm text-blue-400 font-mono break-all">{address}</p>
                     <p className="text-xs text-white/60 mt-2">Balance: {balance.toFixed(2)} ALGO</p>
+                    {balance < 1 && (
+                      <div className="mt-3">
+                        <a
+                          href="https://bank.testnet.algorand.network/"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center px-3 py-2 bg-yellow-500/20 border border-yellow-400/40 text-yellow-300 rounded-lg text-xs font-medium hover:bg-yellow-500/30 transition-all duration-200"
+                        >
+                          <ExternalLinkIcon className="w-4 h-4 mr-1" />
+                          Get TestNet ALGOs
+                        </a>
+                        <div className="text-xs text-yellow-300 mt-2">
+                          Minimum 1 ALGO required to vote or submit proposals.<br />
+                          Use the faucet to fund your wallet.
+                        </div>
+                      </div>
+                    )}
                   </div>
 
                   <div className="space-y-3">
