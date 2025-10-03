@@ -40,6 +40,7 @@ export function DashboardPage() {
   const [currentTime, setCurrentTime] = useState<Date | null>(null)
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
+  const [deletingProposalId, setDeletingProposalId] = useState<number | null>(null)
   const [proposals, setProposals] = useState<any[]>([])
   const [activeProposals, setActiveProposals] = useState<any[]>([])
   const [userProposals, setUserProposals] = useState<any[]>([])
@@ -102,6 +103,8 @@ export function DashboardPage() {
       return;
     }
 
+    setDeletingProposalId(proposalId);
+
     try {
       await deleteProposal(proposalId);
       
@@ -121,6 +124,8 @@ export function DashboardPage() {
     } catch (error) {
       console.error('Failed to delete proposal:', error);
       alert(error instanceof Error ? error.message : 'Failed to delete proposal');
+    } finally {
+      setDeletingProposalId(null);
     }
   };
 
@@ -549,9 +554,14 @@ export function DashboardPage() {
                               variant="outline"
                               size="sm"
                               onClick={() => handleDeleteProposal(proposal.id, proposal.title)}
+                              disabled={deletingProposalId === proposal.id}
                               className="border-red-500/30 text-red-400 hover:bg-red-500/10 bg-transparent"
                             >
-                              <Trash2Icon className="w-4 h-4" />
+                              {deletingProposalId === proposal.id ? (
+                                <div className="w-4 h-4 border-2 border-red-400 border-t-transparent rounded-full animate-spin" />
+                              ) : (
+                                <Trash2Icon className="w-4 h-4" />
+                              )}
                             </Button>
                           )}
                           
