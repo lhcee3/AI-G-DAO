@@ -42,6 +42,8 @@ export function DashboardPage() {
   const [isLoading, setIsLoading] = useState(true)
   const [proposals, setProposals] = useState<any[]>([])
   const [activeProposals, setActiveProposals] = useState<any[]>([])
+  const [userProposals, setUserProposals] = useState<any[]>([])
+  const [showMyProposals, setShowMyProposals] = useState(false)
   const [totalProposalsCount, setTotalProposalsCount] = useState(0)
   const [blockchainStats, setBlockchainStats] = useState({
     totalProposals: 0,
@@ -71,6 +73,12 @@ export function DashboardPage() {
         const active = await getProposals({ status: 'active' })
         setActiveProposals(active)
         
+        // Get user's own proposals if connected
+        if (address) {
+          const myProposals = await getProposals({ creator: address })
+          setUserProposals(myProposals)
+        }
+        
         // Get total count
         const total = await getTotalProposals()
         setTotalProposalsCount(total)
@@ -97,12 +105,17 @@ export function DashboardPage() {
     try {
       await deleteProposal(proposalId);
       
-      // Refresh the proposals list
+      // Refresh all proposal lists
       const allProposals = await getProposals();
       setProposals(allProposals);
       
       const active = await getProposals({ status: 'active' });
       setActiveProposals(active);
+      
+      if (address) {
+        const myProposals = await getProposals({ creator: address });
+        setUserProposals(myProposals);
+      }
       
       alert('Proposal deleted successfully!');
     } catch (error) {
@@ -410,20 +423,6 @@ export function DashboardPage() {
                             Vote No (0.001 ALGO)
                           </Button>
                         </div>
-                        {/* Delete button for proposal creator */}
-                        {address && proposal.creator === address && (
-                          <div className="mt-3 text-center">
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={() => handleDeleteProposal(proposal.id, proposal.title)}
-                              className="border-red-500/30 text-red-400 hover:bg-red-500/10 bg-transparent"
-                            >
-                              <Trash2Icon className="w-4 h-4 mr-2" />
-                              Delete Proposal
-                            </Button>
-                          </div>
-                        )}
                       </div>
                     );
                   })
@@ -462,84 +461,88 @@ export function DashboardPage() {
           {/* Transaction History - Full Width */}
           <TransactionHistory />
 
-          {/* Recent Activity */}
+          {/* My Proposals */}
           <Card className="bg-white/5 backdrop-blur-xl border-white/10 rounded-3xl hover:bg-white/10 transition-all duration-300">
             <CardHeader className="pb-6">
-              <CardTitle className="text-white text-xl flex items-center gap-3">
-                <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-pink-500 rounded-2xl flex items-center justify-center shadow-lg shadow-purple-500/25">
-                  <BarChart3Icon className="w-6 h-6 text-white" />
-                </div>
-                Recent Activity
-              </CardTitle>
+              <div className="flex items-center justify-between">
+                <CardTitle className="text-white text-xl flex items-center gap-3">
+                  <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-pink-500 rounded-2xl flex items-center justify-center shadow-lg shadow-purple-500/25">
+                    <FileTextIcon className="w-6 h-6 text-white" />
+                  </div>
+                  My Proposals
+                  <Badge variant="secondary" className="bg-purple-500/20 text-purple-400 border-purple-500/30 rounded-full">
+                    {userProposals.length} Total
+                  </Badge>
+                </CardTitle>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setShowMyProposals(!showMyProposals)}
+                  className="border-white/20 text-white hover:bg-white/10"
+                >
+                  {showMyProposals ? 'Show All' : 'Show Mine'}
+                </Button>
+              </div>
               <CardDescription className="text-white/60 text-base">
-                Latest updates from the Climate DAO community
+                Proposals you have submitted to the DAO
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               
-              {/* Activity Items */}
-              {proposals.slice(0, 3).map((proposal, index) => {
-                const activities = [
-                  {
-                    action: proposal.status === 'active' ? "Proposal active" : 
-                           proposal.status === 'passed' ? "Proposal passed" :
-                           proposal.status === 'rejected' ? "Proposal rejected" : "Proposal expired",
-                    item: proposal.title,
-                    time: proposal.status === 'active' ? "Active now" : "Recently completed",
-                    icon: proposal.status === 'active' ? ClockIcon :
-                          proposal.status === 'passed' ? CheckCircleIcon :
-                          proposal.status === 'rejected' ? XIcon : ClockIcon,
-                    color: proposal.status === 'active' ? "yellow" :
-                           proposal.status === 'passed' ? "green" :
-                           proposal.status === 'rejected' ? "red" : "gray"
-                  }
-                ];
-                const activity = activities[0];
-                
-                return (
-                  <div key={proposal.id} className="flex items-center gap-4 p-4 bg-white/5 rounded-2xl border border-white/10 hover:bg-white/10 transition-all duration-300">
-                    <div className={`w-12 h-12 bg-${activity.color}-500/20 rounded-2xl flex items-center justify-center`}>
-                      <activity.icon className={`w-6 h-6 text-${activity.color}-400`} />
-                    </div>
-                    <div className="flex-1">
-                      <p className="text-white font-medium text-base">{activity.action}</p>
-                      <p className="text-white/60 truncate">{activity.item}</p>
-                      <p className="text-white/40 text-sm">
-                        Funding: ${proposal.fundingAmount.toLocaleString()} | 
-                        Votes: {proposal.voteYes + proposal.voteNo} total
-                      </p>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <div className="text-right">
-                        <span className="text-white/40 text-sm">{activity.time}</span>
-                        {proposal.aiScore && (
-                          <p className="text-white/60 text-xs">AI Score: {proposal.aiScore}/10</p>
+              {/* My Proposals Items */}
+              {userProposals.length > 0 ? (
+                userProposals.slice(0, 3).map((proposal) => {
+                  const hasVotes = proposal.voteYes + proposal.voteNo > 0;
+                  
+                  return (
+                    <div key={proposal.id} className="flex items-center gap-4 p-4 bg-white/5 rounded-2xl border border-white/10 hover:bg-white/10 transition-all duration-300">
+                      <div className={`w-12 h-12 bg-${proposal.status === 'active' ? 'green' : proposal.status === 'passed' ? 'blue' : 'gray'}-500/20 rounded-2xl flex items-center justify-center`}>
+                        <FileTextIcon className={`w-6 h-6 text-${proposal.status === 'active' ? 'green' : proposal.status === 'passed' ? 'blue' : 'gray'}-400`} />
+                      </div>
+                      <div className="flex-1">
+                        <p className="text-white font-medium text-base">{proposal.title}</p>
+                        <p className="text-white/60 text-sm">Status: {proposal.status}</p>
+                        <p className="text-white/40 text-sm">
+                          Funding: ${proposal.fundingAmount.toLocaleString()} | 
+                          Votes: {proposal.voteYes + proposal.voteNo} total
+                        </p>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <div className="text-right">
+                          <span className="text-white/40 text-sm">
+                            {proposal.status === 'active' ? 'Active' : 'Completed'}
+                          </span>
+                          {proposal.aiScore && (
+                            <p className="text-white/60 text-xs">AI Score: {proposal.aiScore}/10</p>
+                          )}
+                        </div>
+                        {/* Delete button - only show if no votes */}
+                        {!hasVotes && (
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handleDeleteProposal(proposal.id, proposal.title)}
+                            className="ml-2 border-red-500/30 text-red-400 hover:bg-red-500/10 bg-transparent"
+                          >
+                            <Trash2Icon className="w-4 h-4" />
+                          </Button>
                         )}
                       </div>
-                      {/* Delete button - only show for proposal creator */}
-                      {address && proposal.creator === address && (
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => handleDeleteProposal(proposal.id, proposal.title)}
-                          className="ml-2 border-red-500/30 text-red-400 hover:bg-red-500/10 bg-transparent"
-                        >
-                          <Trash2Icon className="w-4 h-4" />
-                        </Button>
-                      )}
                     </div>
-                  </div>
-                );
-              })}
-              
-              {proposals.length === 0 && (
+                  );
+                })
+              ) : (
                 <div className="text-center py-8">
-                  <BarChart3Icon className="w-16 h-16 text-white/20 mx-auto mb-4" />
-                  <p className="text-white/60 mb-2">No recent activity</p>
-                  <p className="text-white/40 text-sm">Activity will appear here as proposals are submitted</p>
+                  <FileTextIcon className="w-16 h-16 text-white/20 mx-auto mb-4" />
+                  <p className="text-white/60 mb-2">No proposals submitted yet</p>
+                  <p className="text-white/40 text-sm">Submit your first climate proposal to get started</p>
+                  <Link href="/submit-proposal">
+                    <Button className="mt-4 bg-gradient-to-r from-green-600 to-blue-600 hover:from-green-700 hover:to-blue-700 text-white">
+                      Submit Proposal
+                    </Button>
+                  </Link>
                 </div>
               )}
-
             </CardContent>
           </Card>
 
