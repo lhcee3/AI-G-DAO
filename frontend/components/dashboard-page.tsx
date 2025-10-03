@@ -21,7 +21,8 @@ import {
   ClockIcon,
   MenuIcon,
   XIcon,
-  SparklesIcon
+  SparklesIcon,
+  Trash2Icon
 } from "lucide-react"
 import Link from "next/link"
 import { useWalletContext } from "@/hooks/use-wallet"
@@ -30,10 +31,12 @@ import { StatsSkeleton, CardSkeleton } from "@/components/ui/skeleton"
 import { WalletInfo } from "@/components/wallet-guard"
 import { VotingHistory } from "@/components/voting-history"
 import { UserProposalsTracker } from "@/components/user-proposals-tracker"
+import { TransactionHistory } from "@/components/transaction-history"
+import { NotificationsPanel } from "@/components/notifications-panel"
 
 export function DashboardPage() {
   const { isConnected, address, balance } = useWalletContext()
-  const { getProposals, getTotalProposals, getBlockchainStats } = useClimateDAO()
+  const { getProposals, getTotalProposals, getBlockchainStats, deleteProposal } = useClimateDAO()
   const [currentTime, setCurrentTime] = useState<Date | null>(null)
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
@@ -84,6 +87,29 @@ export function DashboardPage() {
       fetchProposalData()
     }
   }, [isConnected]) // Remove function dependencies to prevent infinite loops
+
+  // Handle proposal deletion
+  const handleDeleteProposal = async (proposalId: number, proposalTitle: string) => {
+    if (!confirm(`Are you sure you want to delete "${proposalTitle}"? This action cannot be undone.`)) {
+      return;
+    }
+
+    try {
+      await deleteProposal(proposalId);
+      
+      // Refresh the proposals list
+      const allProposals = await getProposals();
+      setProposals(allProposals);
+      
+      const active = await getProposals({ status: 'active' });
+      setActiveProposals(active);
+      
+      alert('Proposal deleted successfully!');
+    } catch (error) {
+      console.error('Failed to delete proposal:', error);
+      alert(error instanceof Error ? error.message : 'Failed to delete proposal');
+    }
+  };
 
   // Update time every minute, only on client side
   useEffect(() => {
@@ -208,6 +234,7 @@ export function DashboardPage() {
             {/* Wallet Status */}
             <div className="hidden md:flex items-center space-x-4">
               <WalletInfo />
+              <NotificationsPanel />
               <Button variant="ghost" size="sm" className="text-white/80 hover:text-white hover:bg-white/10 rounded-xl">
                 <SettingsIcon className="w-4 h-4" />
               </Button>
@@ -383,6 +410,20 @@ export function DashboardPage() {
                             Vote No (0.001 ALGO)
                           </Button>
                         </div>
+                        {/* Delete button for proposal creator */}
+                        {address && proposal.creator === address && (
+                          <div className="mt-3 text-center">
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => handleDeleteProposal(proposal.id, proposal.title)}
+                              className="border-red-500/30 text-red-400 hover:bg-red-500/10 bg-transparent"
+                            >
+                              <Trash2Icon className="w-4 h-4 mr-2" />
+                              Delete Proposal
+                            </Button>
+                          </div>
+                        )}
                       </div>
                     );
                   })
@@ -417,6 +458,9 @@ export function DashboardPage() {
 
           {/* Voting History - Full Width */}
           <VotingHistory />
+
+          {/* Transaction History - Full Width */}
+          <TransactionHistory />
 
           {/* Recent Activity */}
           <Card className="bg-white/5 backdrop-blur-xl border-white/10 rounded-3xl hover:bg-white/10 transition-all duration-300">
@@ -465,10 +509,23 @@ export function DashboardPage() {
                         Votes: {proposal.voteYes + proposal.voteNo} total
                       </p>
                     </div>
-                    <div className="text-right">
-                      <span className="text-white/40 text-sm">{activity.time}</span>
-                      {proposal.aiScore && (
-                        <p className="text-white/60 text-xs">AI Score: {proposal.aiScore}/10</p>
+                    <div className="flex items-center gap-2">
+                      <div className="text-right">
+                        <span className="text-white/40 text-sm">{activity.time}</span>
+                        {proposal.aiScore && (
+                          <p className="text-white/60 text-xs">AI Score: {proposal.aiScore}/10</p>
+                        )}
+                      </div>
+                      {/* Delete button - only show for proposal creator */}
+                      {address && proposal.creator === address && (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handleDeleteProposal(proposal.id, proposal.title)}
+                          className="ml-2 border-red-500/30 text-red-400 hover:bg-red-500/10 bg-transparent"
+                        >
+                          <Trash2Icon className="w-4 h-4" />
+                        </Button>
                       )}
                     </div>
                   </div>

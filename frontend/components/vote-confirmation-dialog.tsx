@@ -14,6 +14,7 @@ import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { VoteIcon, CheckCircleIcon, XCircleIcon, CoinsIcon, ClockIcon, AlertTriangleIcon } from 'lucide-react';
 import { useClimateDAO } from '@/hooks/use-climate-dao';
+import { useNotifications } from '@/hooks/use-notifications';
 import { ProposalVotes, VotingState } from '@/lib/blockchain-queries';
 
 interface VoteConfirmationDialogProps {
@@ -43,7 +44,8 @@ export function VoteConfirmationDialog({
   voteType,
   isLoading
 }: VoteConfirmationDialogProps) {
-  const { getProposalVotes, getUserVotingState } = useClimateDAO();
+  const { getProposalVotes, getUserVotingState, voteOnProposal } = useClimateDAO();
+  const { notifyTransactionSuccess, notifyTransactionFailure } = useNotifications();
   const [realTimeVotes, setRealTimeVotes] = useState<ProposalVotes | null>(null);
   const [votingState, setVotingState] = useState<VotingState>({ hasVoted: false });
   const [loadingVoteData, setLoadingVoteData] = useState(true);

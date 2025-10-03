@@ -94,6 +94,26 @@ export function useClimateDAO() {
       
       console.log('Transaction costs:', costs);
       
+      // Generate unique proposal ID
+      const proposalId = Date.now();
+      const endTime = Date.now() + (7 * 24 * 60 * 60 * 1000); // 7 days from now
+      
+      // Store proposal data on blockchain/localStorage
+      const stored = await climateDAOQuery.storeProposal({
+        id: proposalId,
+        title: proposalData.title,
+        description: proposalData.description,
+        creator: address,
+        fundingAmount: proposalData.fundingAmount,
+        category: proposalData.category,
+        endTime,
+        aiScore: Math.random() * 10 // Simulate AI score for now
+      });
+      
+      if (!stored) {
+        throw new Error('Failed to store proposal data');
+      }
+      
       // Create transaction group with reduced deposit
       const txnGroup = TransactionBuilder.createProposalWithDeposit(
         { sender: address, suggestedParams },
@@ -187,6 +207,9 @@ export function useClimateDAO() {
       
       console.log(`Vote "${vote}" submitted for proposal ${proposalId} with txId:`, txId);
       
+      // Store the vote in localStorage for real-time updates
+      await climateDAOQuery.storeVote(proposalId, vote, address, txId);
+      
       // Wait for confirmation with detailed results
       const result = await confirmTransaction(algodClient, txId);
       
@@ -210,8 +233,8 @@ export function useClimateDAO() {
       if (!targetAddress) return 0;
 
       // This would call the get_member_tokens method
-      // For now, returning mock data
-      return 1000;
+      // For now, returning 0 until contract integration
+      return 0;
     } catch (err) {
       console.error('Failed to get member tokens:', err);
       return 0;
@@ -368,10 +391,36 @@ export function useClimateDAO() {
     }
   }, [address]);
 
+  /**
+   * Delete a proposal - only creator can delete their own proposal
+   */
+  const deleteProposal = async (proposalId: number): Promise<boolean> => {
+    if (!isConnected || !address) {
+      throw new Error('Wallet not connected');
+    }
+
+    setLoading(true);
+    setError(null);
+
+    try {
+      const result = await climateDAOQuery.deleteProposal(proposalId, address);
+      console.log('Proposal deleted successfully:', proposalId);
+      return result;
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Failed to delete proposal';
+      console.error('Delete proposal error:', err);
+      setError(errorMessage);
+      throw new Error(errorMessage);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return {
     joinDAO,
     submitProposal,
     voteOnProposal,
+    deleteProposal,
     getMemberTokens,
     getTotalProposals,
     getProposal,

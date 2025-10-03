@@ -18,10 +18,19 @@ export function WalletConnectPage() {
       clearError()
       setLoading(true, "Connecting to Pera Wallet...")
       await connect()
+      
+      // Auto-redirect to dashboard after successful connection
+      setLoading(true, "Redirecting to dashboard...")
+      setTimeout(() => {
+        router.push('/dashboard')
+      }, 1000) // Give user a moment to see success message
     } catch (err) {
       console.error('Failed to connect wallet:', err)
     } finally {
-      setLoading(false)
+      // Keep loading state for redirect
+      if (!isConnected) {
+        setLoading(false)
+      }
     }
   }
 
@@ -102,45 +111,54 @@ export function WalletConnectPage() {
                     <span className="font-semibold">Pera Wallet Connected!</span>
                   </div>
 
-                  <div className="bg-blue-500/10 border border-blue-500/30 rounded-lg p-4">
-                    <p className="text-xs text-white/60 mb-1">Connected Address:</p>
-                    <p className="text-sm text-blue-400 font-mono break-all">{address}</p>
-                    <p className="text-xs text-white/60 mt-2">Balance: {balance.toFixed(2)} ALGO</p>
-                    {balance < 1 && (
-                      <div className="mt-3">
-                        <a
-                          href="https://bank.testnet.algorand.network/"
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="inline-flex items-center px-3 py-2 bg-yellow-500/20 border border-yellow-400/40 text-yellow-300 rounded-lg text-xs font-medium hover:bg-yellow-500/30 transition-all duration-200"
-                        >
-                          <ExternalLinkIcon className="w-4 h-4 mr-1" />
-                          Get TestNet ALGOs
-                        </a>
-                        <div className="text-xs text-yellow-300 mt-2">
-                          Minimum 1 ALGO required to vote or submit proposals.<br />
-                          Use the faucet to fund your wallet.
-                        </div>
+                  {loading ? (
+                    <div className="text-center py-4">
+                      <div className="w-8 h-8 border-2 border-blue-500/30 border-t-blue-500 rounded-full animate-spin mx-auto mb-3"></div>
+                      <p className="text-blue-400 text-sm">Redirecting to dashboard...</p>
+                    </div>
+                  ) : (
+                    <>
+                      <div className="bg-blue-500/10 border border-blue-500/30 rounded-lg p-4">
+                        <p className="text-xs text-white/60 mb-1">Connected Address:</p>
+                        <p className="text-sm text-blue-400 font-mono break-all">{address}</p>
+                        <p className="text-xs text-white/60 mt-2">Balance: {balance.toFixed(2)} ALGO</p>
+                        {balance < 1 && (
+                          <div className="mt-3">
+                            <a
+                              href="https://dispenser.testnet.aws.algodev.network/"
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="inline-flex items-center px-3 py-2 bg-yellow-500/20 border border-yellow-400/40 text-yellow-300 rounded-lg text-xs font-medium hover:bg-yellow-500/30 transition-all duration-200"
+                            >
+                              <ExternalLinkIcon className="w-4 h-4 mr-1" />
+                              Get TestNet ALGOs
+                            </a>
+                            <div className="text-xs text-yellow-300 mt-2">
+                              Minimum 1 ALGO required to vote or submit proposals.<br />
+                              Use the TestNet dispenser to fund your wallet.
+                            </div>
+                          </div>
+                        )}
                       </div>
-                    )}
-                  </div>
 
-                  <div className="space-y-3">
-                    <Button
-                      className="w-full bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 text-white font-semibold py-3 rounded-lg transition-all duration-300 transform hover:scale-105"
-                      onClick={handleEnterDashboard}
-                    >
-                      Enter DAO Dashboard
-                    </Button>
+                      <div className="space-y-3">
+                        <Button
+                          className="w-full bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 text-white font-semibold py-3 rounded-lg transition-all duration-300 transform hover:scale-105"
+                          onClick={handleEnterDashboard}
+                        >
+                          Enter DAO Dashboard
+                        </Button>
 
-                    <Button
-                      variant="outline"
-                      className="w-full border-blue-500/50 text-blue-400 hover:bg-blue-500/10 py-3 rounded-lg transition-all duration-300 bg-transparent"
-                      onClick={handleDisconnect}
-                    >
-                      Disconnect Wallet
-                    </Button>
-                  </div>
+                        <Button
+                          variant="outline"
+                          className="w-full border-blue-500/50 text-blue-400 hover:bg-blue-500/10 py-3 rounded-lg transition-all duration-300 bg-transparent"
+                          onClick={handleDisconnect}
+                        >
+                          Disconnect Wallet
+                        </Button>
+                      </div>
+                    </>
+                  )}
                 </div>
               ) : (
                 <div className="space-y-6">

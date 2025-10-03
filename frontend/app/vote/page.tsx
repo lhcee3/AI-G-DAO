@@ -8,6 +8,7 @@ import { Progress } from '@/components/ui/progress';
 import { VoteIcon, CheckCircleIcon, XCircleIcon, ClockIcon, TrendingUpIcon, LeafIcon, WalletIcon, ArrowLeftIcon } from 'lucide-react';
 import { useWalletContext } from '@/hooks/use-wallet';
 import { useClimateDAO } from '@/hooks/use-climate-dao';
+import { useNotifications } from '@/hooks/use-notifications';
 import { TransactionStatus } from '@/components/transaction-status';
 import { VoteConfirmationDialog } from '@/components/vote-confirmation-dialog';
 import { TransactionResult } from '@/lib/transaction-builder';
@@ -31,6 +32,7 @@ interface Proposal {
 export default function VotePage() {
   const { isConnected, address, balance } = useWalletContext();
   const { getProposals, voteOnProposal } = useClimateDAO();
+  const { notifyTransactionSuccess, notifyTransactionFailure } = useNotifications();
   const [proposals, setProposals] = useState<Proposal[]>([]);
   const [loading, setLoading] = useState(true);
   const [votingState, setVotingState] = useState<{
@@ -98,6 +100,13 @@ export default function VotePage() {
         result
       });
       
+      // Notify success
+      notifyTransactionSuccess(
+        'Vote',
+        result.txId,
+        `Voted ${confirmationDialog.voteType?.toUpperCase()} on "${confirmationDialog.proposal?.title}"`
+      );
+      
       // Close dialog
       setConfirmationDialog({
         isOpen: false,
@@ -114,11 +123,15 @@ export default function VotePage() {
       }, 3000);
       
     } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Vote failed';
       setVotingState({
         proposalId: confirmationDialog.proposalId,
         status: 'failed',
-        error: error instanceof Error ? error.message : 'Vote failed'
+        error: errorMessage
       });
+      
+      // Notify failure
+      notifyTransactionFailure('Vote', errorMessage);
       
       // Close dialog on error too
       setConfirmationDialog({

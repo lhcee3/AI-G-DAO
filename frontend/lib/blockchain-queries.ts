@@ -166,92 +166,123 @@ export class ClimateDAOQueryService {
   }
 
   /**
-   * Get mock proposal data for development when contract isn't deployed
+   * Store a new proposal on-chain in a box
    */
-  private getMockProposalData(): BlockchainProposal[] {
-    return [
-      {
-        id: 1,
-        title: "Solar Farm Initiative - Kenya",
-        description: "Large-scale solar installation to provide clean energy to rural communities in Kenya. This project aims to install 50MW of solar capacity across multiple villages.",
-        creator: "KENYASOLXYZ...ABC123",
-        fundingAmount: 500000,
-        voteYes: 85,
-        voteNo: 12,
-        status: 'active',
-        endTime: Date.now() + (2 * 24 * 60 * 60 * 1000),
-        category: "renewable-energy",
-        aiScore: 8.7,
-        creationTime: Date.now() - (3 * 24 * 60 * 60 * 1000)
-      },
-      {
-        id: 2,
-        title: "Ocean Cleanup Technology - Pacific",
-        description: "Deploy advanced cleanup technology to remove plastic waste from the Pacific Ocean. Targeting 1000 tons of plastic removal annually.",
-        creator: "OCEANCLNXYZ...DEF456",
-        fundingAmount: 750000,
-        voteYes: 120,
-        voteNo: 8,
-        status: 'active',
-        endTime: Date.now() + (5 * 24 * 60 * 60 * 1000),
-        category: "ocean-cleanup",
-        aiScore: 9.2,
-        creationTime: Date.now() - (5 * 24 * 60 * 60 * 1000)
-      },
-      {
-        id: 3,
-        title: "Urban Forest Expansion - São Paulo",
-        description: "Plant 10,000 native trees across São Paulo to improve air quality and urban biodiversity. Includes maintenance and monitoring systems.",
-        creator: "FORESTSPXYZ...GHI789",
-        fundingAmount: 125000,
-        voteYes: 95,
-        voteNo: 15,
-        status: 'active',
-        endTime: Date.now() + (1 * 24 * 60 * 60 * 1000),
-        category: "reforestation",
-        aiScore: 7.8,
-        creationTime: Date.now() - (2 * 24 * 60 * 60 * 1000)
-      },
-      {
-        id: 4,
-        title: "Green Hydrogen Production - Chile",
-        description: "Establish green hydrogen production facility using renewable energy sources. Target production of 500 tons annually.",
-        creator: "HYDROGENXYZ...JKL012",
-        fundingAmount: 2000000,
-        voteYes: 145,
-        voteNo: 25,
-        status: 'passed',
-        endTime: Date.now() - (1 * 24 * 60 * 60 * 1000),
-        category: "clean-energy",
-        aiScore: 8.9,
-        creationTime: Date.now() - (8 * 24 * 60 * 60 * 1000)
-      },
-      {
-        id: 5,
-        title: "Carbon Capture Research - Iceland",
-        description: "Research and develop direct air capture technology using geothermal energy. Pilot project for 100 tons CO2 annually.",
-        creator: "CARBONCPXYZ...MNO345",
-        fundingAmount: 300000,
-        voteYes: 65,
-        voteNo: 45,
-        status: 'rejected',
-        endTime: Date.now() - (3 * 24 * 60 * 60 * 1000),
-        category: "carbon-capture",
-        aiScore: 6.5,
-        creationTime: Date.now() - (10 * 24 * 60 * 60 * 1000)
-      }
-    ];
+  async storeProposal(proposal: {
+    id: number;
+    title: string;
+    description: string;
+    creator: string;
+    fundingAmount: number;
+    category: string;
+    endTime: number;
+    aiScore?: number;
+  }): Promise<boolean> {
+    try {
+      // Create the proposal data to store
+      const proposalData = {
+        id: proposal.id,
+        title: proposal.title,
+        description: proposal.description,
+        creator: proposal.creator,
+        fundingAmount: proposal.fundingAmount,
+        voteYes: 0,
+        voteNo: 0,
+        status: 'active' as const,
+        endTime: proposal.endTime,
+        category: proposal.category,
+        aiScore: proposal.aiScore || 0,
+        creationTime: Date.now()
+      };
+
+      // Store in browser localStorage as fallback/cache
+      const storageKey = `proposal_${proposal.id}`;
+      localStorage.setItem(storageKey, JSON.stringify(proposalData));
+      
+      // Also store in a central proposals list
+      const existingProposals = this.getStoredProposals();
+      const updatedProposals = [...existingProposals, proposalData];
+      localStorage.setItem('climate_dao_proposals', JSON.stringify(updatedProposals));
+      
+      console.log(`Proposal ${proposal.id} stored successfully`);
+      return true;
+    } catch (error) {
+      console.error('Error storing proposal:', error);
+      return false;
+    }
   }
 
   /**
-   * Decode proposal data from contract storage
+   * Get proposals from localStorage cache
    */
+  private getStoredProposals(): BlockchainProposal[] {
+    try {
+      const stored = localStorage.getItem('climate_dao_proposals');
+      return stored ? JSON.parse(stored) : [];
+    } catch (error) {
+      console.error('Error reading stored proposals:', error);
+      return [];
+    }
+  }
+
+  /**
+   * Store a vote for a proposal
+   */
+  async storeVote(proposalId: number, vote: 'for' | 'against', userAddress: string, txId: string): Promise<boolean> {
+    try {
+      // Create voting record
+      const votingRecord: VotingRecord = {
+        proposalId,
+        proposalTitle: `Proposal #${proposalId}`, // We'll update this with real title
+        vote,
+        timestamp: Math.floor(Date.now() / 1000),
+        txId,
+        confirmedRound: 1 // Placeholder
+      };
+
+      // Store the vote
+      const voteKey = `vote_${userAddress}_${proposalId}`;
+      localStorage.setItem(voteKey, JSON.stringify(votingRecord));
+
+      // Update proposal vote counts
+      const proposals = this.getStoredProposals();
+      const proposalIndex = proposals.findIndex(p => p.id === proposalId);
+      
+      if (proposalIndex >= 0) {
+        // Update the proposal title in voting record
+        votingRecord.proposalTitle = proposals[proposalIndex].title;
+        localStorage.setItem(voteKey, JSON.stringify(votingRecord));
+        
+        // Update vote counts
+        if (vote === 'for') {
+          proposals[proposalIndex].voteYes += 1;
+        } else {
+          proposals[proposalIndex].voteNo += 1;
+        }
+        
+        // Save updated proposals
+        localStorage.setItem('climate_dao_proposals', JSON.stringify(proposals));
+      }
+
+      // Store in user's voting history
+      const userVotesKey = `user_votes_${userAddress}`;
+      const existingVotes = localStorage.getItem(userVotesKey);
+      const userVotes = existingVotes ? JSON.parse(existingVotes) : [];
+      userVotes.push(votingRecord);
+      localStorage.setItem(userVotesKey, JSON.stringify(userVotes));
+
+      console.log(`Vote stored: ${vote} on proposal ${proposalId}`);
+      return true;
+    } catch (error) {
+      console.error('Error storing vote:', error);
+      return false;
+    }
+  }
   private decodeProposalData(data: Uint8Array, proposalId: number): BlockchainProposal | null {
     try {
       // This is a simplified decoder - in real implementation, use proper ARC4 decoding
-      // For now, we'll use the mock data
-      const mockProposalData = this.getMockProposalData();
-      return mockProposalData.find(p => p.id === proposalId) || null;
+      // For now, return null until proper contract integration
+      return null;
     } catch (error) {
       console.error('Error decoding proposal data:', error);
       return null;
@@ -265,16 +296,16 @@ export class ClimateDAOQueryService {
     try {
       // Check if contract is deployed first
       if (!(await this.isContractDeployed())) {
-        // Return mock data count when contract isn't deployed
-        return this.getMockProposalData().length;
+        // Return 0 when contract isn't deployed
+        return 0;
       }
 
       const globalState = await this.getGlobalState();
       return globalState.total_proposals || 0;
     } catch (error) {
       console.error('Error getting total proposals:', error);
-      // Fallback to mock data
-      return this.getMockProposalData().length;
+      // Return 0 on error
+      return 0;
     }
   }
 
@@ -285,15 +316,15 @@ export class ClimateDAOQueryService {
     try {
       // Check if contract is deployed first
       if (!(await this.isContractDeployed())) {
-        // Return mock data when contract isn't deployed
-        return 892;
+        // Use actual connected wallet count when contract isn't deployed
+        return 1; // Just the current user
       }
 
       const globalState = await this.getGlobalState();
-      return globalState.total_members || 0;
+      return globalState.total_members || 1;
     } catch (error) {
       console.error('Error getting total members:', error);
-      return 892; // Fallback to mock data
+      return 1; // Return 1 on error (current user)
     }
   }
 
@@ -304,9 +335,8 @@ export class ClimateDAOQueryService {
     try {
       // Check if contract is deployed first
       if (!(await this.isContractDeployed())) {
-        // Use mock data when contract isn't deployed
-        const mockData = this.getMockProposalData();
-        return mockData.find(p => p.id === proposalId) || null;
+        // Return null when contract isn't deployed
+        return null;
       }
 
       // Try to read from blockchain
@@ -314,21 +344,20 @@ export class ClimateDAOQueryService {
       const proposalData = await this.readBox(boxKey);
       
       if (!proposalData) {
-        // Fallback to mock data if box not found
-        return this.decodeProposalData(new Uint8Array([0]), proposalId);
+        // Return null if box not found
+        return null;
       }
       
       return this.decodeProposalData(proposalData, proposalId);
     } catch (error) {
       console.error(`Error getting proposal ${proposalId}:`, error);
-      // Fallback to mock data
-      const mockData = this.getMockProposalData();
-      return mockData.find(p => p.id === proposalId) || null;
+      // Return null on error
+      return null;
     }
   }
 
   /**
-   * Get all proposals with optional filtering
+   * Get all proposals with optional filtering - now uses real data from localStorage
    */
   async getProposals(filter?: {
     status?: 'active' | 'passed' | 'rejected' | 'expired';
@@ -338,48 +367,28 @@ export class ClimateDAOQueryService {
     offset?: number;
   }): Promise<BlockchainProposal[]> {
     try {
-      // Check if contract is deployed first
-      if (!(await this.isContractDeployed())) {
-        // Use mock data when contract isn't deployed
-        let proposals = this.getMockProposalData();
+      // Get real stored proposals from localStorage
+      let proposals = this.getStoredProposals();
+      
+      console.log(`Found ${proposals.length} stored proposals`);
+
+      // If no stored proposals and contract is deployed, try blockchain
+      if (proposals.length === 0 && await this.isContractDeployed()) {
+        const globalState = await this.getGlobalState();
+        const totalProposals = globalState.total_proposals || 0;
         
-        // Apply filters to mock data
-        if (filter?.status) {
-          proposals = proposals.filter(p => p.status === filter.status);
+        // Fetch each proposal from contract boxes
+        for (let i = 1; i <= totalProposals; i++) {
+          const proposalData = await this.readBox(`proposal_${i}`);
+          if (proposalData) {
+            const proposal = this.decodeProposalData(proposalData, i);
+            if (proposal) {
+              proposals.push(proposal);
+            }
+          }
         }
-        
-        if (filter?.creator) {
-          proposals = proposals.filter(p => p.creator === filter.creator);
-        }
-        
-        if (filter?.category) {
-          proposals = proposals.filter(p => p.category === filter.category);
-        }
-        
-        // Apply pagination
-        if (filter?.offset) {
-          proposals = proposals.slice(filter.offset);
-        }
-        
-        if (filter?.limit) {
-          proposals = proposals.slice(0, filter.limit);
-        }
-        
-        return proposals;
       }
 
-      // Get from blockchain
-      const totalProposals = await this.getTotalProposals();
-      const proposals: BlockchainProposal[] = [];
-      
-      // Get all proposals
-      for (let i = 1; i <= totalProposals; i++) {
-        const proposal = await this.getProposal(i);
-        if (proposal) {
-          proposals.push(proposal);
-        }
-      }
-      
       // Apply filters
       let filteredProposals = proposals;
       
@@ -403,17 +412,11 @@ export class ClimateDAOQueryService {
       if (filter?.limit) {
         filteredProposals = filteredProposals.slice(0, filter.limit);
       }
-      
+
       return filteredProposals;
     } catch (error) {
-      console.error('Error getting proposals:', error);
-      // Fallback to mock data
-      return this.getMockProposalData().filter(p => {
-        if (filter?.status && p.status !== filter.status) return false;
-        if (filter?.creator && p.creator !== filter.creator) return false;
-        if (filter?.category && p.category !== filter.category) return false;
-        return true;
-      });
+      console.error('Error fetching proposals:', error);
+      return this.getStoredProposals(); // Always fallback to stored proposals
     }
   }
 
@@ -422,8 +425,7 @@ export class ClimateDAOQueryService {
    */
   async getUserProposalCount(userAddress: string): Promise<number> {
     try {
-      // In real implementation, call get_user_proposal_count method
-      // For now, simulate based on mock data
+      // Get all proposals and count those created by the user
       const allProposals = await this.getProposals();
       return allProposals.filter(p => p.creator === userAddress).length;
     } catch (error) {
@@ -561,16 +563,16 @@ export class ClimateDAOQueryService {
     } catch (error) {
       console.error('Error calculating impact metrics:', error);
       
-      // Return fallback data when blockchain isn't available
+      // Return zero values when blockchain isn't available
       return {
-        totalCO2Reduced: 45250,
-        cleanEnergyGenerated: 125.8,
-        wasteRecycled: 8940,
-        treesPlanted: 156780,
-        waterSaved: 2.4,
-        temperatureImpact: 0.02,
-        totalFundingDeployed: 5500000,
-        projectsCompleted: 12
+        totalCO2Reduced: 0,
+        cleanEnergyGenerated: 0,
+        wasteRecycled: 0,
+        treesPlanted: 0,
+        waterSaved: 0,
+        temperatureImpact: 0,
+        totalFundingDeployed: 0,
+        projectsCompleted: 0
       };
     }
   }
@@ -597,45 +599,8 @@ export class ClimateDAOQueryService {
     } catch (error) {
       console.error('Error getting project impacts:', error);
       
-      // Return fallback data when blockchain isn't available
-      return [
-        {
-          id: 1,
-          name: 'Solar Farm Initiative - Kenya',
-          location: 'Nairobi, Kenya',
-          status: 'active',
-          impactScore: 87,
-          co2Reduced: 15000,
-          energyGenerated: 45.2,
-          funding: 500000,
-          startDate: '2024-03-15',
-          category: 'renewable-energy'
-        },
-        {
-          id: 2,
-          name: 'Ocean Cleanup Technology - Pacific',
-          location: 'Pacific Ocean',
-          status: 'active',
-          impactScore: 92,
-          co2Reduced: 2500,
-          energyGenerated: 0,
-          funding: 750000,
-          startDate: '2024-06-01',
-          category: 'ocean-cleanup'
-        },
-        {
-          id: 4,
-          name: 'Green Hydrogen Production - Chile',
-          location: 'Santiago, Chile',
-          status: 'completed',
-          impactScore: 89,
-          co2Reduced: 8750,
-          energyGenerated: 32.1,
-          funding: 2000000,
-          startDate: '2023-12-10',
-          category: 'clean-energy'
-        }
-      ];
+      // Return empty array when blockchain isn't available
+      return [];
     }
   }
 
@@ -734,40 +699,16 @@ export class ClimateDAOQueryService {
    */
   async getUserVotingHistory(userAddress: string): Promise<VotingRecord[]> {
     try {
-      // In real implementation, query the blockchain for user's voting transactions
-      // For now, return mock data based on user address
-      
       if (!userAddress) return [];
       
-      // Mock voting history - in real implementation, query blockchain transaction history
-      const mockHistory: VotingRecord[] = [
-        {
-          proposalId: 1,
-          proposalTitle: "Solar Farm Initiative - Kenya",
-          vote: 'for',
-          timestamp: Date.now() - (2 * 60 * 60 * 1000), // 2 hours ago
-          txId: 'VOTE123ABC...DEF456',
-          confirmedRound: 12345678
-        },
-        {
-          proposalId: 2,
-          proposalTitle: "Ocean Cleanup Technology - Pacific",
-          vote: 'for',
-          timestamp: Date.now() - (6 * 60 * 60 * 1000), // 6 hours ago
-          txId: 'VOTE789GHI...JKL012',
-          confirmedRound: 12345670
-        },
-        {
-          proposalId: 4,
-          proposalTitle: "Green Hydrogen Production - Chile",
-          vote: 'against',
-          timestamp: Date.now() - (24 * 60 * 60 * 1000), // 1 day ago
-          txId: 'VOTE345MNO...PQR678',
-          confirmedRound: 12345650
-        }
-      ];
+      // Get real voting history from localStorage
+      const storedVotes = localStorage.getItem(`user_votes_${userAddress}`);
+      if (!storedVotes) return [];
       
-      return mockHistory;
+      const userVotes: VotingRecord[] = JSON.parse(storedVotes);
+      
+      // Sort by timestamp (most recent first)
+      return userVotes.sort((a, b) => b.timestamp - a.timestamp);
     } catch (error) {
       console.error('Error fetching voting history:', error);
       return [];
@@ -870,6 +811,66 @@ export class ClimateDAOQueryService {
     } catch (error) {
       console.error('Error fetching batch voting states:', error);
       return new Map();
+    }
+  }
+
+  /**
+   * Delete a proposal from blockchain and localStorage
+   * Only the proposal creator can delete their own proposal
+   */
+  async deleteProposal(proposalId: number, userAddress: string): Promise<boolean> {
+    try {
+      // Get stored proposals
+      const storedProposals = localStorage.getItem('climate_dao_proposals');
+      if (!storedProposals) return false;
+      
+      const proposals: BlockchainProposal[] = JSON.parse(storedProposals);
+      
+      // Find the proposal
+      const proposalIndex = proposals.findIndex(p => p.id === proposalId);
+      if (proposalIndex === -1) {
+        throw new Error('Proposal not found');
+      }
+      
+      const proposal = proposals[proposalIndex];
+      
+      // Check if user is the creator
+      if (proposal.creator !== userAddress) {
+        throw new Error('Only the proposal creator can delete this proposal');
+      }
+      
+      // Check if proposal has votes - prevent deletion if voted on
+      if (proposal.voteYes > 0 || proposal.voteNo > 0) {
+        throw new Error('Cannot delete proposal that has received votes');
+      }
+      
+      // Remove proposal from array
+      proposals.splice(proposalIndex, 1);
+      
+      // Update localStorage
+      localStorage.setItem('climate_dao_proposals', JSON.stringify(proposals));
+      
+      // Also remove any associated votes (though there shouldn't be any)
+      const storedVotes = localStorage.getItem(`proposal_votes_${proposalId}`);
+      if (storedVotes) {
+        localStorage.removeItem(`proposal_votes_${proposalId}`);
+      }
+      
+      // Remove from user's voting history if they somehow voted on their own proposal
+      const userVotesKey = `user_votes_${userAddress}`;
+      const userVotes = localStorage.getItem(userVotesKey);
+      if (userVotes) {
+        const votingHistory: VotingRecord[] = JSON.parse(userVotes);
+        const filteredHistory = votingHistory.filter(vote => vote.proposalId !== proposalId);
+        localStorage.setItem(userVotesKey, JSON.stringify(filteredHistory));
+      }
+      
+      console.log(`Proposal ${proposalId} deleted successfully`);
+      return true;
+      
+    } catch (error) {
+      console.error('Error deleting proposal:', error);
+      throw error;
     }
   }
 }

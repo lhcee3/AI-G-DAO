@@ -106,6 +106,11 @@ export function SubmitProposalPage() {
         location: "",
       })
       
+      // Auto redirect to dashboard after 2 seconds
+      setTimeout(() => {
+        router.push('/dashboard')
+      }, 2000)
+      
     } catch (err) {
       console.error('Failed to submit proposal:', err)
       const errorMessage = err instanceof Error ? err.message : 'Unknown error occurred'
@@ -116,6 +121,7 @@ export function SubmitProposalPage() {
         error: errorMessage
       })
     } finally {
+      // Always ensure loading is turned off
       setLoading(false)
     }
   }
