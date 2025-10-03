@@ -516,17 +516,53 @@ export function DashboardPage() {
                             <p className="text-white/60 text-xs">AI Score: {proposal.aiScore}/10</p>
                           )}
                         </div>
-                        {/* Delete button - only show if no votes */}
-                        {!hasVotes && (
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => handleDeleteProposal(proposal.id, proposal.title)}
-                            className="ml-2 border-red-500/30 text-red-400 hover:bg-red-500/10 bg-transparent"
-                          >
-                            <Trash2Icon className="w-4 h-4" />
-                          </Button>
-                        )}
+                        
+                        {/* Action buttons */}
+                        <div className="flex gap-2 ml-4">
+                          {/* View button - always available */}
+                          <Link href={`/view-proposal/${proposal.id}`}>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className="border-green-500/30 text-green-400 hover:bg-green-500/10 bg-transparent"
+                            >
+                              View
+                            </Button>
+                          </Link>
+                          
+                          {/* Edit button - only show if no votes */}
+                          {!hasVotes && (
+                            <Link href={`/edit-proposal/${proposal.id}`}>
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                className="border-blue-500/30 text-blue-400 hover:bg-blue-500/10 bg-transparent"
+                              >
+                                Edit
+                              </Button>
+                            </Link>
+                          )}
+                          
+                          {/* Delete button - only show if no votes */}
+                          {!hasVotes && (
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => handleDeleteProposal(proposal.id, proposal.title)}
+                              className="border-red-500/30 text-red-400 hover:bg-red-500/10 bg-transparent"
+                            >
+                              <Trash2Icon className="w-4 h-4" />
+                            </Button>
+                          )}
+                          
+                          {/* Show message if proposal has votes */}
+                          {hasVotes && (
+                            <div className="text-white/40 text-xs">
+                              Cannot edit/delete<br/>
+                              (has votes)
+                            </div>
+                          )}
+                        </div>
                       </div>
                     </div>
                   );

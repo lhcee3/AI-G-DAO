@@ -416,11 +416,45 @@ export function useClimateDAO() {
     }
   };
 
+  /**
+   * Update a proposal - only creator can update their own proposal
+   */
+  const updateProposal = async (proposalData: {
+    id: number;
+    title: string;
+    description: string;
+    fundingAmount: number;
+    expectedImpact: string;
+    category: string;
+    location: string;
+  }): Promise<boolean> => {
+    if (!isConnected || !address) {
+      throw new Error('Wallet not connected');
+    }
+
+    setLoading(true);
+    setError(null);
+
+    try {
+      const result = await climateDAOQuery.updateProposal(proposalData, address);
+      console.log('Proposal updated successfully:', proposalData.id);
+      return result;
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Failed to update proposal';
+      console.error('Update proposal error:', err);
+      setError(errorMessage);
+      throw new Error(errorMessage);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return {
     joinDAO,
     submitProposal,
     voteOnProposal,
     deleteProposal,
+    updateProposal,
     getMemberTokens,
     getTotalProposals,
     getProposal,

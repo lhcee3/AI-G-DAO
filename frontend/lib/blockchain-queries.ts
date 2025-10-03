@@ -873,6 +873,71 @@ export class ClimateDAOQueryService {
       throw error;
     }
   }
+
+  /**
+   * Update a proposal in localStorage
+   * Only the proposal creator can update their own proposal
+   */
+  async updateProposal(proposalData: {
+    id: number;
+    title: string;
+    description: string;
+    fundingAmount: number;
+    expectedImpact: string;
+    category: string;
+    location: string;
+  }, userAddress: string): Promise<boolean> {
+    try {
+      // Get stored proposals
+      const storedProposals = localStorage.getItem('climate_dao_proposals');
+      if (!storedProposals) {
+        throw new Error('No proposals found');
+      }
+      
+      const proposals: BlockchainProposal[] = JSON.parse(storedProposals);
+      
+      // Find the proposal
+      const proposalIndex = proposals.findIndex(p => p.id === proposalData.id);
+      if (proposalIndex === -1) {
+        throw new Error('Proposal not found');
+      }
+      
+      const proposal = proposals[proposalIndex];
+      
+      // Check if user is the creator
+      if (proposal.creator !== userAddress) {
+        throw new Error('Only the proposal creator can update this proposal');
+      }
+      
+      // Check if proposal has votes - prevent updating if voted on
+      if (proposal.voteYes > 0 || proposal.voteNo > 0) {
+        throw new Error('Cannot update proposal that has received votes');
+      }
+      
+      // Update the proposal
+      proposals[proposalIndex] = {
+        ...proposal,
+        title: proposalData.title,
+        description: proposalData.description,
+        fundingAmount: proposalData.fundingAmount,
+        category: proposalData.category,
+        // Store additional fields in a custom way since BlockchainProposal interface is limited
+        // We'll extend the object with extra properties
+        ...(proposalData.expectedImpact && { expectedImpact: proposalData.expectedImpact }),
+        ...(proposalData.location && { location: proposalData.location }),
+      };
+      
+      // Update localStorage
+      localStorage.setItem('climate_dao_proposals', JSON.stringify(proposals));
+      
+      console.log(`Proposal ${proposalData.id} updated successfully`);
+      return true;
+      
+    } catch (error) {
+      console.error('Error updating proposal:', error);
+      throw error;
+    }
+  }
 }
 
 // Singleton instance
