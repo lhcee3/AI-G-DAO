@@ -488,34 +488,6 @@ export function DashboardPage() {
                             <p className="text-white/60 text-xs">AI Score: {proposal.aiScore}/10</p>
                           )}
                         </div>
-                        
-                        {/* Action buttons - Simple and Clean */}
-                        <div className="flex gap-2 ml-4">
-                          <Link href={`/view-proposal?id=${proposal.id}`}>
-                            <button
-                              className="px-3 py-1 text-sm border border-green-500/30 text-green-400 hover:bg-green-500/10 bg-transparent rounded-md transition-colors"
-                            >
-                              View
-                            </button>
-                          </Link>
-                          
-                          {!hasVotes && (
-                            <Link href={`/delete-proposal?id=${proposal.id}`}>
-                              <button
-                                className="px-3 py-1 text-sm border border-red-500/30 text-red-400 hover:bg-red-500/10 bg-transparent rounded-md transition-colors"
-                              >
-                                Delete
-                              </button>
-                            </Link>
-                          )}
-                          
-                          {hasVotes && (
-                            <div className="text-white/40 text-xs px-2">
-                              Has votes<br/>
-                              (locked)
-                            </div>
-                          )}
-                        </div>
                       </div>
                     </div>
                   );
