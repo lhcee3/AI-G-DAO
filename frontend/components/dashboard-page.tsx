@@ -36,11 +36,10 @@ import { NotificationsPanel } from "@/components/notifications-panel"
 
 export function DashboardPage() {
   const { isConnected, address, balance } = useWalletContext()
-  const { getProposals, getTotalProposals, getBlockchainStats, deleteProposal } = useClimateDAO()
+  const { getProposals, getTotalProposals, getBlockchainStats } = useClimateDAO()
   const [currentTime, setCurrentTime] = useState<Date | null>(null)
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
-  const [deletingProposalId, setDeletingProposalId] = useState<number | null>(null)
   const [proposals, setProposals] = useState<any[]>([])
   const [activeProposals, setActiveProposals] = useState<any[]>([])
   const [userProposals, setUserProposals] = useState<any[]>([])
@@ -96,38 +95,6 @@ export function DashboardPage() {
       fetchProposalData()
     }
   }, [isConnected]) // Remove function dependencies to prevent infinite loops
-
-  // Handle proposal deletion
-  const handleDeleteProposal = async (proposalId: number, proposalTitle: string) => {
-    if (!confirm(`Are you sure you want to delete "${proposalTitle}"? This action cannot be undone.`)) {
-      return;
-    }
-
-    setDeletingProposalId(proposalId);
-
-    try {
-      await deleteProposal(proposalId);
-      
-      // Refresh all proposal lists
-      const allProposals = await getProposals();
-      setProposals(allProposals);
-      
-      const active = await getProposals({ status: 'active' });
-      setActiveProposals(active);
-      
-      if (address) {
-        const myProposals = await getProposals({ creator: address });
-        setUserProposals(myProposals);
-      }
-      
-      alert('Proposal deleted successfully!');
-    } catch (error) {
-      console.error('Failed to delete proposal:', error);
-      alert(error instanceof Error ? error.message : 'Failed to delete proposal');
-    } finally {
-      setDeletingProposalId(null);
-    }
-  };
 
   // Update time every minute, only on client side
   useEffect(() => {
@@ -522,54 +489,30 @@ export function DashboardPage() {
                           )}
                         </div>
                         
-                        {/* Action buttons */}
+                        {/* Action buttons - Simple and Clean */}
                         <div className="flex gap-2 ml-4">
-                          {/* View button - always available */}
-                          <Link href={`/view-proposal/${proposal.id}`}>
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              className="border-green-500/30 text-green-400 hover:bg-green-500/10 bg-transparent"
+                          <Link href={`/view-proposal?id=${proposal.id}`}>
+                            <button
+                              className="px-3 py-1 text-sm border border-green-500/30 text-green-400 hover:bg-green-500/10 bg-transparent rounded-md transition-colors"
                             >
                               View
-                            </Button>
+                            </button>
                           </Link>
                           
-                          {/* Edit button - only show if no votes */}
                           {!hasVotes && (
-                            <Link href={`/edit-proposal/${proposal.id}`}>
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                className="border-blue-500/30 text-blue-400 hover:bg-blue-500/10 bg-transparent"
+                            <Link href={`/delete-proposal?id=${proposal.id}`}>
+                              <button
+                                className="px-3 py-1 text-sm border border-red-500/30 text-red-400 hover:bg-red-500/10 bg-transparent rounded-md transition-colors"
                               >
-                                Edit
-                              </Button>
+                                Delete
+                              </button>
                             </Link>
                           )}
                           
-                          {/* Delete button - only show if no votes */}
-                          {!hasVotes && (
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={() => handleDeleteProposal(proposal.id, proposal.title)}
-                              disabled={deletingProposalId === proposal.id}
-                              className="border-red-500/30 text-red-400 hover:bg-red-500/10 bg-transparent"
-                            >
-                              {deletingProposalId === proposal.id ? (
-                                <div className="w-4 h-4 border-2 border-red-400 border-t-transparent rounded-full animate-spin" />
-                              ) : (
-                                <Trash2Icon className="w-4 h-4" />
-                              )}
-                            </Button>
-                          )}
-                          
-                          {/* Show message if proposal has votes */}
                           {hasVotes && (
-                            <div className="text-white/40 text-xs">
-                              Cannot edit/delete<br/>
-                              (has votes)
+                            <div className="text-white/40 text-xs px-2">
+                              Has votes<br/>
+                              (locked)
                             </div>
                           )}
                         </div>
