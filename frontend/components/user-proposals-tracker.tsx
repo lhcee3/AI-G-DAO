@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { FileTextIcon, ClockIcon, CheckCircleIcon, XCircleIcon, EditIcon, EyeIcon } from 'lucide-react';
+import { FileTextIcon, ClockIcon, CheckCircleIcon, XCircleIcon } from 'lucide-react';
 import { useWalletContext } from '@/hooks/use-wallet';
 import { useClimateDAO } from '@/hooks/use-climate-dao';
 import { BlockchainProposal } from '@/lib/blockchain-queries';
@@ -184,26 +184,7 @@ export function UserProposalsTracker() {
                     <span className="text-xs text-white/40">
                       Proposal #{proposal.id} • {proposal.category}
                     </span>
-                    <div className="flex gap-2">
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="h-8 px-3 text-xs text-blue-400 hover:text-blue-300 hover:bg-blue-500/10"
-                      >
-                        <EyeIcon className="w-3 h-3 mr-1" />
-                        View
-                      </Button>
-                      {proposal.status === 'active' && (
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          className="h-8 px-3 text-xs text-green-400 hover:text-green-300 hover:bg-green-500/10"
-                        >
-                          <EditIcon className="w-3 h-3 mr-1" />
-                          Edit
-                        </Button>
-                      )}
-                    </div>
+                    {/* Buttons removed for clean interface */}
                   </div>
                 </div>
               );
