@@ -218,7 +218,33 @@ export class ClimateDAOQueryService {
   private getStoredProposals(): BlockchainProposal[] {
     try {
       const stored = localStorage.getItem('climate_dao_proposals');
-      return stored ? JSON.parse(stored) : [];
+      const proposals = stored ? JSON.parse(stored) : [];
+      
+      // Update proposal statuses based on current time
+      const updatedProposals = proposals.map((proposal: BlockchainProposal) => {
+        const now = Date.now();
+        
+        // Check if proposal has expired
+        if (proposal.endTime && now > proposal.endTime && proposal.status === 'active') {
+          // Check if it passed or was rejected based on votes
+          const totalVotes = proposal.voteYes + proposal.voteNo;
+          if (totalVotes > 0) {
+            const yesPercentage = (proposal.voteYes / totalVotes) * 100;
+            proposal.status = yesPercentage > 50 ? 'passed' : 'rejected';
+          } else {
+            proposal.status = 'expired';
+          }
+        }
+        
+        return proposal;
+      });
+      
+      // Save updated statuses back to localStorage
+      if (updatedProposals.length > 0) {
+        localStorage.setItem('climate_dao_proposals', JSON.stringify(updatedProposals));
+      }
+      
+      return updatedProposals;
     } catch (error) {
       console.error('Error reading stored proposals:', error);
       return [];
@@ -333,25 +359,31 @@ export class ClimateDAOQueryService {
    */
   async getProposal(proposalId: number): Promise<BlockchainProposal | null> {
     try {
-      // Check if contract is deployed first
-      if (!(await this.isContractDeployed())) {
-        // Return null when contract isn't deployed
-        return null;
+      // First check localStorage for stored proposals
+      const storedProposals = this.getStoredProposals();
+      const storedProposal = storedProposals.find(p => p.id === proposalId);
+      
+      if (storedProposal) {
+        console.log(`Found proposal ${proposalId} in localStorage`);
+        return storedProposal;
       }
 
-      // Try to read from blockchain
-      const boxKey = `prop_${proposalId}`;
-      const proposalData = await this.readBox(boxKey);
-      
-      if (!proposalData) {
-        // Return null if box not found
-        return null;
+      // If not found in localStorage and contract is deployed, try blockchain
+      if (await this.isContractDeployed()) {
+        const boxKey = `prop_${proposalId}`;
+        const proposalData = await this.readBox(boxKey);
+        
+        if (proposalData) {
+          console.log(`Found proposal ${proposalId} on blockchain`);
+          return this.decodeProposalData(proposalData, proposalId);
+        }
       }
       
-      return this.decodeProposalData(proposalData, proposalId);
+      console.log(`Proposal ${proposalId} not found anywhere`);
+      return null;
     } catch (error) {
       console.error(`Error getting proposal ${proposalId}:`, error);
-      // Return null on error
+      return null;
       return null;
     }
   }

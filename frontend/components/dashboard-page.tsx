@@ -36,10 +36,11 @@ import { NotificationsPanel } from "@/components/notifications-panel"
 
 export function DashboardPage() {
   const { isConnected, address, balance } = useWalletContext()
-  const { getProposals, getTotalProposals, getBlockchainStats } = useClimateDAO()
+  const { getProposals, getTotalProposals, getBlockchainStats, voteOnProposal } = useClimateDAO()
   const [currentTime, setCurrentTime] = useState<Date | null>(null)
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
+  const [votingProposalId, setVotingProposalId] = useState<number | null>(null)
   const [proposals, setProposals] = useState<any[]>([])
   const [activeProposals, setActiveProposals] = useState<any[]>([])
   const [userProposals, setUserProposals] = useState<any[]>([])
@@ -65,13 +66,18 @@ export function DashboardPage() {
   useEffect(() => {
     const fetchProposalData = async () => {
       try {
-        // Get all proposals
+        // Get all proposals with updated statuses
         const allProposals = await getProposals()
         setProposals(allProposals)
         
-        // Filter active proposals for voting section
-        const active = await getProposals({ status: 'active' })
-        setActiveProposals(active)
+        // Filter ONLY truly active proposals for voting section (not expired)
+        const now = Date.now();
+        const activeProposalsFiltered = allProposals.filter(proposal => 
+          proposal.status === 'active' && 
+          proposal.endTime && 
+          now < proposal.endTime
+        );
+        setActiveProposals(activeProposalsFiltered)
         
         // Get user's own proposals if connected
         if (address) {
@@ -104,6 +110,56 @@ export function DashboardPage() {
     const timer = setInterval(() => setCurrentTime(new Date()), 60000)
     return () => clearInterval(timer)
   }, [])
+
+  // Handle voting on proposals
+  const handleVote = async (proposalId: number, vote: 'for' | 'against') => {
+    if (!isConnected) {
+      alert('Please connect your wallet to vote');
+      return;
+    }
+
+    console.log(`Attempting to vote ${vote} on proposal ${proposalId}`);
+    setVotingProposalId(proposalId);
+
+    try {
+      // First check if proposal exists and is active
+      const proposals = await getProposals();
+      const proposal = proposals.find(p => p.id === proposalId);
+      
+      if (!proposal) {
+        throw new Error('Proposal not found. It may have been deleted.');
+      }
+      
+      if (proposal.status !== 'active') {
+        throw new Error(`Cannot vote on ${proposal.status} proposal`);
+      }
+      
+      if (proposal.endTime && Date.now() > proposal.endTime) {
+        throw new Error('Voting period has ended');
+      }
+
+      await voteOnProposal(proposalId, vote);
+      
+      // Refresh all proposals after successful vote
+      const allProposals = await getProposals();
+      setProposals(allProposals);
+      
+      const now = Date.now();
+      const activeProposalsFiltered = allProposals.filter(proposal => 
+        proposal.status === 'active' && 
+        proposal.endTime && 
+        now < proposal.endTime
+      );
+      setActiveProposals(activeProposalsFiltered);
+      
+      alert(`Vote "${vote}" submitted successfully!`);
+    } catch (error) {
+      console.error('Failed to vote:', error);
+      alert(error instanceof Error ? error.message : 'Failed to submit vote');
+    } finally {
+      setVotingProposalId(null);
+    }
+  };
 
   const quickActions = [
     {
@@ -388,10 +444,27 @@ export function DashboardPage() {
                           </span>
                         </div>
                         <div className="grid grid-cols-2 gap-3">
-                          <Button size="sm" className="bg-green-500/20 hover:bg-green-500/30 text-green-400 border border-green-500/30 rounded-xl">
+                          <Button 
+                            size="sm" 
+                            onClick={() => handleVote(proposal.id, 'for')}
+                            disabled={votingProposalId === proposal.id}
+                            className="bg-green-500/20 hover:bg-green-500/30 text-green-400 border border-green-500/30 rounded-xl"
+                          >
+                            {votingProposalId === proposal.id ? (
+                              <div className="w-4 h-4 border-2 border-green-400 border-t-transparent rounded-full animate-spin mr-2" />
+                            ) : null}
                             Vote Yes (0.001 ALGO)
                           </Button>
-                          <Button size="sm" variant="outline" className="border-red-500/30 text-red-400 hover:bg-red-500/10 rounded-xl">
+                          <Button 
+                            size="sm" 
+                            variant="outline" 
+                            onClick={() => handleVote(proposal.id, 'against')}
+                            disabled={votingProposalId === proposal.id}
+                            className="border-red-500/30 text-red-400 hover:bg-red-500/10 rounded-xl"
+                          >
+                            {votingProposalId === proposal.id ? (
+                              <div className="w-4 h-4 border-2 border-red-400 border-t-transparent rounded-full animate-spin mr-2" />
+                            ) : null}
                             Vote No (0.001 ALGO)
                           </Button>
                         </div>
