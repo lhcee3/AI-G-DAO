@@ -1,49 +1,13 @@
-import { WalletLayout } from '@/components/wallet-layout'import WalletLayout from '@/components/wallet-layout'import WalletLayout from '@/components/wallet-layout'import { WalletLayout } from '@/components/wallet-layout''use client';
+'use client';
 
-import { VotePage } from '@/components/vote-page'
-
-import { VotePage } from '@/components/vote-page'
-
-export default function Vote() {
-
-  return (import { VotePage } from '@/components/vote-page'
-
-    <WalletLayout>
-
-      <VotePage />export default function Vote() {
-
-    </WalletLayout>
-
-  )  return (import { VotePage } from '@/components/vote-page'
-
-}
-    <WalletLayout>
-
-      <VotePage />export default function Vote() {
-
-    </WalletLayout>
-
-  )  return (import { useState, useEffect } from 'react';
-
-}
-    <WalletLayout>
-
-      <VotePage />export default function Vote() {import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-
-    </WalletLayout>
-
-  )  return (import { Button } from '@/components/ui/button';
-
-}
-    <WalletLayout>import { Badge } from '@/components/ui/badge';
-
-      <VotePage />import { Progress } from '@/components/ui/progress';
-
-    </WalletLayout>import { VoteIcon, CheckCircleIcon, XCircleIcon, ClockIcon, TrendingUpIcon, LeafIcon, WalletIcon, ArrowLeftIcon } from 'lucide-react';
-
-  )import { useWalletContext } from '@/hooks/use-wallet';
-
-}import { useClimateDAO } from '@/hooks/use-climate-dao';
+import { useState, useEffect } from 'react';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Progress } from '@/components/ui/progress';
+import { VoteIcon, CheckCircleIcon, XCircleIcon, ClockIcon, TrendingUpIcon, LeafIcon, WalletIcon, ArrowLeftIcon } from 'lucide-react';
+import { useWalletContext } from '@/hooks/use-wallet';
+import { useClimateDAO } from '@/hooks/use-climate-dao';
 import { useNotifications } from '@/hooks/use-notifications';
 import { TransactionStatus } from '@/components/transaction-status';
 import { VoteConfirmationDialog } from '@/components/vote-confirmation-dialog';

@@ -213,6 +213,41 @@ export class ClimateDAOQueryService {
   }
 
   /**
+   * Clean up expired and invalid proposals from localStorage
+   */
+  async cleanupExpiredProposals(): Promise<void> {
+    try {
+      const proposals = this.getStoredProposals();
+      const now = Date.now();
+      
+      // Filter out expired proposals (older than 30 days or ended more than 7 days ago)
+      const validProposals = proposals.filter(proposal => {
+        // Remove if created more than 30 days ago
+        const thirtyDaysAgo = now - (30 * 24 * 60 * 60 * 1000);
+        if (proposal.creationTime < thirtyDaysAgo) {
+          console.log(`Removing old proposal: ${proposal.title}`);
+          return false;
+        }
+        
+        // Remove if ended more than 7 days ago
+        if (proposal.endTime && proposal.endTime < (now - (7 * 24 * 60 * 60 * 1000))) {
+          console.log(`Removing expired proposal: ${proposal.title}`);
+          return false;
+        }
+        
+        return true;
+      });
+      
+      // Update localStorage with cleaned proposals
+      localStorage.setItem('climate_dao_proposals', JSON.stringify(validProposals));
+      
+      console.log(`Cleaned up ${proposals.length - validProposals.length} expired proposals`);
+    } catch (error) {
+      console.error('Error cleaning up proposals:', error);
+    }
+  }
+
+  /**
    * Get proposals from localStorage cache
    */
   private getStoredProposals(): BlockchainProposal[] {

@@ -1,6 +1,5 @@
 import type { Metadata } from 'next'
 import './globals.css'
-import { WalletProvider } from '@/hooks/use-wallet'
 import { LoadingProvider } from '@/hooks/use-loading'
 import { PageTransitionLoader } from '@/components/page-transition-loader'
 
@@ -38,10 +37,8 @@ export default function RootLayout({
     <html lang="en">
       <body>
         <LoadingProvider>
-          <WalletProvider>
             <PageTransitionLoader />
             {children}
-          </WalletProvider>
         </LoadingProvider>
       </body>
     </html>

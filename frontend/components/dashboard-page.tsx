@@ -27,6 +27,7 @@ import {
 import Link from "next/link"
 import { useWalletContext } from "@/hooks/use-wallet"
 import { useClimateDAO } from "@/hooks/use-climate-dao"
+import { climateDAOQuery } from "@/lib/blockchain-queries"
 import { StatsSkeleton, CardSkeleton } from "@/components/ui/skeleton"
 import { WalletInfo } from "@/components/wallet-guard"
 import { VotingHistory } from "@/components/voting-history"
@@ -66,6 +67,9 @@ export function DashboardPage() {
   useEffect(() => {
     const fetchProposalData = async () => {
       try {
+        // First clean up expired proposals
+        await climateDAOQuery.cleanupExpiredProposals();
+        
         // Get all proposals with updated statuses
         const allProposals = await getProposals()
         setProposals(allProposals)
