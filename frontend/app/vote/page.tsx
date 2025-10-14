@@ -9,8 +9,15 @@ import { VoteIcon, CheckCircleIcon, XCircleIcon, ClockIcon, TrendingUpIcon, Leaf
 import { useWalletContext } from '@/hooks/use-wallet';
 import { useClimateDAO } from '@/hooks/use-climate-dao';
 import { useNotifications } from '@/hooks/use-notifications';
-import { TransactionStatus } from '@/components/transaction-status';
-import { VoteConfirmationDialog } from '@/components/vote-confirmation-dialog';
+import dynamic from 'next/dynamic';
+
+// Lazy load heavy components to improve initial page load
+const TransactionStatus = dynamic(() => import('@/components/transaction-status').then(mod => ({ default: mod.TransactionStatus })), {
+  loading: () => <div className="animate-pulse bg-white/5 rounded-xl h-32"></div>
+});
+const VoteConfirmationDialog = dynamic(() => import('@/components/vote-confirmation-dialog').then(mod => ({ default: mod.VoteConfirmationDialog })), {
+  loading: () => <div className="animate-pulse bg-white/5 rounded-xl h-48"></div>
+});
 import { TransactionResult } from '@/lib/transaction-builder';
 import Link from 'next/link';
 import { WalletGuard } from '@/components/wallet-guard';

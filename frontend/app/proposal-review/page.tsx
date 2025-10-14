@@ -10,7 +10,12 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { ArrowLeftIcon, SparklesIcon, WalletIcon } from "lucide-react"
 import Link from "next/link"
 import { useAIReview } from "@/hooks/use-ai-review"
-import { AIReviewDisplay } from "@/components/ai-review-display"
+import dynamic from "next/dynamic"
+
+// Lazy load AI review component to improve initial page load
+const AIReviewDisplay = dynamic(() => import("@/components/ai-review-display").then(mod => ({ default: mod.AIReviewDisplay })), {
+  loading: () => <div className="animate-pulse bg-white/5 rounded-xl h-64"></div>
+})
 import { useWalletContext } from "@/hooks/use-wallet"
 import { WalletGuard } from "@/components/wallet-guard"
 

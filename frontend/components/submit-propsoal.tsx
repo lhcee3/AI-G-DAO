@@ -14,8 +14,16 @@ import { useWalletContext } from "@/hooks/use-wallet"
 import { useClimateDAO } from "@/hooks/use-climate-dao"
 import { useRouter } from "next/navigation"
 import { useLoading } from "@/hooks/use-loading"
-import { TransactionStatus, TransactionCostEstimate } from "@/components/transaction-status"
+import dynamic from "next/dynamic"
 import { TransactionResult } from "@/lib/transaction-builder"
+
+// Lazy load transaction components to improve initial page load
+const TransactionStatus = dynamic(() => import("@/components/transaction-status").then(mod => ({ default: mod.TransactionStatus })), {
+  loading: () => <div className="animate-pulse bg-white/5 rounded-xl h-32"></div>
+})
+const TransactionCostEstimate = dynamic(() => import("@/components/transaction-status").then(mod => ({ default: mod.TransactionCostEstimate })), {
+  loading: () => <div className="animate-pulse bg-white/5 rounded-xl h-16"></div>
+})
 
 export function SubmitProposalPage() {
   const { isConnected, address } = useWalletContext()

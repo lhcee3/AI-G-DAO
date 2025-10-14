@@ -9,11 +9,8 @@ import {
   VoteIcon, 
   BarChart3Icon, 
   FileTextIcon, 
-  SettingsIcon, 
   BrainCircuitIcon, 
   WalletIcon,
-  BellIcon,
-  SearchIcon,
   TrendingUpIcon,
   Users2Icon,
   CoinsIcon,
@@ -22,17 +19,28 @@ import {
   MenuIcon,
   XIcon,
   SparklesIcon,
-  Trash2Icon
+  SettingsIcon
 } from "lucide-react"
 import Link from "next/link"
 import { useWalletContext } from "@/hooks/use-wallet"
 import { useClimateDAO } from "@/hooks/use-climate-dao"
 import { StatsSkeleton, CardSkeleton } from "@/components/ui/skeleton"
 import { WalletInfo } from "@/components/wallet-guard"
-import { VotingHistory } from "@/components/voting-history"
-import { UserProposalsTracker } from "@/components/user-proposals-tracker"
-import { TransactionHistory } from "@/components/transaction-history"
-import { NotificationsPanel } from "@/components/notifications-panel"
+import dynamic from "next/dynamic"
+
+// Lazy load heavy components to improve initial page load
+const VotingHistory = dynamic(() => import("@/components/voting-history").then(mod => ({ default: mod.VotingHistory })), {
+  loading: () => <CardSkeleton />
+})
+const UserProposalsTracker = dynamic(() => import("@/components/user-proposals-tracker").then(mod => ({ default: mod.UserProposalsTracker })), {
+  loading: () => <CardSkeleton />
+})
+const TransactionHistory = dynamic(() => import("@/components/transaction-history").then(mod => ({ default: mod.TransactionHistory })), {
+  loading: () => <CardSkeleton />
+})
+const NotificationsPanel = dynamic(() => import("@/components/notifications-panel").then(mod => ({ default: mod.NotificationsPanel })), {
+  loading: () => <CardSkeleton />
+})
 
 export function DashboardPage() {
   const { isConnected, address, balance } = useWalletContext()
@@ -53,37 +61,33 @@ export function DashboardPage() {
     userVoteCount: 0
   })
 
-  // Simulate loading time for dashboard content
+  // Remove artificial loading delay for better performance
   useEffect(() => {
-    const timer = setTimeout(() => {
-      setIsLoading(false)
-    }, 1500)
-    return () => clearTimeout(timer)
+    setIsLoading(false)
   }, [])
 
-  // Fetch proposals data
+  // Fetch proposals data - optimized to reduce API calls
   useEffect(() => {
     const fetchProposalData = async () => {
       try {
-        // Get all proposals
+        // Get all proposals in one call and process locally
         const allProposals = await getProposals()
         setProposals(allProposals)
         
-        // Filter active proposals for voting section
-        const active = await getProposals({ status: 'active' })
-        setActiveProposals(active)
+        // Filter active proposals locally instead of making another API call
+        const activeProposals = allProposals.filter(p => p.status === 'active')
+        setActiveProposals(activeProposals)
         
-        // Get user's own proposals if connected
+        // Filter user proposals locally if connected
         if (address) {
-          const myProposals = await getProposals({ creator: address })
-          setUserProposals(myProposals)
+          const userProposals = allProposals.filter(p => p.creator === address)
+          setUserProposals(userProposals)
         }
         
-        // Get total count
-        const total = await getTotalProposals()
-        setTotalProposalsCount(total)
+        // Use local data for counts
+        setTotalProposalsCount(allProposals.length)
         
-        // Get blockchain statistics
+        // Only get blockchain stats if needed for display
         const stats = await getBlockchainStats()
         setBlockchainStats(stats)
       } catch (error) {
@@ -94,15 +98,11 @@ export function DashboardPage() {
     if (isConnected) {
       fetchProposalData()
     }
-  }, [isConnected]) // Remove function dependencies to prevent infinite loops
+  }, [isConnected, address])
 
-  // Update time every minute, only on client side
+  // Set initial time on client side only - no constant updates for performance
   useEffect(() => {
-    // Set initial time on client side
     setCurrentTime(new Date())
-    
-    const timer = setInterval(() => setCurrentTime(new Date()), 60000)
-    return () => clearInterval(timer)
   }, [])
 
   const quickActions = [

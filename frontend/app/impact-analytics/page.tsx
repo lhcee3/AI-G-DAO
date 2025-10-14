@@ -15,8 +15,7 @@ import {
   DropletIcon,
   ThermometerIcon,
   WalletIcon,
-  ArrowLeftIcon,
-  LoaderIcon
+  ArrowLeftIcon
 } from 'lucide-react';
 import { useWalletContext } from '@/hooks/use-wallet';
 import { climateDAOQuery, ImpactMetrics, ProjectImpact } from '@/lib/blockchain-queries';
