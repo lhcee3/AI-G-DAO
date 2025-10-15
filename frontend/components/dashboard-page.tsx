@@ -44,10 +44,11 @@ const NotificationsPanel = dynamic(() => import("@/components/notifications-pane
 
 export function DashboardPage() {
   const { isConnected, address, balance } = useWalletContext()
-  const { getProposals, getTotalProposals, getBlockchainStats } = useClimateDAO()
+  const { getProposals, getTotalProposals, getBlockchainStats, voteOnProposal } = useClimateDAO()
   const [currentTime, setCurrentTime] = useState<Date | null>(null)
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
+  const [votingProposalId, setVotingProposalId] = useState<string | null>(null)
   const [proposals, setProposals] = useState<any[]>([])
   const [activeProposals, setActiveProposals] = useState<any[]>([])
   const [userProposals, setUserProposals] = useState<any[]>([])
@@ -104,6 +105,35 @@ export function DashboardPage() {
   useEffect(() => {
     setCurrentTime(new Date())
   }, [])
+
+  // Handle voting on proposals
+  const handleVote = async (proposalId: string, voteType: 'for' | 'against') => {
+    if (!isConnected) {
+      alert('Please connect your wallet to vote')
+      return
+    }
+
+    try {
+      setVotingProposalId(proposalId)
+      const result = await voteOnProposal(parseInt(proposalId), voteType)
+      
+      // If we get a result with txId, the vote was successful
+      if (result.txId) {
+        // Refresh proposals data after successful vote
+        const allProposals = await getProposals()
+        setProposals(allProposals)
+        const activeProposals = allProposals.filter(p => p.status === 'active')
+        setActiveProposals(activeProposals)
+        
+        alert(`Vote "${voteType}" submitted successfully! Transaction ID: ${result.txId}`)
+      }
+    } catch (error) {
+      console.error('Error voting:', error)
+      alert(`Error submitting vote: ${error instanceof Error ? error.message : 'Unknown error'}`)
+    } finally {
+      setVotingProposalId(null)
+    }
+  }
 
   const quickActions = [
     {
@@ -388,11 +418,22 @@ export function DashboardPage() {
                           </span>
                         </div>
                         <div className="grid grid-cols-2 gap-3">
-                          <Button size="sm" className="bg-green-500/20 hover:bg-green-500/30 text-green-400 border border-green-500/30 rounded-xl">
-                            Vote Yes (0.001 ALGO)
+                          <Button 
+                            size="sm" 
+                            className="bg-green-500/20 hover:bg-green-500/30 text-green-400 border border-green-500/30 rounded-xl"
+                            onClick={() => handleVote(proposal.id, 'for')}
+                            disabled={votingProposalId === proposal.id}
+                          >
+                            {votingProposalId === proposal.id ? 'Voting...' : 'Vote Yes (0.001 ALGO)'}
                           </Button>
-                          <Button size="sm" variant="outline" className="border-red-500/30 text-red-400 hover:bg-red-500/10 rounded-xl">
-                            Vote No (0.001 ALGO)
+                          <Button 
+                            size="sm" 
+                            variant="outline" 
+                            className="border-red-500/30 text-red-400 hover:bg-red-500/10 rounded-xl"
+                            onClick={() => handleVote(proposal.id, 'against')}
+                            disabled={votingProposalId === proposal.id}
+                          >
+                            {votingProposalId === proposal.id ? 'Voting...' : 'Vote No (0.001 ALGO)'}
                           </Button>
                         </div>
                       </div>
