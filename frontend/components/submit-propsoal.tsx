@@ -1,7 +1,5 @@
 "use client"
 
-import type React from "react"
-
 import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -100,8 +98,6 @@ export function SubmitProposalPage() {
         txId: result.txId,
         result: result
       })
-      
-      console.log('Proposal submitted successfully:', result)
       
       // Reset form after successful submission
       setFormData({
