@@ -44,7 +44,7 @@ const NotificationsPanel = dynamic(() => import("@/components/notifications-pane
 
 export function DashboardPage() {
   const { isConnected, address, balance } = useWalletContext()
-  const { getProposals, getTotalProposals, getBlockchainStats, voteOnProposal, cleanupExpiredProposals } = useClimateDAO()
+  const { getProposals, getTotalProposals, getBlockchainStats, voteOnProposal, cleanupExpiredProposals, enforceStorageLimits } = useClimateDAO()
   const [currentTime, setCurrentTime] = useState<Date | null>(null)
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
@@ -55,6 +55,7 @@ export function DashboardPage() {
   const [showMyProposals, setShowMyProposals] = useState(false)
   const [totalProposalsCount, setTotalProposalsCount] = useState(0)
   const [lastCleanup, setLastCleanup] = useState<{ removedCount: number; timestamp: number } | null>(null)
+  const [storageUsage, setStorageUsage] = useState<{size: number, limit: number} | null>(null)
   const [blockchainStats, setBlockchainStats] = useState({
     totalProposals: 0,
     totalMembers: 0,
@@ -68,18 +69,35 @@ export function DashboardPage() {
     setIsLoading(false)
   }, [])
 
-  // Fetch proposals data - optimized to reduce API calls
+  // Fetch proposals data - optimized with aggressive storage management
   useEffect(() => {
     const fetchProposalData = async () => {
       try {
-        // Clean up expired proposals (keep expired proposals for 7 days)
-        const cleanupResult = await cleanupExpiredProposals(7)
-        if (cleanupResult.removedCount > 0) {
-          console.log(`Cleaned up ${cleanupResult.removedCount} old expired proposals`)
-          setLastCleanup({ removedCount: cleanupResult.removedCount, timestamp: Date.now() })
+        setIsLoading(true)
+
+        // 1. FIRST: Enforce aggressive storage limits (200KB constraint)
+        const storageResult = await enforceStorageLimits()
+        if (storageResult.cleaned) {
+          console.log(`🗑️ Storage cleanup: ${storageResult.oldSize}KB → ${storageResult.newSize}KB`)
+          setLastCleanup({ 
+            removedCount: storageResult.proposalsRemoved || 0, 
+            timestamp: Date.now() 
+          })
         }
 
-        // Get all proposals in one call and process locally
+        // Update storage usage display
+        setStorageUsage({
+          size: storageResult.currentSize || storageResult.newSize || 0,
+          limit: 200
+        })
+
+        // 2. THEN: Clean up expired proposals (reduced retention to 3 days)
+        const cleanupResult = await cleanupExpiredProposals(3) // Reduced from 7 to 3 days
+        if (cleanupResult.removedCount > 0) {
+          console.log(`🕒 Expired cleanup: Removed ${cleanupResult.removedCount} old proposals`)
+        }
+
+        // 3. Get all proposals in one call and process locally
         const allProposals = await getProposals()
         setProposals(allProposals)
         
@@ -101,25 +119,38 @@ export function DashboardPage() {
         setBlockchainStats(stats)
       } catch (error) {
         console.error('Failed to fetch proposal data:', error)
+      } finally {
+        setIsLoading(false)
       }
     }
 
     if (isConnected) {
       fetchProposalData()
       
-      // Set up periodic cleanup every hour
+      // Set up aggressive periodic cleanup for 200KB storage limit
       const cleanupInterval = setInterval(async () => {
         try {
-          const result = await cleanupExpiredProposals(7)
-          if (result.removedCount > 0) {
-            console.log(`Periodic cleanup: Removed ${result.removedCount} expired proposals`)
+          // First check storage limits
+          const storageResult = await enforceStorageLimits()
+          if (storageResult.cleaned) {
+            console.log('📱 Periodic storage cleanup completed')
+            setStorageUsage({
+              size: storageResult.newSize || 0,
+              limit: 200
+            })
+          }
+          
+          // Then clean expired proposals (more frequent, shorter retention)
+          const expiredResult = await cleanupExpiredProposals(2) // Keep expired for only 2 days
+          if (expiredResult.removedCount > 0) {
+            console.log(`🧹 Periodic cleanup: Removed ${expiredResult.removedCount} expired proposals`)
             // Refresh proposal data after cleanup
             fetchProposalData()
           }
         } catch (error) {
           console.error('Periodic cleanup failed:', error)
         }
-      }, 60 * 60 * 1000) // Run every hour
+      }, 30 * 60 * 1000) // Run every 30 minutes instead of 1 hour
 
       return () => clearInterval(cleanupInterval)
     }
@@ -128,6 +159,28 @@ export function DashboardPage() {
   // Set initial time on client side only - no constant updates for performance
   useEffect(() => {
     setCurrentTime(new Date())
+  }, [])
+
+  // Monitor storage usage
+  useEffect(() => {
+    const checkStorageUsage = () => {
+      try {
+        const proposals = JSON.parse(localStorage.getItem('climate_dao_proposals') || '[]')
+        const votes = JSON.parse(localStorage.getItem('climate_dao_votes') || '[]')
+        const userHistory = JSON.parse(localStorage.getItem('climate_dao_user_history') || '[]')
+        const totalSize = JSON.stringify({proposals, votes, userHistory}).length
+        setStorageUsage({
+          size: Math.round(totalSize / 1024),
+          limit: 200
+        })
+      } catch (error) {
+        console.error('Failed to check storage usage:', error)
+      }
+    }
+
+    checkStorageUsage()
+    const interval = setInterval(checkStorageUsage, 60000) // Check every minute
+    return () => clearInterval(interval)
   }, [])
 
   // Handle voting on proposals
@@ -273,6 +326,15 @@ export function DashboardPage() {
             {/* Wallet Status */}
             <div className="hidden md:flex items-center space-x-4">
               <WalletInfo />
+              {/* Storage Usage Indicator */}
+              {storageUsage && (
+                <div className="flex items-center gap-2 px-3 py-1 bg-white/10 rounded-xl border border-white/20">
+                  <div className="w-2 h-2 rounded-full bg-green-400"></div>
+                  <span className="text-xs text-white/80">
+                    {storageUsage.size}KB/{storageUsage.limit}KB
+                  </span>
+                </div>
+              )}
               <NotificationsPanel />
               <Button variant="ghost" size="sm" className="text-white/80 hover:text-white hover:bg-white/10 rounded-xl">
                 <SettingsIcon className="w-4 h-4" />

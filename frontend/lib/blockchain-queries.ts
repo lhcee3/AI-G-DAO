@@ -642,6 +642,107 @@ export class ClimateDAOQueryService {
   }
 
   /**
+   * Enforce aggressive storage limits for 200KB localStorage constraint
+   * Performs comprehensive cleanup when approaching storage limits
+   */
+  async enforceStorageLimits(): Promise<{
+    cleaned: boolean;
+    oldSize?: number;
+    newSize?: number;
+    proposalsKept?: number;
+    proposalsRemoved?: number;
+    currentSize?: number;
+    proposalsCount?: number;
+  }> {
+    const STORAGE_LIMITS = {
+      maxProposals: 30,        // Reduced for 200KB limit
+      maxVotes: 50,           // Limit vote records
+      cleanupThreshold: 180,   // Cleanup at 180KB (90% of 200KB)
+    };
+    
+    try {
+      // Get current storage data
+      const proposals = this.getStoredProposals();
+      const votes = JSON.parse(localStorage.getItem('climate_dao_votes') || '[]');
+      const userHistory = JSON.parse(localStorage.getItem('climate_dao_user_history') || '[]');
+      
+      // Calculate storage usage (approximate)
+      const proposalsSize = JSON.stringify(proposals).length;
+      const votesSize = JSON.stringify(votes).length;
+      const historySize = JSON.stringify(userHistory).length;
+      const totalSize = proposalsSize + votesSize + historySize;
+      
+      console.log(`📊 Storage usage: ${Math.round(totalSize/1024)}KB / 200KB`);
+      
+      // If approaching limit, perform aggressive cleanup
+      if (totalSize > STORAGE_LIMITS.cleanupThreshold * 1024) {
+        console.log('⚠️  Storage limit reached, performing aggressive cleanup...');
+        
+        // 1. Keep only most recent proposals (sorted by creation time)
+        const recentProposals = proposals
+          .filter(p => p.creationTime) // Ensure timestamp exists
+          .sort((a, b) => new Date(b.creationTime).getTime() - new Date(a.creationTime).getTime())
+          .slice(0, STORAGE_LIMITS.maxProposals);
+        
+        // 2. Compress vote data - keep only essential info
+        const compressedVotes = votes
+          .slice(-STORAGE_LIMITS.maxVotes) // Keep latest votes only
+          .map((vote: any) => ({
+            proposalId: vote.proposalId,
+            vote: vote.vote,
+            timestamp: vote.timestamp || Date.now(),
+            voter: vote.voter
+          }));
+        
+        // 3. Limit user history
+        const compressedHistory = userHistory
+          .slice(-20) // Keep only last 20 user actions
+          .map((action: any) => ({
+            type: action.type,
+            proposalId: action.proposalId,
+            timestamp: action.timestamp || Date.now()
+          }));
+        
+        // Update storage with compressed data
+        localStorage.setItem('climate_dao_proposals', JSON.stringify(recentProposals));
+        localStorage.setItem('climate_dao_votes', JSON.stringify(compressedVotes));
+        localStorage.setItem('climate_dao_user_history', JSON.stringify(compressedHistory));
+        
+        // Calculate new size
+        const newSize = JSON.stringify({
+          proposals: recentProposals,
+          votes: compressedVotes,
+          history: compressedHistory
+        }).length;
+        
+        console.log(`✅ Storage optimized: ${Math.round(newSize/1024)}KB (saved ${Math.round((totalSize - newSize)/1024)}KB)`);
+        
+        return {
+          cleaned: true,
+          oldSize: Math.round(totalSize/1024),
+          newSize: Math.round(newSize/1024),
+          proposalsKept: recentProposals.length,
+          proposalsRemoved: proposals.length - recentProposals.length
+        };
+      }
+      
+      return {
+        cleaned: false,
+        currentSize: Math.round(totalSize/1024),
+        proposalsCount: proposals.length
+      };
+      
+    } catch (error) {
+      console.error('❌ Storage enforcement failed:', error);
+      return {
+        cleaned: false,
+        currentSize: 0,
+        proposalsCount: 0
+      };
+    }
+  }
+
+  /**
    * Get blockchain statistics
    */
   async getStats(userAddress?: string): Promise<BlockchainStats> {

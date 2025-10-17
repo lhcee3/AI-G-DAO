@@ -463,6 +463,23 @@ export function useClimateDAO() {
   }, []);
 
   /**
+   * Enforce aggressive storage limits for 200KB constraint
+   */
+  const enforceStorageLimits = useCallback(async () => {
+    try {
+      return await climateDAOQuery.enforceStorageLimits();
+    } catch (error) {
+      console.error('Error enforcing storage limits:', error);
+      setError('Failed to enforce storage limits');
+      return {
+        cleaned: false,
+        currentSize: 0,
+        proposalsCount: 0
+      };
+    }
+  }, []);
+
+  /**
    * Get user's proposal submission limits
    */
   const getUserProposalLimits = useCallback((userAddress: string) => {
@@ -499,6 +516,7 @@ export function useClimateDAO() {
     getUserVotingHistory,
     getBatchVotingStates,
     cleanupExpiredProposals,
+    enforceStorageLimits,
     getUserProposalLimits,
     loading,
     error,
