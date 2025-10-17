@@ -22,7 +22,7 @@ export function SubmissionGuidelinesPage() {
           <ArrowLeftIcon className="w-5 h-5" />
           <span className="text-sm font-medium">Back to Submit Proposal</span>
         </Link>
-        <div className="text-black font-bold text-lg">Climate DAO - Guidelines</div>
+        <div className="text-black font-bold text-lg">TerraLink - Guidelines</div>
       </header>
 
       <main className="relative z-10 flex-1 px-4 py-8">
@@ -100,7 +100,7 @@ export function SubmissionGuidelinesPage() {
 
       {/* Footer */}
       <footer className="relative z-10 text-center py-6 text-gray-800 text-sm">
-        <p>&copy; {new Date().getFullYear()} Climate DAO. Empowering sustainable innovation.</p>
+        <p>&copy; {new Date().getFullYear()} TerraLink. Empowering sustainable innovation.</p>
       </footer>
     </div>
   )

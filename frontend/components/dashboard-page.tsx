@@ -44,7 +44,7 @@ const NotificationsPanel = dynamic(() => import("@/components/notifications-pane
 
 export function DashboardPage() {
   const { isConnected, address, balance } = useWalletContext()
-  const { getProposals, getTotalProposals, getBlockchainStats, voteOnProposal } = useClimateDAO()
+  const { getProposals, getTotalProposals, getBlockchainStats, voteOnProposal, cleanupExpiredProposals } = useClimateDAO()
   const [currentTime, setCurrentTime] = useState<Date | null>(null)
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
@@ -71,6 +71,12 @@ export function DashboardPage() {
   useEffect(() => {
     const fetchProposalData = async () => {
       try {
+        // Clean up expired proposals (keep expired proposals for 7 days)
+        const cleanupResult = await cleanupExpiredProposals(7)
+        if (cleanupResult.removedCount > 0) {
+          console.log(`Cleaned up ${cleanupResult.removedCount} old expired proposals`)
+        }
+
         // Get all proposals in one call and process locally
         const allProposals = await getProposals()
         setProposals(allProposals)
@@ -98,6 +104,22 @@ export function DashboardPage() {
 
     if (isConnected) {
       fetchProposalData()
+      
+      // Set up periodic cleanup every hour
+      const cleanupInterval = setInterval(async () => {
+        try {
+          const result = await cleanupExpiredProposals(7)
+          if (result.removedCount > 0) {
+            console.log(`Periodic cleanup: Removed ${result.removedCount} expired proposals`)
+            // Refresh proposal data after cleanup
+            fetchProposalData()
+          }
+        } catch (error) {
+          console.error('Periodic cleanup failed:', error)
+        }
+      }, 60 * 60 * 1000) // Run every hour
+
+      return () => clearInterval(cleanupInterval)
     }
   }, [isConnected, address])
 
@@ -221,7 +243,7 @@ export function DashboardPage() {
                 <SparklesIcon className="w-6 h-6 text-white" />
               </div>
               <div>
-                <h1 className="text-white font-bold text-xl">Climate DAO</h1>
+                <h1 className="text-white font-bold text-xl">TerraLink</h1>
                 <p className="text-white/60 text-xs">
                   {currentTime ? (
                     <>
@@ -567,7 +589,7 @@ export function DashboardPage() {
               </a>
             </p>
             <p className="text-white/40 text-xs">
-              Powered by Algorand & AI • &copy; {new Date().getFullYear()} Climate DAO
+              Powered by Algorand & AI • &copy; {new Date().getFullYear()} TerraLink
             </p>
           </div>
         </div>

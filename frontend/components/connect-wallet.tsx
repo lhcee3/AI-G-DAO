@@ -55,7 +55,7 @@ export function WalletConnectPage() {
           <ArrowLeftIcon className="w-5 h-5" />
           <span className="text-sm font-medium">Back to Home</span>
         </Link>
-        <div className="text-blue-400 font-bold text-lg">Climate DAO</div>
+        <div className="text-blue-400 font-bold text-lg">TerraLink</div>
       </header>
 
       <main className="relative z-10 flex-1 flex items-center justify-center px-4">
@@ -63,7 +63,7 @@ export function WalletConnectPage() {
           <div className="text-center space-y-4">
             <h1 className="text-4xl font-bold tracking-tight text-white">Connect Your Wallet</h1>
             <p className="text-blue-300 text-lg">
-              Connect your Pera Wallet to participate in the Climate DAO
+              Connect your Pera Wallet to participate in TerraLink
             </p>
           </div>
 

@@ -449,6 +449,90 @@ export class ClimateDAOQueryService {
   }
 
   /**
+   * Clean up expired proposals that have been expired for more than specified days
+   * @param daysToKeep Number of days to keep expired proposals (default: 7 days)
+   */
+  async cleanupExpiredProposals(daysToKeep: number = 7): Promise<{ removedCount: number; keptCount: number }> {
+    try {
+      const proposals = this.getStoredProposals();
+      const now = Date.now();
+      const daysInMs = daysToKeep * 24 * 60 * 60 * 1000; // Convert days to milliseconds
+      
+      // Update proposal statuses first (check for newly expired)
+      const updatedProposals = proposals.map(proposal => {
+        if (proposal.status === 'active' && proposal.endTime < now) {
+          return { ...proposal, status: 'expired' as const };
+        }
+        return proposal;
+      });
+
+      // Filter out expired proposals that have been expired for more than the specified days
+      const proposalsToKeep = updatedProposals.filter(proposal => {
+        if (proposal.status === 'expired') {
+          const expiredFor = now - proposal.endTime;
+          const shouldRemove = expiredFor > daysInMs;
+          
+          if (shouldRemove) {
+            console.log(`Removing expired proposal: "${proposal.title}" (expired ${Math.floor(expiredFor / (24 * 60 * 60 * 1000))} days ago)`);
+            
+            // Clean up associated vote data
+            this.cleanupProposalVoteData(proposal.id);
+          }
+          
+          return !shouldRemove;
+        }
+        return true; // Keep all non-expired proposals
+      });
+
+      const removedCount = updatedProposals.length - proposalsToKeep.length;
+      const keptCount = proposalsToKeep.length;
+
+      // Save the cleaned up proposals
+      localStorage.setItem('climate_dao_proposals', JSON.stringify(proposalsToKeep));
+      
+      console.log(`Proposal cleanup complete: ${removedCount} removed, ${keptCount} kept`);
+      
+      return { removedCount, keptCount };
+    } catch (error) {
+      console.error('Error during proposal cleanup:', error);
+      return { removedCount: 0, keptCount: 0 };
+    }
+  }
+
+  /**
+   * Clean up vote data associated with a removed proposal
+   */
+  private cleanupProposalVoteData(proposalId: number): void {
+    try {
+      // Remove proposal-specific vote data
+      localStorage.removeItem(`proposal_votes_${proposalId}`);
+      
+      // Clean up from user voting histories
+      const userVotesKeys = Object.keys(localStorage).filter(key => key.startsWith('user_votes_'));
+      
+      userVotesKeys.forEach(key => {
+        try {
+          const userVotes = JSON.parse(localStorage.getItem(key) || '[]');
+          const filteredVotes = userVotes.filter((vote: VotingRecord) => vote.proposalId !== proposalId);
+          
+          if (filteredVotes.length !== userVotes.length) {
+            localStorage.setItem(key, JSON.stringify(filteredVotes));
+          }
+        } catch (error) {
+          console.error(`Error cleaning up user votes for key ${key}:`, error);
+        }
+      });
+
+      // Remove individual vote records
+      const voteKeys = Object.keys(localStorage).filter(key => key.includes(`_${proposalId}`));
+      voteKeys.forEach(key => localStorage.removeItem(key));
+      
+    } catch (error) {
+      console.error(`Error cleaning up vote data for proposal ${proposalId}:`, error);
+    }
+  }
+
+  /**
    * Get blockchain statistics
    */
   async getStats(userAddress?: string): Promise<BlockchainStats> {

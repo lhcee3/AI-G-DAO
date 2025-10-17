@@ -449,6 +449,19 @@ export function useClimateDAO() {
     }
   };
 
+  /**
+   * Clean up expired proposals after specified days
+   */
+  const cleanupExpiredProposals = useCallback(async (daysToKeep: number = 7) => {
+    try {
+      return await climateDAOQuery.cleanupExpiredProposals(daysToKeep);
+    } catch (error) {
+      console.error('Error cleaning up expired proposals:', error);
+      setError('Failed to cleanup expired proposals');
+      return { removedCount: 0, keptCount: 0 };
+    }
+  }, []);
+
   return {
     joinDAO,
     submitProposal,
@@ -464,6 +477,7 @@ export function useClimateDAO() {
     getUserVotingState,
     getUserVotingHistory,
     getBatchVotingStates,
+    cleanupExpiredProposals,
     loading,
     error,
   };
