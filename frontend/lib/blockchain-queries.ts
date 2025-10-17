@@ -166,6 +166,52 @@ export class ClimateDAOQueryService {
   }
 
   /**
+   * Check if user can submit a proposal (rate limiting)
+   */
+  private canUserSubmitProposal(userAddress: string): { canSubmit: boolean; reason?: string } {
+    const LIMITS = {
+      maxPerUser: 10,           // Max total proposals per user
+      maxPerDay: 3,             // Max proposals per user per day
+      minTimeBetween: 1800000,  // 30 minutes between proposals (in ms)
+    };
+
+    try {
+      const existingProposals = this.getStoredProposals();
+      const userProposals = existingProposals.filter(p => p.creator === userAddress);
+      
+      // Check total proposal limit
+      if (userProposals.length >= LIMITS.maxPerUser) {
+        return { canSubmit: false, reason: `Maximum ${LIMITS.maxPerUser} proposals per user reached` };
+      }
+
+      const now = Date.now();
+      const oneDayAgo = now - (24 * 60 * 60 * 1000);
+      
+      // Check daily limit
+      const todayProposals = userProposals.filter(p => p.creationTime > oneDayAgo);
+      if (todayProposals.length >= LIMITS.maxPerDay) {
+        return { canSubmit: false, reason: `Maximum ${LIMITS.maxPerDay} proposals per day reached` };
+      }
+
+      // Check time between proposals
+      if (userProposals.length > 0) {
+        const lastProposal = userProposals.sort((a, b) => b.creationTime - a.creationTime)[0];
+        const timeSinceLastProposal = now - lastProposal.creationTime;
+        
+        if (timeSinceLastProposal < LIMITS.minTimeBetween) {
+          const minutesLeft = Math.ceil((LIMITS.minTimeBetween - timeSinceLastProposal) / 60000);
+          return { canSubmit: false, reason: `Please wait ${minutesLeft} minutes before submitting another proposal` };
+        }
+      }
+
+      return { canSubmit: true };
+    } catch (error) {
+      console.error('Error checking proposal limits:', error);
+      return { canSubmit: true }; // Allow on error to avoid blocking users
+    }
+  }
+
+  /**
    * Store a new proposal on-chain in a box
    */
   async storeProposal(proposal: {
@@ -179,6 +225,11 @@ export class ClimateDAOQueryService {
     aiScore?: number;
   }): Promise<boolean> {
     try {
+      // Check rate limits
+      const rateCheck = this.canUserSubmitProposal(proposal.creator);
+      if (!rateCheck.canSubmit) {
+        throw new Error(rateCheck.reason || 'Proposal submission limit reached');
+      }
       // Create the proposal data to store
       const proposalData = {
         id: proposal.id,
@@ -445,6 +496,64 @@ export class ClimateDAOQueryService {
     } catch (error) {
       console.error('Error getting user vote count:', error);
       return 0;
+    }
+  }
+
+  /**
+   * Get user's proposal submission limits and current usage
+   */
+  getUserProposalLimits(userAddress: string): {
+    maxPerUser: number;
+    maxPerDay: number;
+    currentTotal: number;
+    currentToday: number;
+    canSubmitNext: Date;
+    remainingToday: number;
+    remainingTotal: number;
+  } {
+    const LIMITS = {
+      maxPerUser: 10,
+      maxPerDay: 3,
+      minTimeBetween: 1800000, // 30 minutes
+    };
+
+    try {
+      const existingProposals = this.getStoredProposals();
+      const userProposals = existingProposals.filter(p => p.creator === userAddress);
+      
+      const now = Date.now();
+      const oneDayAgo = now - (24 * 60 * 60 * 1000);
+      const todayProposals = userProposals.filter(p => p.creationTime > oneDayAgo);
+      
+      let canSubmitNext = new Date(now);
+      if (userProposals.length > 0) {
+        const lastProposal = userProposals.sort((a, b) => b.creationTime - a.creationTime)[0];
+        const nextAllowedTime = lastProposal.creationTime + LIMITS.minTimeBetween;
+        if (nextAllowedTime > now) {
+          canSubmitNext = new Date(nextAllowedTime);
+        }
+      }
+
+      return {
+        maxPerUser: LIMITS.maxPerUser,
+        maxPerDay: LIMITS.maxPerDay,
+        currentTotal: userProposals.length,
+        currentToday: todayProposals.length,
+        canSubmitNext,
+        remainingToday: Math.max(0, LIMITS.maxPerDay - todayProposals.length),
+        remainingTotal: Math.max(0, LIMITS.maxPerUser - userProposals.length),
+      };
+    } catch (error) {
+      console.error('Error getting user proposal limits:', error);
+      return {
+        maxPerUser: LIMITS.maxPerUser,
+        maxPerDay: LIMITS.maxPerDay,
+        currentTotal: 0,
+        currentToday: 0,
+        canSubmitNext: new Date(),
+        remainingToday: LIMITS.maxPerDay,
+        remainingTotal: LIMITS.maxPerUser,
+      };
     }
   }
 

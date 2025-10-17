@@ -462,6 +462,27 @@ export function useClimateDAO() {
     }
   }, []);
 
+  /**
+   * Get user's proposal submission limits
+   */
+  const getUserProposalLimits = useCallback((userAddress: string) => {
+    try {
+      return climateDAOQuery.getUserProposalLimits(userAddress);
+    } catch (error) {
+      console.error('Error getting user proposal limits:', error);
+      setError('Failed to get proposal limits');
+      return {
+        maxPerUser: 10,
+        maxPerDay: 3,
+        currentTotal: 0,
+        currentToday: 0,
+        canSubmitNext: new Date(),
+        remainingToday: 3,
+        remainingTotal: 10,
+      };
+    }
+  }, []);
+
   return {
     joinDAO,
     submitProposal,
@@ -478,6 +499,7 @@ export function useClimateDAO() {
     getUserVotingHistory,
     getBatchVotingStates,
     cleanupExpiredProposals,
+    getUserProposalLimits,
     loading,
     error,
   };

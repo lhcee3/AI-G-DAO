@@ -54,6 +54,7 @@ export function DashboardPage() {
   const [userProposals, setUserProposals] = useState<any[]>([])
   const [showMyProposals, setShowMyProposals] = useState(false)
   const [totalProposalsCount, setTotalProposalsCount] = useState(0)
+  const [lastCleanup, setLastCleanup] = useState<{ removedCount: number; timestamp: number } | null>(null)
   const [blockchainStats, setBlockchainStats] = useState({
     totalProposals: 0,
     totalMembers: 0,
@@ -75,6 +76,7 @@ export function DashboardPage() {
         const cleanupResult = await cleanupExpiredProposals(7)
         if (cleanupResult.removedCount > 0) {
           console.log(`Cleaned up ${cleanupResult.removedCount} old expired proposals`)
+          setLastCleanup({ removedCount: cleanupResult.removedCount, timestamp: Date.now() })
         }
 
         // Get all proposals in one call and process locally
