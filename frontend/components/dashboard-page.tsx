@@ -44,7 +44,7 @@ const NotificationsPanel = dynamic(() => import("@/components/notifications-pane
 })
 
 export function DashboardPage() {
-  const { isConnected, address, balance } = useWalletContext()
+  const { isConnected, address, balance, disconnect } = useWalletContext()
   const { getProposals, getTotalProposals, getBlockchainStats, voteOnProposal, cleanupExpiredProposals, enforceStorageLimits } = useClimateDAO()
   const [currentTime, setCurrentTime] = useState<Date | null>(null)
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
@@ -64,6 +64,17 @@ export function DashboardPage() {
     userProposalCount: 0,
     userVoteCount: 0
   })
+
+  // Validate wallet connection and address format for Algorand
+  useEffect(() => {
+    if (isConnected && address) {
+      // Validate Algorand address format (should be 58 characters)
+      if (address.length !== 58) {
+        console.warn('Invalid Algorand address format detected')
+        disconnect() // Force disconnect if not a valid Algorand address
+      }
+    }
+  }, [isConnected, address, disconnect])
 
   // Remove artificial loading delay for better performance
   useEffect(() => {

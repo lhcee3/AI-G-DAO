@@ -66,10 +66,14 @@ export function WalletConnectPage() {
       <main className="relative z-10 flex-1 flex items-center justify-center px-4">
         <div className="max-w-md w-full space-y-8">
           <div className="text-center space-y-4">
-            <h1 className="text-4xl font-bold tracking-tight text-white">Connect Your Wallet</h1>
+            <h1 className="text-4xl font-bold tracking-tight text-white">Connect Your Algorand Wallet</h1>
             <p className="text-blue-300 text-lg">
-              Connect your Pera Wallet to participate in TerraLinke
+              Connect your Pera Wallet to participate in TerraLinke on Algorand blockchain
             </p>
+            <div className="inline-flex items-center gap-2 px-3 py-1 bg-green-500/10 border border-green-500/30 rounded-full text-sm text-green-400">
+              <div className="w-2 h-2 bg-green-400 rounded-full"></div>
+              <span>Algorand Network • Carbon Negative</span>
+            </div>
           </div>
 
           <Card className="bg-white/5 backdrop-blur-xl border-white/10 rounded-3xl shadow-2xl">
@@ -77,9 +81,9 @@ export function WalletConnectPage() {
               <div className="mx-auto w-16 h-16 bg-blue-500/20 rounded-full flex items-center justify-center">
                 <WalletIcon className="w-8 h-8 text-blue-400" />
               </div>
-              <CardTitle className="text-2xl text-white">Pera Wallet</CardTitle>
+              <CardTitle className="text-2xl text-white">Pera Wallet (Algorand)</CardTitle>
               <CardDescription className="text-white/70">
-                Securely connect your Algorand wallet to participate in DAO governance
+                The official wallet for Algorand blockchain. TerraLinke does not support MetaMask or Ethereum wallets.
               </CardDescription>
             </CardHeader>
 
@@ -87,6 +91,17 @@ export function WalletConnectPage() {
               {error && (
                 <div className="bg-red-500/10 border border-red-500/30 rounded-lg p-4 space-y-3">
                   <p className="text-red-400 text-sm">{error}</p>
+                  {error.includes('MetaMask') && (
+                    <div className="text-xs text-white/60 space-y-1">
+                      <p><strong>Why can't I use MetaMask?</strong></p>
+                      <ul className="list-disc list-inside ml-2 space-y-1">
+                        <li>TerraLinke is built on Algorand blockchain (carbon-negative)</li>
+                        <li>MetaMask only supports Ethereum-compatible networks</li>
+                        <li>You need Pera Wallet for Algorand interactions</li>
+                        <li>Visit <a href="https://perawallet.app" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:text-blue-300 underline">perawallet.app</a> to download</li>
+                      </ul>
+                    </div>
+                  )}
                   {error.includes('install Pera Wallet') && (
                     <div className="text-xs text-white/60 space-y-1">
                       <p>To install Pera Wallet:</p>
@@ -178,7 +193,7 @@ export function WalletConnectPage() {
                         <span>Connecting...</span>
                       </div>
                     ) : (
-                      "Connect Pera Wallet"
+                      "Connect Algorand Wallet (Pera)"
                     )}
                   </Button>
 
@@ -207,6 +222,11 @@ export function WalletConnectPage() {
               <p className="text-xs text-white/70 leading-relaxed">
                 <strong>Need TestNet ALGOs?</strong><br/>
                 Visit the <a href="https://testnet.algoexplorer.io/dispenser" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:text-blue-300 underline">Algorand TestNet Dispenser</a> to get free test tokens for trying the DAO.
+              </p>
+            </div>
+            <div className="bg-yellow-500/10 border border-yellow-500/30 rounded-lg p-3 mt-2">
+              <p className="text-xs text-yellow-400 leading-relaxed">
+                <strong>⚠️ Important:</strong> TerraLinke uses Algorand blockchain, not Ethereum. MetaMask will not work with this platform. Please use Pera Wallet for Algorand.
               </p>
             </div>
           </div>
