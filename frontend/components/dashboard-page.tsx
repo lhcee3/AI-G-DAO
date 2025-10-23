@@ -19,7 +19,8 @@ import {
   MenuIcon,
   XIcon,
   SparklesIcon,
-  SettingsIcon
+  SettingsIcon,
+  LeafIcon
 } from "lucide-react"
 import Link from "next/link"
 import { useWalletContext } from "@/hooks/use-wallet"
@@ -294,11 +295,11 @@ export function DashboardPage() {
           <div className="flex items-center justify-between">
             {/* Logo */}
             <div className="flex items-center space-x-3">
-              <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-2xl flex items-center justify-center shadow-lg shadow-blue-500/25">
-                <SparklesIcon className="w-6 h-6 text-white" />
+              <div className="w-12 h-12 bg-gradient-to-br from-teal-500 to-emerald-500 rounded-2xl flex items-center justify-center shadow-lg shadow-teal-500/25">
+                <LeafIcon className="w-6 h-6 text-white" />
               </div>
               <div>
-                <h1 className="text-white font-bold text-xl">TerraLink</h1>
+                <h1 className="text-white font-bold text-xl">TerraLinke</h1>
                 <p className="text-white/60 text-xs">
                   {currentTime ? (
                     <>
@@ -653,7 +654,7 @@ export function DashboardPage() {
               </a>
             </p>
             <p className="text-white/40 text-xs">
-              Powered by Algorand & AI • &copy; {new Date().getFullYear()} TerraLink
+              Powered by Algorand & AI • &copy; {new Date().getFullYear()} TerraLinke
             </p>
           </div>
         </div>

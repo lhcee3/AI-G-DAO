@@ -2,7 +2,7 @@
 
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { WalletIcon, ArrowLeftIcon, CheckCircleIcon, ExternalLinkIcon } from "lucide-react"
+import { WalletIcon, ArrowLeftIcon, CheckCircleIcon, ExternalLinkIcon, LeafIcon } from "lucide-react"
 import Link from "next/link"
 import { useWalletContext } from "@/hooks/use-wallet"
 import { useRouter } from "next/navigation"
@@ -55,7 +55,12 @@ export function WalletConnectPage() {
           <ArrowLeftIcon className="w-5 h-5" />
           <span className="text-sm font-medium">Back to Home</span>
         </Link>
-        <div className="text-blue-400 font-bold text-lg">TerraLink</div>
+        <div className="flex items-center gap-2">
+          <div className="w-8 h-8 bg-gradient-to-br from-teal-400 to-emerald-500 rounded-lg flex items-center justify-center">
+            <LeafIcon className="w-5 h-5 text-white" />
+          </div>
+          <div className="text-blue-400 font-bold text-lg">TerraLinke</div>
+        </div>
       </header>
 
       <main className="relative z-10 flex-1 flex items-center justify-center px-4">
@@ -63,7 +68,7 @@ export function WalletConnectPage() {
           <div className="text-center space-y-4">
             <h1 className="text-4xl font-bold tracking-tight text-white">Connect Your Wallet</h1>
             <p className="text-blue-300 text-lg">
-              Connect your Pera Wallet to participate in TerraLink
+              Connect your Pera Wallet to participate in TerraLinke
             </p>
           </div>
 

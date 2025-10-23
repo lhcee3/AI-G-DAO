@@ -17,7 +17,12 @@ export function LandingPage() {
 
       {/* Header */}
       <header className="relative z-10 flex items-center justify-between p-6">
-        <div className="text-teal-400 font-bold text-xl">TerraLink</div>
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 bg-gradient-to-br from-teal-400 to-emerald-500 rounded-xl flex items-center justify-center shadow-lg">
+            <LeafIcon className="w-6 h-6 text-white" />
+          </div>
+          <div className="text-teal-400 font-bold text-3xl tracking-wide drop-shadow-lg">TerraLinke</div>
+        </div>
         <div className="flex items-center gap-3">
           <a 
             href="https://github.com/lhcee3/AI-G-DAO" 
@@ -136,7 +141,7 @@ export function LandingPage() {
         <section className="py-20 px-4">
           <div className="max-w-6xl mx-auto">
             <div className="text-center mb-16">
-              <h2 className="text-4xl font-bold text-white mb-4">Why TerraLink?</h2>
+              <h2 className="text-4xl font-bold text-white mb-4">Why TerraLinke?</h2>
               <p className="text-xl text-gray-300 max-w-2xl mx-auto">
                 Transparent, efficient, and impactful climate action through innovation
               </p>
@@ -249,7 +254,7 @@ export function LandingPage() {
         <div className="max-w-6xl mx-auto px-4 py-8">
           <div className="flex flex-col md:flex-row justify-between items-center gap-4">
             <div className="text-gray-400 text-sm">
-              &copy; {new Date().getFullYear()} TerraLink. Built by{" "}
+              &copy; {new Date().getFullYear()} TerraLinke. Built by{" "}
               <a
                 href="https://github.com/lhcee3"
                 target="_blank"
