@@ -5,6 +5,8 @@ export interface TransactionResult {
   confirmedRound: number
   timestamp?: number
   success?: boolean
+  // optional human-readable message (used for mock responses or errors)
+  message?: string
   applicationIndex?: number
   createdAssetIndex?: number
   globalStateDelta?: any[]

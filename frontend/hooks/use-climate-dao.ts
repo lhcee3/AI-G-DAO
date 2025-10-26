@@ -169,7 +169,18 @@ export function useClimateDAO() {
       // Check if user has already voted on this proposal
       const votingState = await climateDAOQuery.getUserVotingState(proposalId, address);
       if (votingState.hasVoted) {
-        throw new Error(`You have already voted "${votingState.userVote}" on this proposal`);
+        // Don't throw here - return a structured result so callers can show a friendly notification
+        const message = `You have already voted "${votingState.userVote}" on this proposal`;
+        console.log('⚠️ Duplicate vote attempt:', message);
+        // set user-visible error but return a non-throwing result for UI to consume
+        setError(message);
+        return {
+          txId: '',
+          confirmedRound: 0,
+          timestamp: Date.now(),
+          success: false,
+          message
+        } as TransactionResult;
       }
 
       // Get proposal to validate

@@ -27,6 +27,7 @@ import { useWalletContext } from "@/hooks/use-wallet"
 import { useClimateDAO } from "@/hooks/use-climate-dao"
 import { StatsSkeleton, CardSkeleton } from "@/components/ui/skeleton"
 import { WalletInfo } from "@/components/wallet-guard"
+import { TransactionNotification } from "@/components/transaction-notification"
 import dynamic from "next/dynamic"
 
 // Lazy load heavy components to improve initial page load
@@ -57,6 +58,19 @@ export function DashboardPage() {
   const [totalProposalsCount, setTotalProposalsCount] = useState(0)
   const [lastCleanup, setLastCleanup] = useState<{ removedCount: number; timestamp: number } | null>(null)
   const [storageUsage, setStorageUsage] = useState<{size: number, limit: number} | null>(null)
+  
+  // Transaction notification state
+  const [transactionNotification, setTransactionNotification] = useState<{
+    isOpen: boolean;
+    txId: string;
+    message: string;
+    type: 'success' | 'error' | 'info' | 'warning';
+  }>({
+    isOpen: false,
+    txId: '',
+    message: '',
+    type: 'success'
+  })
   const [blockchainStats, setBlockchainStats] = useState({
     totalProposals: 0,
     totalMembers: 0,
@@ -195,10 +209,15 @@ export function DashboardPage() {
     return () => clearInterval(interval)
   }, [])
 
-  // Handle voting on proposals - Enhanced error handling for debugging
+  // Handle voting on proposals - Enhanced with notification system
   const handleVote = async (proposalId: number, voteType: 'for' | 'against') => {
     if (!isConnected) {
-      alert('Please connect your wallet to vote')
+      setTransactionNotification({
+        isOpen: true,
+        txId: '',
+        message: 'Please connect your wallet to vote',
+        type: 'error'
+      })
       return
     }
 
@@ -209,6 +228,17 @@ export function DashboardPage() {
       const result = await voteOnProposal(proposalId, voteType)
       console.log('🎉 Vote result:', result)
       
+      // If the result explicitly indicates a non-success (e.g. duplicate vote), show a friendly notification
+      if ((result as any).success === false && (result as any).message) {
+        setTransactionNotification({
+          isOpen: true,
+          txId: '',
+          message: (result as any).message,
+          type: 'warning'
+        })
+        return
+      }
+
       // If we get a result with txId, the vote was successful
       if (result.txId) {
         // Refresh proposals data after successful vote
@@ -217,20 +247,31 @@ export function DashboardPage() {
         const activeProposals = allProposals.filter(p => p.status === 'active')
         setActiveProposals(activeProposals)
         
-        alert(`✅ Vote "${voteType}" submitted successfully!\n\nTransaction ID: ${result.txId}\n\nYou can verify this on AlgoExplorer`)
+        // Show success notification with copyable transaction ID
+        setTransactionNotification({
+          isOpen: true,
+          txId: result.txId,
+          message: `Your "${voteType}" vote has been successfully recorded on the Algorand blockchain!`,
+          type: 'success'
+        })
       } else {
         throw new Error('No transaction ID returned - vote may have failed')
       }
     } catch (error) {
-      console.error('❌ Voting error details:', error)
+      console.error(' Voting error details:', error)
       
       let errorMessage = 'Unknown error occurred'
       if (error instanceof Error) {
         errorMessage = error.message
       }
       
-      // Show detailed error for debugging
-      alert(`❌ Vote failed!\n\nError: ${errorMessage}\n\nCheck console for details`)
+      // Show error notification
+      setTransactionNotification({
+        isOpen: true,
+        txId: '',
+        message: `Vote failed: ${errorMessage}`,
+        type: 'error'
+      })
     } finally {
       setVotingProposalId(null)
     }
@@ -682,6 +723,15 @@ export function DashboardPage() {
           </div>
         </div>
       </footer>
+
+      {/* Transaction Notification */}
+      <TransactionNotification
+        isOpen={transactionNotification.isOpen}
+        onClose={() => setTransactionNotification(prev => ({ ...prev, isOpen: false }))}
+        txId={transactionNotification.txId}
+        message={transactionNotification.message}
+        type={transactionNotification.type}
+      />
     </div>
   )
 }
