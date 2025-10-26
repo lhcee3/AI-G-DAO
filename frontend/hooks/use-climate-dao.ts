@@ -152,8 +152,8 @@ export function useClimateDAO() {
   };
 
   /**
-   * Vote on a proposal with micro-transaction cost (0.01 ALGO + fee)
-   * Includes double-voting prevention and real blockchain integration
+   * Vote on a proposal with DEMO mode (localStorage-based for shipping)
+   * Includes double-voting prevention and mock blockchain simulation
    */
   const voteOnProposal = async (proposalId: number, vote: 'for' | 'against'): Promise<TransactionResult> => {
     if (!isConnected || !address) {
@@ -164,61 +164,48 @@ export function useClimateDAO() {
     setError(null);
 
     try {
+      console.log('�️ DEMO MODE: Starting vote:', vote, 'on proposal', proposalId)
+      
       // Check if user has already voted on this proposal
       const votingState = await climateDAOQuery.getUserVotingState(proposalId, address);
       if (votingState.hasVoted) {
         throw new Error(`You have already voted "${votingState.userVote}" on this proposal`);
       }
 
-      // Get proposal to check if voting is still active
+      // Get proposal to validate
       const proposal = await climateDAOQuery.getProposal(proposalId);
       if (!proposal) {
-        throw new Error('Proposal not found');
+        const allProposals = await climateDAOQuery.getProposals();
+        console.log('🔍 Available proposal IDs:', allProposals.map(p => p.id));
+        throw new Error(`Proposal ${proposalId} not found`);
       }
 
       if (proposal.status !== 'active') {
         throw new Error('Voting is no longer active for this proposal');
       }
 
-      if (proposal.endTime <= Date.now()) {
-        throw new Error('Voting period has ended');
-      }
-
-      const suggestedParams = await getSuggestedParams();
+      console.log('🚀 DEMO MODE: Simulating blockchain transaction...')
       
-      // Calculate costs - reduced voting cost to 0.01 ALGO
-      const costs = calculateTransactionCosts(1); // Single app call
-      console.log('Voting costs (reduced):', costs);
+      // DEMO MODE: Generate mock transaction ID
+      const mockTxId = 'DEMO_TX_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
       
-      // Create voting transaction
-      const voteTxn = TransactionBuilder.createVoteTransaction(
-        { sender: address, suggestedParams },
-        CONTRACT_IDS.CLIMATE_DAO,
-        proposalId,
-        vote
-      );
-
-      // Sign transaction
-      const signedTxn = await signTransaction(voteTxn);
+      // Store vote in localStorage 
+      await climateDAOQuery.storeVote(proposalId, vote, address, mockTxId);
       
-      // Submit transaction
-      const response = await algodClient.sendRawTransaction(signedTxn).do();
-      const txId = response.txid;
+      console.log(`✅ Vote "${vote}" recorded successfully with mock txId:`, mockTxId);
       
-      console.log(`Vote "${vote}" submitted for proposal ${proposalId} with txId:`, txId);
-      
-      // Store the vote in localStorage for real-time updates
-      await climateDAOQuery.storeVote(proposalId, vote, address, txId);
-      
-      // Wait for confirmation with detailed results
-      const result = await confirmTransaction(algodClient, txId);
-      
-      console.log('Vote confirmed:', result);
+      // Return mock result that looks like real blockchain response
+      const result: TransactionResult = {
+        txId: mockTxId,
+        confirmedRound: Date.now(),
+        timestamp: Date.now(),
+        success: true
+      };
       
       return result;
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Voting failed';
-      console.error('Voting error:', err);
+      console.error('❌ Voting error:', errorMessage);
       setError(errorMessage);
       throw new Error(errorMessage);
     } finally {

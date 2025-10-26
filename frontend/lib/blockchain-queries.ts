@@ -384,9 +384,17 @@ export class ClimateDAOQueryService {
    */
   async getProposal(proposalId: number): Promise<BlockchainProposal | null> {
     try {
-      // Check if contract is deployed first
+      // First check localStorage for stored proposals
+      const storedProposals = this.getStoredProposals();
+      const storedProposal = storedProposals.find(p => p.id === proposalId);
+      
+      if (storedProposal) {
+        return storedProposal;
+      }
+
+      // Check if contract is deployed and try blockchain
       if (!(await this.isContractDeployed())) {
-        // Return null when contract isn't deployed
+        // Return null when contract isn't deployed and not in localStorage
         return null;
       }
 

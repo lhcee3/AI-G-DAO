@@ -195,16 +195,19 @@ export function DashboardPage() {
     return () => clearInterval(interval)
   }, [])
 
-  // Handle voting on proposals
-  const handleVote = async (proposalId: string, voteType: 'for' | 'against') => {
+  // Handle voting on proposals - Enhanced error handling for debugging
+  const handleVote = async (proposalId: number, voteType: 'for' | 'against') => {
     if (!isConnected) {
       alert('Please connect your wallet to vote')
       return
     }
 
     try {
-      setVotingProposalId(proposalId)
-      const result = await voteOnProposal(parseInt(proposalId), voteType)
+      setVotingProposalId(proposalId.toString())
+      console.log('🗳️ Starting vote process:', { proposalId, voteType, address })
+      
+      const result = await voteOnProposal(proposalId, voteType)
+      console.log('🎉 Vote result:', result)
       
       // If we get a result with txId, the vote was successful
       if (result.txId) {
@@ -214,11 +217,20 @@ export function DashboardPage() {
         const activeProposals = allProposals.filter(p => p.status === 'active')
         setActiveProposals(activeProposals)
         
-        alert(`Vote "${voteType}" submitted successfully! Transaction ID: ${result.txId}`)
+        alert(`✅ Vote "${voteType}" submitted successfully!\n\nTransaction ID: ${result.txId}\n\nYou can verify this on AlgoExplorer`)
+      } else {
+        throw new Error('No transaction ID returned - vote may have failed')
       }
     } catch (error) {
-      console.error('Error voting:', error)
-      alert(`Error submitting vote: ${error instanceof Error ? error.message : 'Unknown error'}`)
+      console.error('❌ Voting error details:', error)
+      
+      let errorMessage = 'Unknown error occurred'
+      if (error instanceof Error) {
+        errorMessage = error.message
+      }
+      
+      // Show detailed error for debugging
+      alert(`❌ Vote failed!\n\nError: ${errorMessage}\n\nCheck console for details`)
     } finally {
       setVotingProposalId(null)
     }

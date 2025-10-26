@@ -3,6 +3,8 @@ import algosdk from 'algosdk'
 export interface TransactionResult {
   txId: string
   confirmedRound: number
+  timestamp?: number
+  success?: boolean
   applicationIndex?: number
   createdAssetIndex?: number
   globalStateDelta?: any[]
