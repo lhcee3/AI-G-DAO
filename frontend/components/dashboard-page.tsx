@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useMemo } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
@@ -28,6 +28,8 @@ import { useClimateDAO } from "@/hooks/use-climate-dao"
 import { StatsSkeleton, CardSkeleton } from "@/components/ui/skeleton"
 import { WalletInfo } from "@/components/wallet-guard"
 import { TransactionNotification } from "@/components/transaction-notification"
+import { ProposalFilters } from "@/components/proposal-filters"
+import { filterProposalsByCategories, getCategoryById } from "@/lib/proposal-categories"
 import dynamic from "next/dynamic"
 
 // Lazy load heavy components to improve initial page load
@@ -59,6 +61,11 @@ export function DashboardPage() {
   const [lastCleanup, setLastCleanup] = useState<{ removedCount: number; timestamp: number } | null>(null)
   const [storageUsage, setStorageUsage] = useState<{size: number, limit: number} | null>(null)
   
+  // NEW: Filtering state
+  const [selectedCategories, setSelectedCategories] = useState<string[]>([])
+  const [statusFilter, setStatusFilter] = useState<'all' | 'active' | 'passed' | 'rejected' | 'expired'>('all')
+  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid')
+  
   // Transaction notification state
   const [transactionNotification, setTransactionNotification] = useState<{
     isOpen: boolean;
@@ -78,6 +85,34 @@ export function DashboardPage() {
     userProposalCount: 0,
     userVoteCount: 0
   })
+
+  // NEW: Filtered proposals using useMemo for performance
+  const filteredProposals = useMemo(() => {
+    let filtered = [...proposals];
+    
+    // Apply category filter
+    if (selectedCategories.length > 0) {
+      filtered = filterProposalsByCategories(filtered, selectedCategories);
+    }
+    
+    // Apply status filter
+    if (statusFilter !== 'all') {
+      filtered = filtered.filter(proposal => proposal.status === statusFilter);
+    }
+    
+    return filtered;
+  }, [proposals, selectedCategories, statusFilter]);
+
+  const filteredActiveProposals = useMemo(() => {
+    let filtered = [...activeProposals];
+    
+    // Apply category filter
+    if (selectedCategories.length > 0) {
+      filtered = filterProposalsByCategories(filtered, selectedCategories);
+    }
+    
+    return filtered;
+  }, [activeProposals, selectedCategories]);
 
   // Validate wallet connection and address format for Algorand
   useEffect(() => {
@@ -315,15 +350,15 @@ export function DashboardPage() {
   const stats = [
     { 
       label: "Active Proposals", 
-      value: blockchainStats.activeProposals.toString(), 
-      change: activeProposals.length > 0 ? "+12%" : "0%", 
+      value: filteredActiveProposals.length.toString(), 
+      change: filteredActiveProposals.length > 0 ? "+12%" : "0%", 
       icon: FileTextIcon, 
       color: "blue" 
     },
     { 
       label: "Total Proposals", 
-      value: blockchainStats.totalProposals.toString(), 
-      change: blockchainStats.totalProposals > 0 ? "+8%" : "0%", 
+      value: filteredProposals.length.toString(), 
+      change: filteredProposals.length > 0 ? "+8%" : "0%", 
       icon: VoteIcon, 
       color: "green" 
     },
@@ -507,6 +542,18 @@ export function DashboardPage() {
             </div>
           )}
 
+          {/* Proposal Filters */}
+          <ProposalFilters
+            proposals={proposals}
+            activeProposals={activeProposals}
+            selectedCategories={selectedCategories}
+            onCategoryChange={setSelectedCategories}
+            statusFilter={statusFilter}
+            onStatusChange={setStatusFilter}
+            viewMode={viewMode}
+            onViewModeChange={setViewMode}
+          />
+
           {/* Dashboard Content Grid */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12">
             
@@ -524,7 +571,7 @@ export function DashboardPage() {
                     Active Votes
                   </CardTitle>
                   <Badge variant="secondary" className="bg-green-500/20 text-green-400 border-green-500/30 rounded-full">
-                    {activeProposals.length} Pending
+                    {filteredActiveProposals.length} Pending
                   </Badge>
                 </div>
                 <CardDescription className="text-white/60 text-base">
@@ -534,8 +581,8 @@ export function DashboardPage() {
               <CardContent className="space-y-6">
                 
                 {/* Active Proposals */}
-                {activeProposals.length > 0 ? (
-                  activeProposals.slice(0, 3).map((proposal) => {
+                {filteredActiveProposals.length > 0 ? (
+                  filteredActiveProposals.slice(0, 3).map((proposal) => {
                     const timeLeft = Math.ceil((proposal.endTime - Date.now()) / (24 * 60 * 60 * 1000));
                     const timeText = timeLeft > 0 ? `${timeLeft}d left` : 'Expired';
                     const totalVotes = proposal.voteYes + proposal.voteNo;
@@ -544,7 +591,17 @@ export function DashboardPage() {
                     return (
                       <div key={proposal.id} className="bg-white/5 rounded-2xl p-6 border border-white/10 hover:bg-white/10 transition-all duration-300">
                         <div className="flex items-center justify-between mb-4">
-                          <h4 className="text-white font-medium text-lg">{proposal.title}</h4>
+                          <div className="flex items-center gap-2">
+                            <h4 className="text-white font-medium text-lg">{proposal.title}</h4>
+                            {(() => {
+                              const category = getCategoryById(proposal.category);
+                              return category ? (
+                                <Badge className={`bg-white/10 backdrop-blur-sm border border-white/20 text-white text-xs px-2 py-1`}>
+                                  {category.icon} {category.name}
+                                </Badge>
+                              ) : null;
+                            })()}
+                          </div>
                           <Badge className={`${timeLeft > 0 ? 'bg-yellow-500/20 text-yellow-400 border-yellow-500/30' : 'bg-red-500/20 text-red-400 border-red-500/30'} rounded-full`}>
                             <ClockIcon className="w-3 h-3 mr-1" />
                             {timeText}
@@ -598,11 +655,11 @@ export function DashboardPage() {
                   </div>
                 )}
                 
-                {activeProposals.length > 3 && (
+                {filteredActiveProposals.length > 3 && (
                   <div className="text-center pt-4">
                     <Link href="/vote">
                       <Button variant="outline" size="sm" className="border-blue-500/30 text-blue-400 hover:bg-blue-500/10">
-                        View All {activeProposals.length} Active Proposals
+                        View All {filteredActiveProposals.length} Active Proposals
                       </Button>
                     </Link>
                   </div>
