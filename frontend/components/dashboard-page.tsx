@@ -20,7 +20,8 @@ import {
   XIcon,
   SparklesIcon,
   SettingsIcon,
-  LeafIcon
+  LeafIcon,
+  Search
 } from "lucide-react"
 import Link from "next/link"
 import { useWalletContext } from "@/hooks/use-wallet"
@@ -29,7 +30,9 @@ import { StatsSkeleton, CardSkeleton } from "@/components/ui/skeleton"
 import { WalletInfo } from "@/components/wallet-guard"
 import { TransactionNotification } from "@/components/transaction-notification"
 import { ProposalFilters } from "@/components/proposal-filters"
+import { ProposalSearch, SearchResults } from "@/components/proposal-search"
 import { filterProposalsByCategories, getCategoryById } from "@/lib/proposal-categories"
+import { ProposalSearchEngine, SearchResult } from "@/lib/proposal-search"
 import dynamic from "next/dynamic"
 
 // Lazy load heavy components to improve initial page load
@@ -66,6 +69,10 @@ export function DashboardPage() {
   const [statusFilter, setStatusFilter] = useState<'all' | 'active' | 'passed' | 'rejected' | 'expired'>('all')
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid')
   
+  // NEW: Search state
+  const [searchTerm, setSearchTerm] = useState<string>('')
+  const [isSearching, setIsSearching] = useState<boolean>(false)
+  
   // Transaction notification state
   const [transactionNotification, setTransactionNotification] = useState<{
     isOpen: boolean;
@@ -90,6 +97,13 @@ export function DashboardPage() {
   const filteredProposals = useMemo(() => {
     let filtered = [...proposals];
     
+    // Apply search filter first
+    if (searchTerm.trim()) {
+      const searchEngine = ProposalSearchEngine.getInstance();
+      const searchResults = searchEngine.search(proposals, searchTerm);
+      filtered = searchResults;
+    }
+    
     // Apply category filter
     if (selectedCategories.length > 0) {
       filtered = filterProposalsByCategories(filtered, selectedCategories);
@@ -101,7 +115,7 @@ export function DashboardPage() {
     }
     
     return filtered;
-  }, [proposals, selectedCategories, statusFilter]);
+  }, [proposals, selectedCategories, statusFilter, searchTerm]);
 
   const filteredActiveProposals = useMemo(() => {
     let filtered = [...activeProposals];
@@ -542,6 +556,17 @@ export function DashboardPage() {
             </div>
           )}
 
+          {/* Search Interface */}
+          <div className="mb-8">
+            <ProposalSearch
+              proposals={proposals}
+              onSearchResults={(results) => {
+                // Search results are handled by filteredProposals useMemo
+              }}
+              onSearchTermChange={setSearchTerm}
+            />
+          </div>
+
           {/* Proposal Filters */}
           <ProposalFilters
             proposals={proposals}
@@ -553,6 +578,43 @@ export function DashboardPage() {
             viewMode={viewMode}
             onViewModeChange={setViewMode}
           />
+
+          {/* Search Results Section */}
+          {searchTerm.trim() && (
+            <div className="mb-8">
+              <div className="bg-white/5 backdrop-blur-xl border-white/10 rounded-3xl p-6">
+                <div className="flex items-center justify-between mb-6">
+                  <h2 className="text-white text-xl font-semibold flex items-center gap-3">
+                    <Search className="w-5 h-5 text-cyan-400" />
+                    Search Results for "{searchTerm}"
+                  </h2>
+                  <Badge variant="secondary" className="bg-cyan-500/20 text-cyan-400 border-cyan-500/30 rounded-full">
+                    {filteredProposals.length} found
+                  </Badge>
+                </div>
+                
+                {filteredProposals.length > 0 ? (
+                  <SearchResults 
+                    results={(() => {
+                      const searchEngine = ProposalSearchEngine.getInstance();
+                      return searchEngine.search(proposals, searchTerm);
+                    })()} 
+                    searchTerm={searchTerm}
+                    onVote={handleVote}
+                    votingProposalId={votingProposalId}
+                  />
+                ) : (
+                  <div className="text-center py-8">
+                    <div className="w-16 h-16 bg-white/10 rounded-full flex items-center justify-center mx-auto mb-4">
+                      <Search className="w-8 h-8 text-white/40" />
+                    </div>
+                    <p className="text-white/60 text-lg">No proposals found matching "{searchTerm}"</p>
+                    <p className="text-white/40 text-sm mt-2">Try adjusting your search terms or filters</p>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
 
           {/* Dashboard Content Grid */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12">
