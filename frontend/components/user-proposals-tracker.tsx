@@ -192,7 +192,7 @@ export function UserProposalsTracker() {
             
             {userProposals.length >= 3 && (
               <div className="text-center pt-4">
-                <Button variant="outline" size="sm" className="border-blue-500/30 text-blue-400 hover:bg-blue-500/10">
+                <Button size="sm" className="bg-blue-500/10 border border-blue-500/30 text-blue-400 hover:bg-blue-500/20">
                   View All My Proposals
                 </Button>
               </div>

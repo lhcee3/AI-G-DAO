@@ -31,8 +31,10 @@ import { WalletInfo } from "@/components/wallet-guard"
 import { TransactionNotification } from "@/components/transaction-notification"
 import { ProposalFilters } from "@/components/proposal-filters"
 import { ProposalSearch, SearchResults } from "@/components/proposal-search"
+import { FavoriteButton } from "@/components/favorite-button"
 import { filterProposalsByCategories, getCategoryById } from "@/lib/proposal-categories"
 import { ProposalSearchEngine, SearchResult } from "@/lib/proposal-search"
+import { favoritesManager } from "@/lib/proposal-favorites"
 import dynamic from "next/dynamic"
 
 // Lazy load heavy components to improve initial page load
@@ -73,6 +75,10 @@ export function DashboardPage() {
   const [searchTerm, setSearchTerm] = useState<string>('')
   const [isSearching, setIsSearching] = useState<boolean>(false)
   
+  // NEW: Favorites state
+  const [showFavoritesOnly, setShowFavoritesOnly] = useState<boolean>(false)
+  const [favorites, setFavorites] = useState<string[]>([])
+  
   // Transaction notification state
   const [transactionNotification, setTransactionNotification] = useState<{
     isOpen: boolean;
@@ -101,7 +107,12 @@ export function DashboardPage() {
     if (searchTerm.trim()) {
       const searchEngine = ProposalSearchEngine.getInstance();
       const searchResults = searchEngine.search(proposals, searchTerm);
-      filtered = searchResults;
+      filtered = searchResults; // SearchResult objects are already enhanced proposals
+    }
+    
+    // Apply favorites filter
+    if (showFavoritesOnly) {
+      filtered = favoritesManager.filterFavoriteProposals(filtered);
     }
     
     // Apply category filter
@@ -115,7 +126,7 @@ export function DashboardPage() {
     }
     
     return filtered;
-  }, [proposals, selectedCategories, statusFilter, searchTerm]);
+  }, [proposals, selectedCategories, statusFilter, searchTerm, showFavoritesOnly]);
 
   const filteredActiveProposals = useMemo(() => {
     let filtered = [...activeProposals];
@@ -142,6 +153,19 @@ export function DashboardPage() {
   // Remove artificial loading delay for better performance
   useEffect(() => {
     setIsLoading(false)
+  }, [])
+
+  // Load and subscribe to favorites changes
+  useEffect(() => {
+    // Load initial favorites
+    setFavorites(favoritesManager.getFavorites())
+    
+    // Subscribe to changes
+    const unsubscribe = favoritesManager.subscribe((updatedFavorites) => {
+      setFavorites(updatedFavorites)
+    })
+    
+    return unsubscribe
   }, [])
 
   // Fetch proposals data - optimized with aggressive storage management
@@ -408,86 +432,24 @@ export function DashboardPage() {
           <div className="flex items-center justify-between">
             {/* Logo */}
             <div className="flex items-center space-x-3">
-              <div className="w-12 h-12 bg-gradient-to-br from-teal-500 to-emerald-500 rounded-2xl flex items-center justify-center shadow-lg shadow-teal-500/25">
-                <LeafIcon className="w-6 h-6 text-white" />
+              <div className="w-10 h-10 bg-gradient-to-br from-teal-500 to-emerald-500 rounded-2xl flex items-center justify-center shadow-lg shadow-teal-500/25">
+                <LeafIcon className="w-5 h-5 text-white" />
               </div>
               <div>
-                <h1 className="text-white font-bold text-xl">TerraLinke</h1>
-                <p className="text-white/60 text-xs">
-                  {currentTime ? (
-                    <>
-                      {currentTime.toLocaleDateString('en-US', { 
-                        month: 'numeric', 
-                        day: 'numeric', 
-                        year: 'numeric' 
-                      })} • {currentTime.toLocaleTimeString('en-US', { 
-                        hour: '2-digit', 
-                        minute: '2-digit',
-                        hour12: false 
-                      })}
-                    </>
-                  ) : (
-                    'Loading...'
-                  )}
-                </p>
+                <h1 className="text-white font-bold text-lg">TerraLinke</h1>
+                <p className="text-white/60 text-xs">Climate DAO Platform</p>
               </div>
-            </div>
-
-            {/* Desktop Navigation */}
-            <div className="hidden md:flex items-center space-x-4">
             </div>
 
             {/* Wallet Status */}
-            <div className="hidden md:flex items-center space-x-4">
+            <div className="flex items-center space-x-3">
               <WalletInfo />
-              {/* Storage Usage Indicator */}
-              {storageUsage && (
-                <div className="flex items-center gap-2 px-3 py-1 bg-white/10 rounded-xl border border-white/20">
-                  <div className="w-2 h-2 rounded-full bg-green-400"></div>
-                  <span className="text-xs text-white/80">
-                    {storageUsage.size}KB/{storageUsage.limit}KB
-                  </span>
-                </div>
-              )}
               <NotificationsPanel />
-              <Button variant="ghost" size="sm" className="text-white/80 hover:text-white hover:bg-white/10 rounded-xl">
+              <Button variant="ghost" size="sm" className="text-white/80 hover:text-white hover:bg-white/10 rounded-xl p-2">
                 <SettingsIcon className="w-4 h-4" />
               </Button>
             </div>
-
-            {/* Mobile Menu Button */}
-            <Button 
-              variant="ghost" 
-              size="sm" 
-              className="md:hidden text-white hover:bg-white/10 rounded-xl"
-              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            >
-              {mobileMenuOpen ? <XIcon className="w-5 h-5" /> : <MenuIcon className="w-5 h-5" />}
-            </Button>
           </div>
-
-          {/* Mobile Menu */}
-          {mobileMenuOpen && (
-            <div className="md:hidden mt-6 pt-6 border-t border-white/20 space-y-4">
-              {isConnected ? (
-                <div className="flex items-center justify-between bg-white/5 rounded-xl p-3">
-                  <div>
-                    <p className="text-white font-medium">{address?.slice(0, 10)}...</p>
-                    <p className="text-white/60 text-sm">{balance.toFixed(2)} ALGO</p>
-                  </div>
-                  <Badge variant="secondary" className="bg-green-500/20 text-green-400 rounded-full">
-                    Pera
-                  </Badge>
-                </div>
-              ) : (
-                <Link href="/connect-wallet">
-                  <Button className="w-full bg-gradient-to-r from-blue-500 to-cyan-500 text-white rounded-xl">
-                    Connect Wallet
-                  </Button>
-                </Link>
-              )}
-            </div>
-          )}
         </div>
       </nav>
 
@@ -577,6 +539,8 @@ export function DashboardPage() {
             onStatusChange={setStatusFilter}
             viewMode={viewMode}
             onViewModeChange={setViewMode}
+            showFavoritesOnly={showFavoritesOnly}
+            onFavoritesToggle={setShowFavoritesOnly}
           />
 
           {/* Search Results Section */}
@@ -624,23 +588,23 @@ export function DashboardPage() {
 
             {/* Active Votes Card */}
             <Card className="bg-white/5 backdrop-blur-xl border-white/10 rounded-3xl hover:bg-white/10 transition-all duration-300">
-              <CardHeader className="pb-6">
+              <CardHeader className="pb-4">
                 <div className="flex items-center justify-between">
-                  <CardTitle className="text-white text-xl flex items-center gap-3">
-                    <div className="w-12 h-12 bg-gradient-to-br from-green-500 to-emerald-500 rounded-2xl flex items-center justify-center shadow-lg shadow-green-500/25">
-                      <VoteIcon className="w-6 h-6 text-white" />
+                  <CardTitle className="text-white text-lg flex items-center gap-3">
+                    <div className="w-10 h-10 bg-gradient-to-br from-green-500 to-emerald-500 rounded-2xl flex items-center justify-center shadow-lg shadow-green-500/25">
+                      <VoteIcon className="w-5 h-5 text-white" />
                     </div>
                     Active Votes
                   </CardTitle>
-                  <Badge variant="secondary" className="bg-green-500/20 text-green-400 border-green-500/30 rounded-full">
+                  <Badge variant="secondary" className="bg-green-500/20 text-green-400 border-green-500/30 rounded-full text-xs">
                     {filteredActiveProposals.length} Pending
                   </Badge>
                 </div>
-                <CardDescription className="text-white/60 text-base">
+                <CardDescription className="text-white/60 text-sm">
                   Proposals awaiting your vote
                 </CardDescription>
               </CardHeader>
-              <CardContent className="space-y-6">
+              <CardContent className="space-y-4">
                 
                 {/* Active Proposals */}
                 {filteredActiveProposals.length > 0 ? (
@@ -651,59 +615,66 @@ export function DashboardPage() {
                     const yesPercentage = totalVotes > 0 ? Math.round((proposal.voteYes / totalVotes) * 100) : 0;
                     
                     return (
-                      <div key={proposal.id} className="bg-white/5 rounded-2xl p-6 border border-white/10 hover:bg-white/10 transition-all duration-300">
-                        <div className="flex items-center justify-between mb-4">
-                          <div className="flex items-center gap-2">
-                            <h4 className="text-white font-medium text-lg">{proposal.title}</h4>
-                            {(() => {
-                              const category = getCategoryById(proposal.category);
-                              return category ? (
-                                <Badge className={`bg-white/10 backdrop-blur-sm border border-white/20 text-white text-xs px-2 py-1`}>
-                                  {category.icon} {category.name}
-                                </Badge>
-                              ) : null;
-                            })()}
+                      <div key={proposal.id} className="bg-white/5 rounded-2xl p-5 border border-white/10 hover:bg-white/10 transition-all duration-300">
+                        {/* Header Row */}
+                        <div className="flex items-start justify-between mb-3">
+                          <div className="flex-1">
+                            <div className="flex items-center gap-2 mb-2">
+                              <h4 className="text-white font-medium text-base line-clamp-1">{proposal.title}</h4>
+                              {(() => {
+                                const category = getCategoryById(proposal.category);
+                                return category ? (
+                                  <Badge className="bg-white/10 text-white text-xs px-2 py-1 shrink-0">
+                                    {category.icon} {category.name}
+                                  </Badge>
+                                ) : null;
+                              })()}
+                            </div>
                           </div>
-                          <Badge className={`${timeLeft > 0 ? 'bg-yellow-500/20 text-yellow-400 border-yellow-500/30' : 'bg-red-500/20 text-red-400 border-red-500/30'} rounded-full`}>
-                            <ClockIcon className="w-3 h-3 mr-1" />
-                            {timeText}
-                          </Badge>
-                        </div>
-                        <div className="flex items-center justify-between mb-4">
-                          <span className="text-white/60">
-                            AI Impact Score: {proposal.aiScore ? `${proposal.aiScore}/10` : 'N/A'}
-                          </span>
-                          <div className="flex items-center gap-1 text-green-400">
-                            <TrendingUpIcon className="w-4 h-4" />
-                            {proposal.aiScore && proposal.aiScore >= 8 ? 'High Impact' : 
-                             proposal.aiScore && proposal.aiScore >= 6 ? 'Medium Impact' : 'Low Impact'}
+                          <div className="flex items-center gap-2 ml-3">
+                            <FavoriteButton
+                              proposalId={proposal.id.toString()}
+                              size="sm"
+                              variant="ghost"
+                            />
+                            <Badge className={`${timeLeft > 0 ? 'bg-yellow-500/20 text-yellow-400' : 'bg-red-500/20 text-red-400'} text-xs px-2 py-1`}>
+                              <ClockIcon className="w-3 h-3 mr-1" />
+                              {timeText}
+                            </Badge>
                           </div>
                         </div>
-                        <div className="flex items-center justify-between mb-4">
+
+                        {/* Stats Row */}
+                        <div className="flex items-center justify-between text-sm mb-4">
                           <span className="text-white/60">
-                            Funding: ${proposal.fundingAmount.toLocaleString()}
+                            ${proposal.fundingAmount.toLocaleString()}
                           </span>
                           <span className="text-white/60">
-                            Votes: {yesPercentage}% yes ({totalVotes} total)
+                            {yesPercentage}% yes ({totalVotes} votes)
                           </span>
+                          {proposal.aiScore && (
+                            <div className="flex items-center gap-1 text-green-400">
+                              <TrendingUpIcon className="w-3 h-3" />
+                              <span className="text-xs">{proposal.aiScore}/10</span>
+                            </div>
+                          )}
                         </div>
-                        <div className="grid grid-cols-2 gap-3">
+                        <div className="grid grid-cols-2 gap-2">
                           <Button 
                             size="sm" 
-                            className="bg-green-500/20 hover:bg-green-500/30 text-green-400 border border-green-500/30 rounded-xl"
+                            className="bg-green-500/20 hover:bg-green-500/30 text-green-400 border border-green-500/30 rounded-xl h-8 text-xs"
                             onClick={() => handleVote(proposal.id, 'for')}
                             disabled={votingProposalId === proposal.id}
                           >
-                            {votingProposalId === proposal.id ? 'Voting...' : 'Vote Yes (0.001 ALGO)'}
+                            {votingProposalId === proposal.id ? 'Voting...' : '✓ Yes'}
                           </Button>
                           <Button 
                             size="sm" 
-                            variant="outline" 
-                            className="border-red-500/30 text-red-400 hover:bg-red-500/10 rounded-xl"
+                            className="bg-red-500/10 border border-red-500/30 text-red-400 hover:bg-red-500/20 rounded-xl h-8 text-xs"
                             onClick={() => handleVote(proposal.id, 'against')}
                             disabled={votingProposalId === proposal.id}
                           >
-                            {votingProposalId === proposal.id ? 'Voting...' : 'Vote No (0.001 ALGO)'}
+                            {votingProposalId === proposal.id ? 'Voting...' : '✗ No'}
                           </Button>
                         </div>
                       </div>
@@ -720,7 +691,7 @@ export function DashboardPage() {
                 {filteredActiveProposals.length > 3 && (
                   <div className="text-center pt-4">
                     <Link href="/vote">
-                      <Button variant="outline" size="sm" className="border-blue-500/30 text-blue-400 hover:bg-blue-500/10">
+                      <Button size="sm" className="bg-blue-500/10 border border-blue-500/30 text-blue-400 hover:bg-blue-500/20">
                         View All {filteredActiveProposals.length} Active Proposals
                       </Button>
                     </Link>
@@ -729,7 +700,7 @@ export function DashboardPage() {
 
                 {/* View All Votes */}
                 <Link href="/vote">
-                  <Button variant="outline" className="w-full border-white/20 text-black hover:bg-white/10 rounded-2xl py-3">
+                  <Button className="w-full bg-white/5 border border-white/20 text-white hover:bg-white/10 rounded-2xl py-3">
                     View All Active Votes
                   </Button>
                 </Link>
@@ -758,10 +729,9 @@ export function DashboardPage() {
                   </Badge>
                 </CardTitle>
                 <Button
-                  variant="outline"
                   size="sm"
                   onClick={() => setShowMyProposals(!showMyProposals)}
-                  className="border-white/20 text-white hover:bg-white/10"
+                  className="bg-white/5 border border-white/20 text-white hover:bg-white/10"
                 >
                   {showMyProposals ? 'Show All' : 'Show Mine'}
                 </Button>

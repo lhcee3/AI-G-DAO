@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
+import { FavoriteButton } from '@/components/favorite-button';
 import { 
   SearchIcon, 
   XIcon, 
@@ -312,10 +313,17 @@ export function SearchResults({ results, searchTerm, onVote, votingProposalId }:
                       />
                     </div>
                     
-                    <Badge className={`${timeLeft > 0 ? 'bg-yellow-500/20 text-yellow-400 border-yellow-500/30' : 'bg-red-500/20 text-red-400 border-red-500/30'} rounded-full ml-4`}>
-                      <ClockIcon className="w-3 h-3 mr-1" />
-                      {timeText}
-                    </Badge>
+                    <div className="flex items-center gap-2 ml-4">
+                      <FavoriteButton
+                        proposalId={result.id.toString()}
+                        size="sm"
+                        variant="ghost"
+                      />
+                      <Badge className={`${timeLeft > 0 ? 'bg-yellow-500/20 text-yellow-400 border-yellow-500/30' : 'bg-red-500/20 text-red-400 border-red-500/30'} rounded-full`}>
+                        <ClockIcon className="w-3 h-3 mr-1" />
+                        {timeText}
+                      </Badge>
+                    </div>
                   </div>
 
                   {/* Stats */}
@@ -361,8 +369,7 @@ export function SearchResults({ results, searchTerm, onVote, votingProposalId }:
                       </Button>
                       <Button 
                         size="sm" 
-                        variant="outline" 
-                        className="border-red-500/30 text-red-400 hover:bg-red-500/10 rounded-xl"
+                        className="bg-red-500/10 border border-red-500/30 text-red-400 hover:bg-red-500/20 rounded-xl"
                         onClick={() => onVote(result.id, 'against')}
                         disabled={votingProposalId === result.id.toString()}
                       >

@@ -9,7 +9,8 @@ import {
   XIcon, 
   CheckIcon,
   GridIcon,
-  ListIcon
+  ListIcon,
+  Heart
 } from 'lucide-react';
 import { 
   PROPOSAL_CATEGORIES, 
@@ -26,6 +27,8 @@ interface ProposalFiltersProps {
   onStatusChange: (status: 'all' | 'active' | 'passed' | 'rejected' | 'expired') => void;
   viewMode: 'grid' | 'list';
   onViewModeChange: (mode: 'grid' | 'list') => void;
+  showFavoritesOnly: boolean;
+  onFavoritesToggle: (showFavoritesOnly: boolean) => void;
 }
 
 export function ProposalFilters({
@@ -36,7 +39,9 @@ export function ProposalFilters({
   statusFilter,
   onStatusChange,
   viewMode,
-  onViewModeChange
+  onViewModeChange,
+  showFavoritesOnly,
+  onFavoritesToggle
 }: ProposalFiltersProps) {
   const [showFilters, setShowFilters] = useState(false);
   
@@ -64,9 +69,8 @@ export function ProposalFilters({
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-4">
           <Button
-            variant="outline"
             onClick={() => setShowFilters(!showFilters)}
-            className="bg-white/5 backdrop-blur-xl border-white/20 text-white hover:bg-white/10"
+            className="bg-white/5 backdrop-blur-xl border border-white/20 text-white hover:bg-white/10"
           >
             <FilterIcon className="w-4 h-4 mr-2" />
             Filters
@@ -177,6 +181,25 @@ export function ProposalFilters({
             </div>
           </div>
           
+          {/* Favorites Filter */}
+          <div>
+            <h4 className="text-white font-medium mb-3">Favorites</h4>
+            <div className="flex gap-2">
+              <Button
+                variant={showFavoritesOnly ? 'default' : 'outline'}
+                size="sm"
+                onClick={() => onFavoritesToggle(!showFavoritesOnly)}
+                className={showFavoritesOnly ? 
+                  'bg-red-500/20 backdrop-blur-sm text-red-400 border-red-500/30 hover:bg-red-500/30' : 
+                  'bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10'
+                }
+              >
+                <Heart className={`w-4 h-4 mr-2 ${showFavoritesOnly ? 'fill-current' : ''}`} />
+                {showFavoritesOnly ? 'Favorites Only' : 'Show All'}
+              </Button>
+            </div>
+          </div>
+          
           {/* Category Filter */}
           <div>
             <h4 className="text-white font-medium mb-3">Categories</h4>
@@ -189,9 +212,8 @@ export function ProposalFilters({
                 return (
                   <Button
                     key={category.id}
-                    variant="outline"
                     onClick={() => toggleCategory(category.id)}
-                    className={`relative h-auto p-4 flex flex-col items-center text-center space-y-2 transition-all duration-200 ${
+                    className={`relative h-auto p-4 flex flex-col items-center text-center space-y-2 transition-all duration-200 border ${
                       isSelected 
                         ? 'bg-white/20 backdrop-blur-sm text-white border-white/40 shadow-lg' 
                         : 'bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10'
