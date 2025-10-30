@@ -2,7 +2,7 @@
 
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { BotIcon, CoinsIcon, HandshakeIcon, LeafIcon, LightbulbIcon, VoteIcon, ArrowRightIcon, CheckCircleIcon, StarIcon } from "lucide-react"
+import { BotIcon, CoinsIcon, HandshakeIcon, LeafIcon, LightbulbIcon, VoteIcon, ArrowRightIcon, CheckCircleIcon, StarIcon, GithubIcon } from "lucide-react"
 import Link from "next/link"
 import Image from "next/image"
 import StarBorder from "@/components/ui/star-border"
@@ -15,26 +15,34 @@ export function LandingPage() {
         <div className="absolute inset-0 animate-moving-gradient"></div>
       </div>
 
-      {/* Header */}
-      <header className="relative z-10 flex items-center justify-between p-6">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 bg-gradient-to-br from-teal-400 to-emerald-500 rounded-xl flex items-center justify-center shadow-lg">
-            <LeafIcon className="w-6 h-6 text-white" />
+      {/* Mobile-optimized Header */}
+      <header className="relative z-10 flex items-center justify-between p-4 sm:p-6">
+        <div className="flex items-center gap-2 sm:gap-3">
+          <div className="w-8 h-8 sm:w-10 sm:h-10 bg-gradient-to-br from-teal-400 to-emerald-500 rounded-xl flex items-center justify-center shadow-lg">
+            <LeafIcon className="w-4 h-4 sm:w-6 sm:h-6 text-white" />
           </div>
-          <div className="text-teal-400 font-bold text-3xl tracking-wide drop-shadow-lg">TerraLinke</div>
+          <div className="text-teal-400 font-bold text-xl sm:text-3xl tracking-wide drop-shadow-lg">TerraLinke</div>
         </div>
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2 sm:gap-3">
           <a 
             href="https://github.com/lhcee3/AI-G-DAO" 
             target="_blank" 
             rel="noopener noreferrer"
-            className="inline-flex items-center gap-2 px-4 py-2 border border-gray-500/50 text-gray-300 hover:text-white hover:border-gray-400/70 bg-transparent rounded-md transition-all duration-200 hover:bg-gray-800/30"
+            className="hidden sm:inline-flex items-center gap-2 px-4 py-2 border border-gray-500/50 text-gray-300 hover:text-white hover:border-gray-400/70 bg-transparent rounded-md transition-all duration-200 hover:bg-gray-800/30 touch-manipulation"
           >
             <StarIcon className="w-4 h-4" />
             <span className="text-sm font-medium">Star on GitHub</span>
           </a>
+          <a 
+            href="https://github.com/lhcee3/AI-G-DAO" 
+            target="_blank" 
+            rel="noopener noreferrer"
+            className="sm:hidden p-2 border border-gray-500/50 text-gray-300 hover:text-white hover:border-gray-400/70 bg-transparent rounded-md transition-all duration-200 hover:bg-gray-800/30 touch-manipulation"
+          >
+            <GithubIcon className="w-4 h-4" />
+          </a>
           <Link href="/connect-wallet">
-            <Button variant="outline" className="border-teal-500/50 text-teal-400 hover:bg-teal-500/10 bg-transparent">
+            <Button variant="ghost" className="bg-white/5 border border-white/20 text-white hover:bg-white/10 text-xs sm:text-sm px-3 sm:px-4 py-2 h-8 sm:h-10 touch-manipulation">
               Connect Wallet
             </Button>
           </Link>
@@ -42,38 +50,38 @@ export function LandingPage() {
       </header>
 
       <main className="relative z-10 flex-1">
-        {/* Hero Section */}
-        <section className="flex items-center justify-center min-h-[70vh] px-4">
-          <div className="max-w-4xl mx-auto text-center space-y-8">
+        {/* Mobile-optimized Hero Section */}
+        <section className="flex items-center justify-center min-h-[60vh] sm:min-h-[70vh] px-4 py-8">
+          <div className="max-w-4xl mx-auto text-center space-y-6 sm:space-y-8">
             {/* Algorand Badge */}
-            <div className="flex justify-center mb-6">
-              <div className="inline-flex items-center gap-2 px-4 py-2 bg-teal-500/10 border border-teal-500/30 rounded-full text-sm text-teal-400 backdrop-blur-sm">
-                <LeafIcon className="w-4 h-4" />
+            <div className="flex justify-center mb-4 sm:mb-6">
+              <div className="inline-flex items-center gap-2 px-3 py-1 sm:px-4 sm:py-2 bg-teal-500/10 border border-teal-500/30 rounded-full text-xs sm:text-sm text-teal-400 backdrop-blur-sm">
+                <LeafIcon className="w-3 h-3 sm:w-4 sm:h-4" />
                 <span>Powered by Algorand's carbon-negative blockchain</span>
               </div>
             </div>
             
-            <div className="space-y-6">
-              <h1 className="text-5xl md:text-7xl font-bold tracking-tight">
+            <div className="space-y-4 sm:space-y-6">
+              <h1 className="text-3xl sm:text-5xl md:text-7xl font-bold tracking-tight leading-tight">
                 AI-Governed DAO for <span className="climate-glow">Climate</span> Impact
               </h1>
-              <p className="text-xl md:text-2xl text-gray-300 max-w-3xl mx-auto leading-relaxed">
+              <p className="text-base sm:text-xl md:text-2xl text-gray-300 max-w-3xl mx-auto leading-relaxed">
                 Revolutionizing green project funding with hybrid intelligence on Algorand. 
                 AI-powered impact assessment meets human wisdom for climate action.
               </p>
             </div>
             
-            <div className="flex justify-center items-center">
+            <div className="flex justify-center items-center pt-4">
               <Link href="/connect-wallet">
                 <StarBorder 
                   color="#14b8a6" 
                   speed="3s"
                   thickness={4}
-                  className="transition-all duration-300 transform hover:scale-105"
+                  className="transition-all duration-300 transform hover:scale-105 touch-manipulation"
                 >
-                  <div className="flex items-center gap-2 text-lg font-semibold px-2 py-1">
+                  <div className="flex items-center gap-2 text-base sm:text-lg font-semibold px-2 py-1">
                     Join the DAO
-                    <ArrowRightIcon className="w-5 h-5" />
+                    <ArrowRightIcon className="w-4 h-4 sm:w-5 sm:h-5" />
                   </div>
                 </StarBorder>
               </Link>
@@ -81,167 +89,164 @@ export function LandingPage() {
           </div>
         </section>
 
-        {/* How It Works - Simplified */}
-        <section className="py-20 px-4">
+        {/* Mobile-optimized How It Works */}
+        <section className="py-12 sm:py-20 px-4">
           <div className="max-w-6xl mx-auto">
-            <div className="text-center mb-16">
-              <h2 className="text-4xl font-bold text-white mb-4">
+            <div className="text-center mb-8 sm:mb-16">
+              <h2 className="text-2xl sm:text-4xl font-bold text-white mb-3 sm:mb-4">
                 Hybrid Decision-Making Model
               </h2>
-              <p className="text-xl text-gray-300 max-w-2xl mx-auto">
+              <p className="text-sm sm:text-xl text-gray-300 max-w-2xl mx-auto">
                 AI precision meets community wisdom for impactful climate action
               </p>
             </div>
 
-            <div className="grid md:grid-cols-4 gap-8">
-              <div className="text-center space-y-4">
-                <div className="w-16 h-16 bg-teal-500/20 rounded-full flex items-center justify-center mx-auto">
-                  <LightbulbIcon className="w-8 h-8 text-teal-400" />
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 sm:gap-8">
+              <div className="text-center space-y-3 sm:space-y-4">
+                <div className="w-12 h-12 sm:w-16 sm:h-16 bg-teal-500/20 rounded-full flex items-center justify-center mx-auto">
+                  <LightbulbIcon className="w-6 h-6 sm:w-8 sm:h-8 text-teal-400" />
                 </div>
                 <div>
-                  <h3 className="text-xl font-semibold text-white mb-2">Submit</h3>
-                  <p className="text-gray-300 text-sm">Organizations submit green project proposals</p>
+                  <h3 className="text-sm sm:text-xl font-semibold text-white mb-1 sm:mb-2">Submit</h3>
+                  <p className="text-gray-300 text-xs sm:text-sm">Organizations submit green project proposals</p>
                 </div>
               </div>
 
-              <div className="text-center space-y-4">
-                <div className="w-16 h-16 bg-teal-500/20 rounded-full flex items-center justify-center mx-auto">
-                  <BotIcon className="w-8 h-8 text-teal-400" />
+              <div className="text-center space-y-3 sm:space-y-4">
+                <div className="w-12 h-12 sm:w-16 sm:h-16 bg-teal-500/20 rounded-full flex items-center justify-center mx-auto">
+                  <BotIcon className="w-6 h-6 sm:w-8 sm:h-8 text-teal-400" />
                 </div>
                 <div>
-                  <h3 className="text-xl font-semibold text-white mb-2">AI Analysis</h3>
-                  <p className="text-gray-300 text-sm">AI evaluates environmental impact score</p>
+                  <h3 className="text-sm sm:text-xl font-semibold text-white mb-1 sm:mb-2">AI Analysis</h3>
+                  <p className="text-gray-300 text-xs sm:text-sm">AI evaluates environmental impact score</p>
                 </div>
               </div>
 
-              <div className="text-center space-y-4">
-                <div className="w-16 h-16 bg-teal-500/20 rounded-full flex items-center justify-center mx-auto">
-                  <VoteIcon className="w-8 h-8 text-teal-400" />
+              <div className="text-center space-y-3 sm:space-y-4">
+                <div className="w-12 h-12 sm:w-16 sm:h-16 bg-teal-500/20 rounded-full flex items-center justify-center mx-auto">
+                  <VoteIcon className="w-6 h-6 sm:w-8 sm:h-8 text-teal-400" />
                 </div>
                 <div>
-                  <h3 className="text-xl font-semibold text-white mb-2">Vote</h3>
-                  <p className="text-gray-300 text-sm">Community reviews and votes on proposals</p>
+                  <h3 className="text-sm sm:text-xl font-semibold text-white mb-1 sm:mb-2">Vote</h3>
+                  <p className="text-gray-300 text-xs sm:text-sm">Community reviews and votes on proposals</p>
                 </div>
               </div>
 
-              <div className="text-center space-y-4">
-                <div className="w-16 h-16 bg-teal-500/20 rounded-full flex items-center justify-center mx-auto">
-                  <HandshakeIcon className="w-8 h-8 text-teal-400" />
+              <div className="text-center space-y-3 sm:space-y-4">
+                <div className="w-12 h-12 sm:w-16 sm:h-16 bg-teal-500/20 rounded-full flex items-center justify-center mx-auto">
+                  <HandshakeIcon className="w-6 h-6 sm:w-8 sm:h-8 text-teal-400" />
                 </div>
                 <div>
-                  <h3 className="text-xl font-semibold text-white mb-2">Fund</h3>
-                  <p className="text-gray-300 text-sm">Smart contracts release funding automatically</p>
+                  <h3 className="text-sm sm:text-xl font-semibold text-white mb-1 sm:mb-2">Fund</h3>
+                  <p className="text-gray-300 text-xs sm:text-sm">Smart contracts release funding automatically</p>
                 </div>
               </div>
             </div>
           </div>
         </section>
 
-        {/* Key Features */}
-        <section className="py-20 px-4">
+        {/* Mobile-optimized Key Features */}
+        <section className="py-12 sm:py-20 px-4">
           <div className="max-w-6xl mx-auto">
-            <div className="text-center mb-16">
-              <h2 className="text-4xl font-bold text-white mb-4">Why TerraLinke?</h2>
-              <p className="text-xl text-gray-300 max-w-2xl mx-auto">
+            <div className="text-center mb-8 sm:mb-16">
+              <h2 className="text-2xl sm:text-4xl font-bold text-white mb-3 sm:mb-4">Why TerraLinke?</h2>
+              <p className="text-sm sm:text-xl text-gray-300 max-w-2xl mx-auto">
                 Transparent, efficient, and impactful climate action through innovation
               </p>
             </div>
 
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-              <Card className="bg-black/30 border-teal-500/20 backdrop-blur-sm hover:bg-black/40 transition-all duration-300">
-                <CardContent className="p-6">
-                  <div className="flex items-center gap-3 mb-4">
-                    <BotIcon className="w-6 h-6 text-teal-400" />
-                    <h3 className="text-lg font-semibold text-white">AI-Powered Vetting</h3>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-8">
+              <Card className="bg-white/5 backdrop-blur-xl border-white/10 rounded-xl sm:rounded-2xl hover:bg-white/10 transition-all duration-300">
+                <CardHeader className="p-4 sm:p-6">
+                  <div className="w-10 h-10 sm:w-12 sm:h-12 bg-green-500/20 rounded-lg flex items-center justify-center mb-3 sm:mb-4">
+                    <BotIcon className="w-5 h-5 sm:w-6 sm:h-6 text-green-400" />
                   </div>
-                  <p className="text-gray-300 text-sm">
-                    Intelligent scoring ensures only the most impactful climate projects receive funding
-                  </p>
-                </CardContent>
+                  <CardTitle className="text-white text-base sm:text-lg">AI-Powered Assessment</CardTitle>
+                  <CardDescription className="text-white/70 text-sm">
+                    Advanced AI evaluates project environmental impact objectively
+                  </CardDescription>
+                </CardHeader>
               </Card>
 
-              <Card className="bg-black/30 border-teal-500/20 backdrop-blur-sm hover:bg-black/40 transition-all duration-300">
-                <CardContent className="p-6">
-                  <div className="flex items-center gap-3 mb-4">
-                    <VoteIcon className="w-6 h-6 text-teal-400" />
-                    <h3 className="text-lg font-semibold text-white">Decentralized Governance</h3>
+              <Card className="bg-white/5 backdrop-blur-xl border-white/10 rounded-xl sm:rounded-2xl hover:bg-white/10 transition-all duration-300">
+                <CardHeader className="p-4 sm:p-6">
+                  <div className="w-10 h-10 sm:w-12 sm:h-12 bg-blue-500/20 rounded-lg flex items-center justify-center mb-3 sm:mb-4">
+                    <VoteIcon className="w-5 h-5 sm:w-6 sm:h-6 text-blue-400" />
                   </div>
-                  <p className="text-gray-300 text-sm">
-                    Global community collectively decides the future of climate finance
-                  </p>
-                </CardContent>
+                  <CardTitle className="text-white text-base sm:text-lg">Transparent Voting</CardTitle>
+                  <CardDescription className="text-white/70 text-sm">
+                    All votes recorded on blockchain for complete transparency
+                  </CardDescription>
+                </CardHeader>
               </Card>
 
-              <Card className="bg-black/30 border-teal-500/20 backdrop-blur-sm hover:bg-black/40 transition-all duration-300">
-                <CardContent className="p-6">
-                  <div className="flex items-center gap-3 mb-4">
-                    <LeafIcon className="w-6 h-6 text-teal-400" />
-                    <h3 className="text-lg font-semibold text-white">Real Impact</h3>
+              <Card className="bg-white/5 backdrop-blur-xl border-white/10 rounded-xl sm:rounded-2xl hover:bg-white/10 transition-all duration-300">
+                <CardHeader className="p-4 sm:p-6">
+                  <div className="w-10 h-10 sm:w-12 sm:h-12 bg-purple-500/20 rounded-lg flex items-center justify-center mb-3 sm:mb-4">
+                    <LeafIcon className="w-5 h-5 sm:w-6 sm:h-6 text-purple-400" />
                   </div>
-                  <p className="text-gray-300 text-sm">
-                    Direct funding for verified projects with measurable CO₂ reduction
-                  </p>
-                </CardContent>
+                  <CardTitle className="text-white text-base sm:text-lg">Carbon Negative</CardTitle>
+                  <CardDescription className="text-white/70 text-sm">
+                    Built on Algorand's environmentally sustainable blockchain
+                  </CardDescription>
+                </CardHeader>
               </Card>
 
-              <Card className="bg-black/30 border-teal-500/20 backdrop-blur-sm hover:bg-black/40 transition-all duration-300">
-                <CardContent className="p-6">
-                  <div className="flex items-center gap-3 mb-4">
-                    <Image
-                      src="/algorand_logo_mark.png"
-                      alt="Algorand"
-                      width={24}
-                      height={24}
-                      className="w-6 h-6"
-                      style={{ filter: "brightness(0) invert(1) sepia(1) saturate(10000%) hue-rotate(170deg)" }}
-                    />
-                    <h3 className="text-lg font-semibold text-white">Algorand Powered</h3>
+              <Card className="bg-white/5 backdrop-blur-xl border-white/10 rounded-xl sm:rounded-2xl hover:bg-white/10 transition-all duration-300">
+                <CardHeader className="p-4 sm:p-6">
+                  <div className="w-10 h-10 sm:w-12 sm:h-12 bg-yellow-500/20 rounded-lg flex items-center justify-center mb-3 sm:mb-4">
+                    <HandshakeIcon className="w-5 h-5 sm:w-6 sm:h-6 text-yellow-400" />
                   </div>
-                  <p className="text-gray-300 text-sm">
-                    Secure, scalable, and environmentally friendly blockchain infrastructure
-                  </p>
-                </CardContent>
+                  <CardTitle className="text-white text-base sm:text-lg">Smart Contracts</CardTitle>
+                  <CardDescription className="text-white/70 text-sm">
+                    Automated funding release based on milestone achievements
+                  </CardDescription>
+                </CardHeader>
               </Card>
 
-              <Card className="bg-black/30 border-teal-500/20 backdrop-blur-sm hover:bg-black/40 transition-all duration-300">
-                <CardContent className="p-6">
-                  <div className="flex items-center gap-3 mb-4">
-                    <CoinsIcon className="w-6 h-6 text-teal-400" />
-                    <h3 className="text-lg font-semibold text-white">Tokenized Credits</h3>
+              <Card className="bg-white/5 backdrop-blur-xl border-white/10 rounded-xl sm:rounded-2xl hover:bg-white/10 transition-all duration-300">
+                <CardHeader className="p-4 sm:p-6">
+                  <div className="w-10 h-10 sm:w-12 sm:h-12 bg-red-500/20 rounded-lg flex items-center justify-center mb-3 sm:mb-4">
+                    <CoinsIcon className="w-5 h-5 sm:w-6 sm:h-6 text-red-400" />
                   </div>
-                  <p className="text-gray-300 text-sm">
-                    Transparent management of verified carbon credits with easy transfer
-                  </p>
-                </CardContent>
+                  <CardTitle className="text-white text-base sm:text-lg">Global Impact</CardTitle>
+                  <CardDescription className="text-white/70 text-sm">
+                    Fund climate projects worldwide with minimal barriers
+                  </CardDescription>
+                </CardHeader>
               </Card>
 
-              <Card className="bg-black/30 border-teal-500/20 backdrop-blur-sm hover:bg-black/40 transition-all duration-300">
-                <CardContent className="p-6">
-                  <div className="flex items-center gap-3 mb-4">
-                    <CheckCircleIcon className="w-6 h-6 text-teal-400" />
-                    <h3 className="text-lg font-semibold text-white">Hybrid Innovation</h3>
+              <Card className="bg-white/5 backdrop-blur-xl border-white/10 rounded-xl sm:rounded-2xl hover:bg-white/10 transition-all duration-300">
+                <CardHeader className="p-4 sm:p-6">
+                  <div className="w-10 h-10 sm:w-12 sm:h-12 bg-teal-500/20 rounded-lg flex items-center justify-center mb-3 sm:mb-4">
+                    <CheckCircleIcon className="w-5 h-5 sm:w-6 sm:h-6 text-teal-400" />
                   </div>
-                  <p className="text-gray-300 text-sm">
-                    Unique decision-making model setting new standards for environmental initiatives
-                  </p>
-                </CardContent>
+                  <CardTitle className="text-white text-base sm:text-lg">Community Driven</CardTitle>
+                  <CardDescription className="text-white/70 text-sm">
+                    Democratic governance with token-based voting rights
+                  </CardDescription>
+                </CardHeader>
               </Card>
             </div>
           </div>
         </section>
 
-        {/* CTA Section */}
-        <section className="py-20 px-4">
-          <div className="max-w-4xl mx-auto text-center">
-            <div className="bg-black/20 backdrop-blur-sm border border-teal-500/20 rounded-2xl p-12">
-              <h2 className="text-4xl font-bold text-white mb-4">Ready to Shape Climate's Future?</h2>
-              <p className="text-xl text-gray-300 mb-8 max-w-2xl mx-auto">
-                Join our community of innovators funding verified climate projects through intelligent governance
-              </p>
+        {/* Mobile-optimized Call to Action */}
+        <section className="py-12 sm:py-20 px-4">
+          <div className="max-w-4xl mx-auto text-center space-y-6 sm:space-y-8">
+            <h2 className="text-2xl sm:text-4xl font-bold text-white">Ready to Make an Impact?</h2>
+            <p className="text-sm sm:text-xl text-gray-300 max-w-2xl mx-auto">
+              Join the TerraLinke community and start funding climate projects that matter
+            </p>
+            <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center items-center pt-4">
               <Link href="/connect-wallet">
-                <Button size="lg" className="px-8 py-4 text-lg bg-teal-600 hover:bg-teal-700 text-white rounded-xl shadow-lg transition-all duration-300 transform hover:scale-105">
-                  Get Started Now
-                  <ArrowRightIcon className="ml-2 w-5 h-5" />
+                <Button className="w-full sm:w-auto bg-teal-600 hover:bg-teal-700 text-white font-medium px-6 sm:px-8 py-3 rounded-xl text-sm sm:text-base h-12 sm:h-14 touch-manipulation">
+                  Connect Wallet & Start Voting
+                </Button>
+              </Link>
+              <Link href="/submit-proposal">
+                <Button variant="ghost" className="w-full sm:w-auto bg-white/5 border border-white/20 text-white hover:bg-white/10 font-medium px-6 sm:px-8 py-3 rounded-xl text-sm sm:text-base h-12 sm:h-14 touch-manipulation">
+                  Submit Your Project
                 </Button>
               </Link>
             </div>
@@ -249,65 +254,67 @@ export function LandingPage() {
         </section>
       </main>
 
-      {/* Footer */}
-      <footer className="relative z-10 border-t border-gray-800/50 bg-black/20 backdrop-blur-sm">
-        <div className="max-w-6xl mx-auto px-4 py-8">
-          <div className="flex flex-col md:flex-row justify-between items-center gap-4">
-            <div className="text-gray-400 text-sm">
-              &copy; {new Date().getFullYear()} TerraLinke. Built by{" "}
-              <a
-                href="https://github.com/lhcee3"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-teal-400 hover:text-teal-300 underline"
-              >
-                Aneesh
-              </a>
+      {/* Mobile-optimized Footer */}
+      <footer className="relative z-10 border-t border-white/10 bg-white/5 backdrop-blur-xl">
+        <div className="max-w-6xl mx-auto px-4 py-6 sm:py-8">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 sm:gap-8">
+            <div className="text-center sm:text-left">
+              <div className="flex items-center justify-center sm:justify-start gap-2 mb-3">
+                <div className="w-6 h-6 bg-gradient-to-br from-teal-400 to-emerald-500 rounded-lg flex items-center justify-center">
+                  <LeafIcon className="w-4 h-4 text-white" />
+                </div>
+                <span className="text-teal-400 font-bold text-lg">TerraLinke</span>
+              </div>
+              <p className="text-white/60 text-xs sm:text-sm">
+                AI-governed climate action DAO on Algorand blockchain
+              </p>
             </div>
-            <div className="flex gap-6 text-sm">
-              <a href="#" className="text-gray-400 hover:text-white transition-colors">
-                Privacy Policy
-              </a>
-              <a href="#" className="text-gray-400 hover:text-white transition-colors">
-                Terms of Service
-              </a>
+            
+            <div className="text-center">
+              <h4 className="text-white font-semibold mb-3 text-sm">Quick Links</h4>
+              <div className="space-y-2 text-xs sm:text-sm">
+                <Link href="/dashboard" className="block text-white/60 hover:text-white transition-colors">
+                  Dashboard
+                </Link>
+                <Link href="/submit-proposal" className="block text-white/60 hover:text-white transition-colors">
+                  Submit Proposal
+                </Link>
+                <Link href="/submission-guidelines" className="block text-white/60 hover:text-white transition-colors">
+                  Guidelines
+                </Link>
+              </div>
             </div>
+            
+            <div className="text-center sm:text-right">
+              <h4 className="text-white font-semibold mb-3 text-sm">Connect</h4>
+              <div className="space-y-2 text-xs sm:text-sm">
+                <a 
+                  href="https://github.com/lhcee3/AI-G-DAO" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="block text-white/60 hover:text-white transition-colors"
+                >
+                  GitHub
+                </a>
+                <a 
+                  href="https://algorand.foundation/" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="block text-white/60 hover:text-white transition-colors"
+                >
+                  Algorand
+                </a>
+              </div>
+            </div>
+          </div>
+          
+          <div className="border-t border-white/10 mt-6 sm:mt-8 pt-4 sm:pt-6 text-center">
+            <p className="text-white/40 text-xs">
+              © 2024 TerraLinke. Built with ❤️ for the planet.
+            </p>
           </div>
         </div>
       </footer>
-
-      {/* CSS for animations */}
-      <style jsx>{`
-        @keyframes moving-gradient {
-          0% {
-            background-position: 0% 50%;
-          }
-          50% {
-            background-position: 100% 50%;
-          }
-          100% {
-            background-position: 0% 50%;
-          }
-        }
-        .animate-moving-gradient {
-          background: linear-gradient(270deg, #000000, #000080, #000000);
-          background-size: 400% 400%;
-          animation: moving-gradient 15s ease infinite;
-        }
-
-        @keyframes blink-glow {
-          0%, 100% {
-            text-shadow: 0 0 5px rgba(0, 255, 255, 0.3), 0 0 10px rgba(0, 255, 255, 0.3), 0 0 15px rgba(0, 255, 255, 0.3);
-          }
-          50% {
-            text-shadow: 0 0 15px rgba(0, 255, 255, 0.8), 0 0 25px rgba(0, 255, 255, 0.8), 0 0 35px rgba(0, 255, 255, 0.8);
-          }
-        }
-        .climate-glow {
-          animation: blink-glow 3s infinite alternate;
-          color: #00FFFF;
-        }
-      `}</style>
     </div>
   )
 }

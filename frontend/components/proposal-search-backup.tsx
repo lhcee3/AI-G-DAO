@@ -245,10 +245,10 @@ export function SearchResults({ results, searchTerm, onVote, votingProposalId }:
 
   if (results.length === 0) {
     return (
-      <Card className="bg-white/5 backdrop-blur-xl border-white/10 rounded-xl sm:rounded-2xl p-6 sm:p-8 text-center">
-        <SearchIcon className="w-12 h-12 sm:w-16 sm:h-16 text-white/20 mx-auto mb-4" />
-        <h3 className="text-white font-medium mb-2 text-sm sm:text-base">No proposals found</h3>
-        <p className="text-white/60 text-xs sm:text-sm">
+      <Card className="bg-white/5 backdrop-blur-xl border-white/10 rounded-2xl p-8 text-center">
+        <SearchIcon className="w-16 h-16 text-white/20 mx-auto mb-4" />
+        <h3 className="text-white font-medium mb-2">No proposals found</h3>
+        <p className="text-white/60 text-sm">
           Try adjusting your search terms or browsing by category
         </p>
       </Card>
@@ -257,19 +257,19 @@ export function SearchResults({ results, searchTerm, onVote, votingProposalId }:
 
   return (
     <div className="space-y-4">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+      <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <span className="text-white font-medium text-sm sm:text-base">Search Results</span>
-          <Badge className="bg-white/20 backdrop-blur-sm text-white text-xs">
+          <span className="text-white font-medium">Search Results</span>
+          <Badge className="bg-white/20 backdrop-blur-sm text-white">
             {results.length} found
           </Badge>
         </div>
-        <div className="text-white/60 text-xs sm:text-sm">
+        <div className="text-white/60 text-sm">
           for "{searchTerm}"
         </div>
       </div>
 
-      <div className="space-y-3 sm:space-y-4">
+      <div className="space-y-4">
         {results.map((result) => {
           const category = getCategoryById(result.category);
           const timeLeft = Math.ceil((result.endTime - Date.now()) / (24 * 60 * 60 * 1000));
@@ -278,61 +278,57 @@ export function SearchResults({ results, searchTerm, onVote, votingProposalId }:
           const yesPercentage = totalVotes > 0 ? Math.round((result.voteYes / totalVotes) * 100) : 0;
 
           return (
-            <Card key={result.id} className="bg-white/5 backdrop-blur-xl border-white/10 rounded-xl sm:rounded-2xl hover:bg-white/10 transition-all duration-300">
-              <CardContent className="p-4 sm:p-6">
-                <div className="space-y-3 sm:space-y-4">
+            <Card key={result.id} className="bg-white/5 backdrop-blur-xl border-white/10 rounded-2xl hover:bg-white/10 transition-all duration-300">
+              <CardContent className="p-6">
+                <div className="space-y-4">
                   
-                  {/* Mobile-optimized Header */}
-                  <div className="space-y-3">
-                    <div className="flex items-start justify-between gap-3">
-                      <div className="flex-1 min-w-0">
+                  {/* Header */}
+                  <div className="flex items-start justify-between">
+                    <div className="flex-1 space-y-2">
+                      <div className="flex items-center gap-2 flex-wrap">
                         <h3 
-                          className="text-white font-medium text-sm sm:text-lg leading-tight"
+                          className="text-white font-medium text-lg"
                           dangerouslySetInnerHTML={{ 
                             __html: searchEngine.highlightMatches(result.title, searchTerm) 
                           }}
                         />
+                        {category && (
+                          <Badge className="bg-white/10 backdrop-blur-sm border border-white/20 text-white text-xs">
+                            {category.icon} {category.name}
+                          </Badge>
+                        )}
+                        <Badge className="bg-white/20 backdrop-blur-sm text-white text-xs">
+                          Score: {result.relevanceScore}
+                        </Badge>
                       </div>
                       
-                      <div className="flex items-center gap-2 flex-shrink-0">
-                        <FavoriteButton
-                          proposalId={result.id.toString()}
-                          size="sm"
-                          variant="ghost"
-                        />
-                        <Badge className={`${timeLeft > 0 ? 'bg-yellow-500/20 text-yellow-400 border-yellow-500/30' : 'bg-red-500/20 text-red-400 border-red-500/30'} rounded-full text-xs`}>
-                          <ClockIcon className="w-3 h-3 mr-1" />
-                          {timeText}
-                        </Badge>
-                      </div>
+                      <p 
+                        className="text-white/70 text-sm leading-relaxed"
+                        dangerouslySetInnerHTML={{ 
+                          __html: searchEngine.highlightMatches(
+                            result.description.slice(0, 150) + (result.description.length > 150 ? '...' : ''), 
+                            searchTerm
+                          ) 
+                        }}
+                      />
                     </div>
                     
-                    {/* Mobile-optimized Category and Score */}
-                    <div className="flex flex-wrap items-center gap-2">
-                      {category && (
-                        <Badge className="bg-white/10 backdrop-blur-sm border border-white/20 text-white text-xs">
-                          {category.icon} {category.name}
-                        </Badge>
-                      )}
-                      <Badge className="bg-white/20 backdrop-blur-sm text-white text-xs">
-                        Score: {result.relevanceScore}
+                    <div className="flex items-center gap-2 ml-4">
+                      <FavoriteButton
+                        proposalId={result.id.toString()}
+                        size="sm"
+                        variant="ghost"
+                      />
+                      <Badge className={`${timeLeft > 0 ? 'bg-yellow-500/20 text-yellow-400 border-yellow-500/30' : 'bg-red-500/20 text-red-400 border-red-500/30'} rounded-full`}>
+                        <ClockIcon className="w-3 h-3 mr-1" />
+                        {timeText}
                       </Badge>
                     </div>
-                    
-                    <p 
-                      className="text-white/70 text-xs sm:text-sm leading-relaxed"
-                      dangerouslySetInnerHTML={{ 
-                        __html: searchEngine.highlightMatches(
-                          result.description.slice(0, 120) + (result.description.length > 120 ? '...' : ''), 
-                          searchTerm
-                        ) 
-                      }}
-                    />
                   </div>
 
-                  {/* Mobile-optimized Stats */}
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs">
-                    <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4">
+                  {/* Stats */}
+                  <div className="flex items-center justify-between text-sm">
+                    <div className="flex items-center gap-4">
                       <span className="text-white/60">
                         Funding: ${result.fundingAmount.toLocaleString()}
                       </span>
@@ -341,7 +337,7 @@ export function SearchResults({ results, searchTerm, onVote, votingProposalId }:
                       </span>
                       {result.aiScore && (
                         <div className="flex items-center gap-1 text-green-400">
-                          <TrendingUpIcon className="w-3 h-3" />
+                          <TrendingUpIcon className="w-4 h-4" />
                           AI Score: {result.aiScore}/10
                         </div>
                       )}
@@ -350,7 +346,7 @@ export function SearchResults({ results, searchTerm, onVote, votingProposalId }:
 
                   {/* Matched Fields */}
                   {result.matchedFields.length > 0 && (
-                    <div className="flex flex-wrap items-center gap-2">
+                    <div className="flex items-center gap-2">
                       <span className="text-white/40 text-xs">Matched:</span>
                       {result.matchedFields.map((field) => (
                         <Badge key={field} className="bg-white/10 text-white/60 text-xs px-2 py-1">
@@ -360,12 +356,12 @@ export function SearchResults({ results, searchTerm, onVote, votingProposalId }:
                     </div>
                   )}
 
-                  {/* Mobile-optimized Voting Buttons */}
+                  {/* Voting Buttons */}
                   {result.status === 'active' && (
-                    <div className="grid grid-cols-2 gap-2 sm:gap-3 pt-2">
+                    <div className="grid grid-cols-2 gap-3 pt-2">
                       <Button 
                         size="sm" 
-                        className="bg-green-500/20 hover:bg-green-500/30 text-green-400 border border-green-500/30 rounded-xl text-xs sm:text-sm h-8 sm:h-9 touch-manipulation"
+                        className="bg-green-500/20 hover:bg-green-500/30 text-green-400 border border-green-500/30 rounded-xl"
                         onClick={() => onVote(result.id, 'for')}
                         disabled={votingProposalId === result.id.toString()}
                       >
@@ -373,7 +369,7 @@ export function SearchResults({ results, searchTerm, onVote, votingProposalId }:
                       </Button>
                       <Button 
                         size="sm" 
-                        className="bg-red-500/10 border border-red-500/30 text-red-400 hover:bg-red-500/20 rounded-xl text-xs sm:text-sm h-8 sm:h-9 touch-manipulation"
+                        className="bg-red-500/10 border border-red-500/30 text-red-400 hover:bg-red-500/20 rounded-xl"
                         onClick={() => onVote(result.id, 'against')}
                         disabled={votingProposalId === result.id.toString()}
                       >
