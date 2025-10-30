@@ -69,6 +69,7 @@ export function useClimateDAO() {
   /**
    * Submit a proposal to the blockchain with reduced ALGO costs
    * Only requires 0.1 ALGO deposit instead of 1 ALGO
+   * Now includes DEMO mode for development/testing
    */
   const submitProposal = async (proposalData: {
     title: string
@@ -86,19 +87,14 @@ export function useClimateDAO() {
     setError(null);
 
     try {
-      const suggestedParams = await getSuggestedParams();
-      
-      // Calculate costs - reduced from 1 ALGO to 0.1 ALGO deposit
-      const depositAmount = 0.1; // ALGO
-      const costs = calculateTransactionCosts(2); // Payment + App call
-      
-      console.log('Transaction costs:', costs);
+      console.log('🚀 Starting proposal submission...');
       
       // Generate unique proposal ID
       const proposalId = Date.now();
       const endTime = Date.now() + (7 * 24 * 60 * 60 * 1000); // 7 days from now
       
       // Store proposal data on blockchain/localStorage
+      console.log('Storing proposal data...');
       const stored = await climateDAOQuery.storeProposal({
         id: proposalId,
         title: proposalData.title,
@@ -111,8 +107,43 @@ export function useClimateDAO() {
       });
       
       if (!stored) {
-        throw new Error('Failed to store proposal data');
+        throw new Error('Failed to store proposal data. Please try again.');
       }
+      
+      console.log('Proposal data stored successfully!');
+      
+      // DEMO MODE: Skip blockchain transactions for now
+      // This allows the app to work without requiring a fully deployed smart contract
+      const DEMO_MODE = true; // Set to false when smart contract is deployed
+      
+      if (DEMO_MODE) {
+        console.log('🎯 DEMO MODE: Simulating blockchain transaction...');
+        
+        // Generate a mock transaction ID
+        const mockTxId = `demo_tx_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+        
+        // Simulate a delay for transaction processing
+        await new Promise(resolve => setTimeout(resolve, 2000));
+        
+        console.log('✅ DEMO MODE: Proposal submitted successfully with mock txId:', mockTxId);
+        
+        return {
+          txId: mockTxId,
+          confirmedRound: Date.now(),
+          applicationIndex: CONTRACT_IDS.CLIMATE_DAO,
+          timestamp: Date.now(),
+          success: true,
+          message: 'Proposal submitted successfully (Demo Mode)'
+        } as TransactionResult;
+      }
+      
+      // PRODUCTION MODE: Real blockchain transactions
+      const suggestedParams = await getSuggestedParams();
+      const depositAmount = 0.1; // ALGO
+      const costs = calculateTransactionCosts(2); // Payment + App call
+      
+      console.log('Transaction costs:', costs);
+      console.log('Creating transaction group...');
       
       // Create transaction group with reduced deposit
       const txnGroup = TransactionBuilder.createProposalWithDeposit(
@@ -122,6 +153,8 @@ export function useClimateDAO() {
         depositAmount
       );
 
+      console.log('Transaction group created, signing...');
+      
       // Sign all transactions in group
       const signedTxns = [];
       for (const txn of txnGroup) {
@@ -129,6 +162,8 @@ export function useClimateDAO() {
         signedTxns.push(signedTxn);
       }
 
+      console.log('Transactions signed, submitting to blockchain...');
+      
       // Submit transaction group
       const response = await algodClient.sendRawTransaction(signedTxns).do();
       const txId = response.txid;
@@ -152,8 +187,8 @@ export function useClimateDAO() {
   };
 
   /**
-   * Vote on a proposal with DEMO mode (localStorage-based for shipping)
-   * Includes double-voting prevention and mock blockchain simulation
+   * Vote on a proposal with real blockchain transactions
+   * Includes double-voting prevention and testnet compatibility
    */
   const voteOnProposal = async (proposalId: number, vote: 'for' | 'against'): Promise<TransactionResult> => {
     if (!isConnected || !address) {
@@ -164,15 +199,13 @@ export function useClimateDAO() {
     setError(null);
 
     try {
-      console.log('�️ DEMO MODE: Starting vote:', vote, 'on proposal', proposalId)
+      console.log('🗳️ Starting vote:', vote, 'on proposal', proposalId);
       
       // Check if user has already voted on this proposal
       const votingState = await climateDAOQuery.getUserVotingState(proposalId, address);
       if (votingState.hasVoted) {
-        // Don't throw here - return a structured result so callers can show a friendly notification
         const message = `You have already voted "${votingState.userVote}" on this proposal`;
         console.log('⚠️ Duplicate vote attempt:', message);
-        // set user-visible error but return a non-throwing result for UI to consume
         setError(message);
         return {
           txId: '',
@@ -195,25 +228,67 @@ export function useClimateDAO() {
         throw new Error('Voting is no longer active for this proposal');
       }
 
-      console.log('🚀 DEMO MODE: Simulating blockchain transaction...')
+      // PRODUCTION MODE: Real blockchain transactions
+      console.log('🚀 Creating real blockchain voting transaction...');
       
-      // DEMO MODE: Generate mock transaction ID
-      const mockTxId = 'DEMO_TX_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+      const suggestedParams = await getSuggestedParams();
       
-      // Store vote in localStorage 
-      await climateDAOQuery.storeVote(proposalId, vote, address, mockTxId);
+      // Check if contract is deployed
+      if (!CONTRACT_IDS.CLIMATE_DAO || CONTRACT_IDS.CLIMATE_DAO === 0) {
+        console.warn('⚠️ Smart contract not deployed, falling back to demo mode');
+        
+        // Fallback to demo mode for development
+        const mockTxId = 'DEMO_VOTE_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+        await climateDAOQuery.storeVote(proposalId, vote, address, mockTxId);
+        
+        return {
+          txId: mockTxId,
+          confirmedRound: Date.now(),
+          timestamp: Date.now(),
+          success: true,
+          message: `Vote "${vote}" recorded (Demo Mode - Contract Not Deployed)`
+        } as TransactionResult;
+      }
       
-      console.log(`✅ Vote "${vote}" recorded successfully with mock txId:`, mockTxId);
+      // Create voting transaction with minimal cost (just network fee ~0.001 ALGO)
+      const voteTxn = TransactionBuilder.createVoteTransaction(
+        { sender: address, suggestedParams },
+        CONTRACT_IDS.CLIMATE_DAO,
+        proposalId,
+        vote
+      );
+
+      console.log('Signing voting transaction...');
       
-      // Return mock result that looks like real blockchain response
-      const result: TransactionResult = {
-        txId: mockTxId,
-        confirmedRound: Date.now(),
-        timestamp: Date.now(),
-        success: true
+      // Sign the transaction
+      const signedTxn = await signTransaction(voteTxn);
+
+      console.log('Submitting vote to Algorand testnet...');
+      
+      // Submit transaction
+      const response = await algodClient.sendRawTransaction(signedTxn).do();
+      const txId = response.txid;
+      
+      console.log('Vote transaction submitted with txId:', txId);
+      console.log('🔗 View on Lora:', `https://lora.algokit.io/testnet/transaction/${txId}`);
+      
+      // Wait for confirmation
+      const result = await confirmTransaction(algodClient, txId);
+      
+      console.log('Vote confirmed on blockchain:', result);
+      
+      // Store vote in localStorage for UI updates
+      await climateDAOQuery.storeVote(proposalId, vote, address, txId);
+      
+      console.log(`✅ Vote "${vote}" recorded successfully with real txId:`, txId);
+      
+      return {
+        ...result,
+        success: true,
+        message: `Vote "${vote}" recorded on Algorand testnet`,
+        txId: txId
       };
       
-      return result;
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Voting failed';
       console.error('❌ Voting error:', errorMessage);

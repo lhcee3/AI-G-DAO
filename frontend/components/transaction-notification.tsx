@@ -42,7 +42,7 @@ export function TransactionNotification({
   };
 
   const openInExplorer = () => {
-    window.open(`https://testnet.algoexplorer.io/tx/${txId}`, '_blank');
+    window.open(`https://lora.algokit.io/testnet/transaction/${txId}`, '_blank');
   };
 
   if (!isOpen) return null;

@@ -5,7 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
-import { VoteIcon, CheckCircleIcon, XCircleIcon, ClockIcon, TrendingUpIcon, LeafIcon, WalletIcon, ArrowLeftIcon } from 'lucide-react';
+import { VoteIcon, CheckCircleIcon, XCircleIcon, ClockIcon, TrendingUpIcon, LeafIcon, WalletIcon, ArrowLeftIcon, CopyIcon, ExternalLinkIcon } from 'lucide-react';
 import { useWalletContext } from '@/hooks/use-wallet';
 import { useClimateDAO } from '@/hooks/use-climate-dao';
 import { useNotifications } from '@/hooks/use-notifications';
@@ -62,6 +62,9 @@ export default function VotePage() {
     proposal: null,
     voteType: null
   });
+
+  // State for copy feedback
+  const [copied, setCopied] = useState(false);
 
   // Fetch proposals
   useEffect(() => {
@@ -367,6 +370,99 @@ export default function VotePage() {
                                 <>Vote No (0.001 ALGO)</>
                               )}
                             </Button>
+                          </div>
+                        )}
+                        
+                        {/* Transaction ID Box - Always visible for active proposals */}
+                        {proposal.status === 'active' && (
+                          <div className="mt-4 p-3 bg-black/20 border border-white/20 rounded-xl">
+                            <div className="space-y-3">
+                              <div>
+                                <label className="text-xs text-white/70 mb-2 block">Transaction ID:</label>
+                                <div className="flex items-center gap-2 bg-black/30 rounded-lg p-3">
+                                  <code className="text-sm text-blue-400 font-mono break-all flex-1">
+                                    {votingState.proposalId === proposal.id && votingState.txId 
+                                      ? votingState.txId 
+                                      : 'No transaction yet - vote to generate transaction ID'}
+                                  </code>
+                                  {votingState.proposalId === proposal.id && votingState.txId && (
+                                    <Button
+                                      size="sm"
+                                      variant="ghost"
+                                      onClick={async () => {
+                                        await navigator.clipboard.writeText(votingState.txId!);
+                                        setCopied(true);
+                                        setTimeout(() => setCopied(false), 2000);
+                                      }}
+                                      className="text-white/70 hover:text-white hover:bg-white/10 p-2 h-8 w-8"
+                                    >
+                                      <CopyIcon className="w-4 h-4" />
+                                    </Button>
+                                  )}
+                                </div>
+                                {copied && votingState.proposalId === proposal.id && votingState.txId && (
+                                  <p className="text-xs text-green-400 mt-1">Copied to clipboard!</p>
+                                )}
+                              </div>
+                              
+                              {votingState.proposalId === proposal.id && votingState.txId && (
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  onClick={() => window.open(`https://lora.algokit.io/testnet/transaction/${votingState.txId}`, '_blank')}
+                                  className="w-full border-blue-500/30 text-blue-400 hover:bg-blue-500/10 bg-transparent text-xs"
+                                >
+                                  <ExternalLinkIcon className="w-4 h-4 mr-2" />
+                                  View on Lora Explorer
+                                </Button>
+                              )}
+                            </div>
+                          </div>
+                        )}
+                        
+                        {/* Transaction Success Box */}
+                        {votingState.proposalId === proposal.id && votingState.status === 'confirmed' && votingState.txId && (
+                          <div className="mt-4 p-4 bg-green-500/10 border border-green-500/30 rounded-xl">
+                            <div className="flex items-center gap-2 mb-3">
+                              <CheckCircleIcon className="w-5 h-5 text-green-400" />
+                              <span className="text-green-400 font-medium">Vote Confirmed!</span>
+                            </div>
+                            
+                            <div className="space-y-3">
+                              <div>
+                                <label className="text-xs text-white/70 mb-1 block">Transaction ID:</label>
+                                <div className="flex items-center gap-2 bg-black/20 rounded-lg p-2">
+                                  <code className="text-xs text-blue-400 font-mono break-all flex-1">
+                                    {votingState.txId}
+                                  </code>
+                                  <Button
+                                    size="sm"
+                                    variant="ghost"
+                                    onClick={async () => {
+                                      await navigator.clipboard.writeText(votingState.txId!);
+                                      setCopied(true);
+                                      setTimeout(() => setCopied(false), 2000);
+                                    }}
+                                    className="text-white/70 hover:text-white hover:bg-white/10 p-1 h-6 w-6"
+                                  >
+                                    <CopyIcon className="w-3 h-3" />
+                                  </Button>
+                                </div>
+                                {copied && (
+                                  <p className="text-xs text-green-400 mt-1">Copied to clipboard!</p>
+                                )}
+                              </div>
+                              
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() => window.open(`https://lora.algokit.io/testnet/transaction/${votingState.txId}`, '_blank')}
+                                className="w-full border-blue-500/30 text-blue-400 hover:bg-blue-500/10 bg-transparent text-xs"
+                              >
+                                <ExternalLinkIcon className="w-3 h-3 mr-2" />
+                                View on Lora Explorer
+                              </Button>
+                            </div>
                           </div>
                         )}
                         

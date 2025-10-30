@@ -168,11 +168,11 @@ export function TransactionStatus({
             <Button
               variant="outline"
               size="sm"
-              onClick={() => window.open(`https://testnet.algoexplorer.io/tx/${txId}`, '_blank')}
+              onClick={() => window.open(`https://lora.algokit.io/testnet/transaction/${txId}`, '_blank')}
               className="flex-1 border-white/30 text-white hover:bg-white/10 bg-transparent"
             >
               <ExternalLinkIcon className="w-4 h-4 mr-2" />
-              View on Explorer
+              View on Lora
             </Button>
           )}
           {onClose && (

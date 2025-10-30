@@ -169,10 +169,11 @@ export class ClimateDAOQueryService {
    * Check if user can submit a proposal (rate limiting)
    */
   private canUserSubmitProposal(userAddress: string): { canSubmit: boolean; reason?: string } {
+    // Development-friendly limits for testing
     const LIMITS = {
-      maxPerUser: 10,           // Max total proposals per user
-      maxPerDay: 3,             // Max proposals per user per day
-      minTimeBetween: 1800000,  // 30 minutes between proposals (in ms)
+      maxPerUser: 50,           // Increased for testing
+      maxPerDay: 20,            // Increased for testing  
+      minTimeBetween: 60000,    // Reduced to 1 minute for testing (60000 ms)
     };
 
     try {
@@ -200,7 +201,13 @@ export class ClimateDAOQueryService {
         
         if (timeSinceLastProposal < LIMITS.minTimeBetween) {
           const minutesLeft = Math.ceil((LIMITS.minTimeBetween - timeSinceLastProposal) / 60000);
-          return { canSubmit: false, reason: `Please wait ${minutesLeft} minutes before submitting another proposal` };
+          const secondsLeft = Math.ceil((LIMITS.minTimeBetween - timeSinceLastProposal) / 1000);
+          
+          if (minutesLeft < 1) {
+            return { canSubmit: false, reason: `Please wait ${secondsLeft} seconds before submitting another proposal` };
+          } else {
+            return { canSubmit: false, reason: `Please wait ${minutesLeft} minute(s) before submitting another proposal` };
+          }
         }
       }
 
@@ -228,8 +235,10 @@ export class ClimateDAOQueryService {
       // Check rate limits
       const rateCheck = this.canUserSubmitProposal(proposal.creator);
       if (!rateCheck.canSubmit) {
+        console.error('Rate limit check failed:', rateCheck.reason);
         throw new Error(rateCheck.reason || 'Proposal submission limit reached');
       }
+      
       // Create the proposal data to store
       const proposalData = {
         id: proposal.id,
@@ -251,7 +260,14 @@ export class ClimateDAOQueryService {
       localStorage.setItem(storageKey, JSON.stringify(proposalData));
       
       // Also store in a central proposals list
-      const existingProposals = this.getStoredProposals();
+      let existingProposals: BlockchainProposal[] = [];
+      try {
+        existingProposals = this.getStoredProposals();
+      } catch (error) {
+        console.warn('Could not get existing proposals, starting fresh:', error);
+        existingProposals = [];
+      }
+      
       const updatedProposals = [...existingProposals, proposalData];
       localStorage.setItem('climate_dao_proposals', JSON.stringify(updatedProposals));
       
@@ -266,7 +282,7 @@ export class ClimateDAOQueryService {
   /**
    * Get proposals from localStorage cache
    */
-  private getStoredProposals(): BlockchainProposal[] {
+  getStoredProposals(): BlockchainProposal[] {
     try {
       const stored = localStorage.getItem('climate_dao_proposals');
       return stored ? JSON.parse(stored) : [];
@@ -1240,7 +1256,114 @@ export class ClimateDAOQueryService {
       throw error;
     }
   }
+
+  /**
+   * DEVELOPMENT ONLY: Clear all proposal data from localStorage
+   */
+  clearAllProposals(): void {
+    try {
+      localStorage.removeItem('climate_dao_proposals');
+      
+      // Also clear individual proposal keys
+      const keys = Object.keys(localStorage);
+      keys.forEach(key => {
+        if (key.startsWith('proposal_')) {
+          localStorage.removeItem(key);
+        }
+      });
+      
+      console.log('🗑️ All proposal data cleared from localStorage');
+    } catch (error) {
+      console.error('Error clearing proposals:', error);
+    }
+  }
+
+  /**
+   * DEVELOPMENT ONLY: Clear all voting data from localStorage
+   */
+  clearAllVotes(): void {
+    try {
+      const keys = Object.keys(localStorage);
+      keys.forEach(key => {
+        if (key.startsWith('vote_') || key.startsWith('user_votes_')) {
+          localStorage.removeItem(key);
+        }
+      });
+      
+      console.log('🗑️ All voting data cleared from localStorage');
+    } catch (error) {
+      console.error('Error clearing votes:', error);
+    }
+  }
+
+  /**
+   * DEVELOPMENT ONLY: Clear ALL app data from localStorage
+   */
+  clearAllData(): void {
+    try {
+      // First, clear all localStorage completely
+      localStorage.clear();
+      
+      // Then specifically target our keys in case some remain
+      const keys = Object.keys(localStorage);
+      keys.forEach(key => {
+        if (key.startsWith('climate_dao_') || 
+            key.startsWith('proposal_') || 
+            key.startsWith('vote_') || 
+            key.startsWith('user_votes_') ||
+            key.startsWith('favorites_') ||
+            key.startsWith('categories_') ||
+            key.startsWith('search_')) {
+          localStorage.removeItem(key);
+        }
+      });
+      
+      console.log('🗑️ ALL localStorage data cleared completely');
+      console.log('🔄 Refresh the page to see clean state');
+    } catch (error) {
+      console.error('Error clearing app data:', error);
+    }
+  }
+
+  /**
+   * DEVELOPMENT ONLY: Nuclear option - clear everything and prevent auto-restore
+   */
+  nukeAllData(): void {
+    try {
+      // Clear localStorage completely
+      localStorage.clear();
+      
+      // Set a flag to prevent auto-restore
+      localStorage.setItem('DEVELOPMENT_CLEARED', 'true');
+      
+      console.log('💥 NUCLEAR CLEAR: All data destroyed');
+      console.log('🚫 Auto-restore disabled');
+      console.log('🔄 REFRESH THE PAGE NOW to see clean state');
+    } catch (error) {
+      console.error('Error in nuclear clear:', error);
+    }
+  }
 }
 
 // Singleton instance
 export const climateDAOQuery = new ClimateDAOQueryService();
+
+// DEVELOPMENT ONLY: Expose clearing functions globally in browser
+if (typeof window !== 'undefined') {
+  (window as any).devTools = {
+    clearProposals: () => climateDAOQuery.clearAllProposals(),
+    clearVotes: () => climateDAOQuery.clearAllVotes(),
+    clearAllData: () => climateDAOQuery.clearAllData(),
+    nukeAllData: () => climateDAOQuery.nukeAllData(),
+    getProposals: () => climateDAOQuery.getStoredProposals(),
+    getStats: () => climateDAOQuery.getStats('dummy-address')
+  };
+  
+  console.log('🛠️ DevTools available: window.devTools');
+  console.log('  - clearProposals(): Clear all proposals');
+  console.log('  - clearVotes(): Clear all votes');
+  console.log('  - clearAllData(): Clear everything');
+  console.log('  - nukeAllData(): NUCLEAR CLEAR (prevents auto-restore)');
+  console.log('  - getProposals(): View all proposals');
+  console.log('  - getStats(): View statistics');
+}
