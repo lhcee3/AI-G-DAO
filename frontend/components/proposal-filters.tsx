@@ -64,29 +64,29 @@ export function ProposalFilters({
   const hasActiveFilters = selectedCategories.length > 0 || statusFilter !== 'all';
   
   return (
-    <div className="space-y-4">
-      {/* Filter Header */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-4">
+    <div className="space-y-3 sm:space-y-4">
+      {/* Filter Header - Mobile optimized */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-0">
+        <div className="flex items-center gap-3 sm:gap-4 overflow-x-auto pb-1">
           <Button
             onClick={() => setShowFilters(!showFilters)}
-            className="bg-white/5 backdrop-blur-xl border border-white/20 text-white hover:bg-white/10"
+            className="bg-white/5 backdrop-blur-xl border border-white/20 text-white hover:bg-white/10 shrink-0"
           >
             <FilterIcon className="w-4 h-4 mr-2" />
-            Filters
+            <span className="hidden sm:inline">Filters</span>
+            <span className="sm:hidden">Filter</span>
             {hasActiveFilters && (
-              <Badge className="ml-2 bg-white/20 backdrop-blur-sm text-white border-white/30">
-                {selectedCategories.length + (statusFilter !== 'all' ? 1 : 0)}
+              <Badge className="ml-2 bg-white/20 backdrop-blur-sm text-white border-white/30 text-xs">
+                {selectedCategories.length + (statusFilter !== 'all' ? 1 : 0) + (showFavoritesOnly ? 1 : 0)}
               </Badge>
             )}
           </Button>
           
           {hasActiveFilters && (
             <Button
-              variant="ghost"
               size="sm"
               onClick={clearAllFilters}
-              className="text-white/60 hover:text-white hover:bg-white/10"
+              className="text-white/60 hover:text-white hover:bg-white/10 shrink-0"
             >
               <XIcon className="w-4 h-4 mr-1" />
               Clear All
@@ -203,7 +203,7 @@ export function ProposalFilters({
           {/* Category Filter */}
           <div>
             <h4 className="text-white font-medium mb-3">Categories</h4>
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3">
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
               {PROPOSAL_CATEGORIES.map(category => {
                 const isSelected = selectedCategories.includes(category.id);
                 const totalCount = categoryStats[category.id] || 0;
@@ -213,7 +213,7 @@ export function ProposalFilters({
                   <Button
                     key={category.id}
                     onClick={() => toggleCategory(category.id)}
-                    className={`relative h-auto p-4 flex flex-col items-center text-center space-y-2 transition-all duration-200 border ${
+                    className={`relative h-auto p-3 sm:p-4 flex flex-col items-center text-center space-y-1 sm:space-y-2 transition-all duration-200 border touch-manipulation ${
                       isSelected 
                         ? 'bg-white/20 backdrop-blur-sm text-white border-white/40 shadow-lg' 
                         : 'bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10'
@@ -221,9 +221,9 @@ export function ProposalFilters({
                     disabled={totalCount === 0}
                   >
                     {isSelected && (
-                      <CheckIcon className="absolute top-2 right-2 w-4 h-4" />
+                      <CheckIcon className="absolute top-1 right-1 sm:top-2 sm:right-2 w-3 h-3 sm:w-4 sm:h-4" />
                     )}
-                    <div className="text-2xl">{category.icon}</div>
+                    <div className="text-lg sm:text-2xl">{category.icon}</div>
                     <div className="text-xs font-medium leading-tight">
                       {category.name}
                     </div>

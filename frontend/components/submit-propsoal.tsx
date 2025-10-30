@@ -6,7 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
-import { ArrowLeftIcon, UploadIcon, FileTextIcon, DollarSignIcon, CalendarIcon } from "lucide-react"
+import { ArrowLeftIcon, UploadIcon, FileTextIcon, DollarSignIcon, CalendarIcon, LeafIcon } from "lucide-react"
 import Link from "next/link"
 import { useWalletContext } from "@/hooks/use-wallet"
 import { useClimateDAO } from "@/hooks/use-climate-dao"
@@ -146,308 +146,273 @@ export function SubmitProposalPage() {
         <div className="absolute inset-0 bg-black/40"></div>
       </div>
 
-      {/* Header */}
-      <header className="relative z-10 flex items-center justify-between p-6">
-        <Link href="/dashboard" className="flex items-center gap-2 text-white hover:text-blue-200 transition-colors">
-          <ArrowLeftIcon className="w-5 h-5" />
-          <span className="text-sm font-medium">Back to Dashboard</span>
+      {/* Mobile-optimized Header */}
+      <header className="relative z-10 flex items-center justify-between p-4 sm:p-6">
+        <Link href="/dashboard" className="flex items-center gap-2 text-blue-400 hover:text-blue-300 transition-colors touch-manipulation">
+          <ArrowLeftIcon className="w-4 h-4 sm:w-5 sm:h-5" />
+          <span className="text-xs sm:text-sm font-medium">Back to Dashboard</span>
         </Link>
-        <div className="text-white font-bold text-lg">TerraLinke - Submit Proposal</div>
+        <div className="flex items-center gap-2">
+          <div className="w-6 h-6 sm:w-8 sm:h-8 bg-gradient-to-br from-teal-400 to-emerald-500 rounded-lg flex items-center justify-center">
+            <LeafIcon className="w-3 h-3 sm:w-5 sm:h-5 text-white" />
+          </div>
+          <div className="text-blue-400 font-bold text-base sm:text-lg">TerraLinke</div>
+        </div>
       </header>
 
-      <main className="relative z-10 flex-1 px-4 py-8">
-        <div className="max-w-4xl mx-auto space-y-8">
-          <div className="text-center space-y-4">
-            <h1 className="text-4xl font-bold tracking-tight text-blue-400">Submit Your Climate Project</h1>
-            <p className="text-blue-500 text-lg max-w-2xl mx-auto">
-              Share your innovative climate solution with our DAO community. Our AI will evaluate your proposal for
-              environmental impact and feasibility.
+      {/* Main Content */}
+      <main className="relative z-10 flex-1 px-4 py-6 pb-16">
+        <div className="max-w-2xl mx-auto space-y-6 sm:space-y-8">
+          
+          {/* Page Title */}
+          <div className="text-center space-y-2 sm:space-y-4">
+            <h1 className="text-2xl sm:text-4xl font-bold text-white leading-tight">Submit Climate Proposal</h1>
+            <p className="text-blue-300 text-sm sm:text-lg">
+              Propose your climate impact project to the TerraLinke community
             </p>
           </div>
 
-          {/* Success Banner */}
-          {transactionState.status === 'confirmed' && (
-            <div className="bg-green-500/20 border border-green-500/50 rounded-lg p-4 text-center">
-              <div className="flex items-center justify-center space-x-2 text-green-400">
-                <div className="w-6 h-6 text-green-400">✅</div>
-                <div>
-                  <h3 className="font-semibold text-lg">Proposal Submitted Successfully!</h3>
-                  <p className="text-sm text-green-300 mt-1">
-                    Your climate project proposal has been submitted to the blockchain. The form will reset in a few seconds.
-                  </p>
-                  {transactionState.txId && (
-                    <p className="text-xs text-green-200 mt-2">
-                      Transaction ID: {transactionState.txId}
-                    </p>
-                  )}
-                </div>
-              </div>
-            </div>
+          {/* Transaction Status */}
+          {transactionState.status !== 'idle' && (
+            <TransactionStatus
+              status={transactionState.status}
+              txId={transactionState.txId}
+              result={transactionState.result}
+              error={transactionState.error}
+              onClose={closeTransactionStatus}
+            />
           )}
 
-          {/* Error Banner */}
-          {transactionState.status === 'failed' && (
-            <div className="bg-red-500/20 border border-red-500/50 rounded-lg p-4 text-center">
-              <div className="flex items-center justify-center space-x-2 text-red-400">
-                <div className="w-6 h-6 text-red-400">❌</div>
-                <div>
-                  <h3 className="font-semibold text-lg">Transaction Failed</h3>
-                  <p className="text-sm text-red-300 mt-1">
-                    {transactionState.error || "Unable to submit proposal to blockchain. Please try again."}
-                  </p>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    className="mt-2 border-red-500/50 text-red-400 hover:bg-red-500/10"
-                    onClick={() => setTransactionState({ status: 'idle' })}
-                  >
-                    Dismiss
-                  </Button>
-                </div>
-              </div>
-            </div>
-          )}
-
-          <Card className="bg-black/80 border-blue-500/50 backdrop-blur-sm shadow-2xl">
-            <CardHeader className="text-center space-y-4">
-              <div className="mx-auto w-16 h-16 bg-blue-500/20 rounded-full flex items-center justify-center">
-                <FileTextIcon className="w-8 h-8 text-blue-400" />
-              </div>
-              <CardTitle className="text-2xl text-blue-400">Project Proposal Form</CardTitle>
-              <CardDescription className="text-gray-300">
-                Provide detailed information about your climate impact project
+          {/* Proposal Form */}
+          <Card className="bg-white/5 backdrop-blur-xl border-white/10 rounded-2xl shadow-2xl">
+            <CardHeader className="p-4 sm:p-6">
+              <CardTitle className="text-white flex items-center gap-2 text-lg sm:text-xl">
+                <FileTextIcon className="w-5 h-5 sm:w-6 sm:h-6 text-blue-400" />
+                Project Details
+              </CardTitle>
+              <CardDescription className="text-white/70 text-sm">
+                Provide comprehensive information about your climate impact project
               </CardDescription>
             </CardHeader>
 
-            <CardContent className="space-y-6">
-              {/* Transaction Status Display */}
-              {transactionState.status !== 'idle' && (
-                <div className="mb-6">
-                  <TransactionStatus
-                    txId={transactionState.txId}
-                    result={transactionState.result}
-                    status={transactionState.status}
-                    error={transactionState.error}
-                    onClose={transactionState.status !== 'pending' ? closeTransactionStatus : undefined}
-                    estimatedTime={8}
+            <CardContent className="p-4 sm:p-6">
+              <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
+                
+                {/* Project Title */}
+                <div className="space-y-2">
+                  <Label htmlFor="projectTitle" className="text-white font-medium text-sm">
+                    Project Title *
+                  </Label>
+                  <Input
+                    id="projectTitle"
+                    type="text"
+                    placeholder="e.g., Solar Power Installation for Rural Community"
+                    value={formData.projectTitle}
+                    onChange={(e) => handleInputChange("projectTitle", e.target.value)}
+                    required
+                    className="bg-white/5 border-white/20 text-white placeholder-white/40 focus:border-white/40 focus:ring-white/20 rounded-xl text-sm sm:text-base h-10 sm:h-12"
                   />
                 </div>
-              )}
 
-              {/* Cost Estimation */}
-              {transactionState.status === 'idle' && (
-                <TransactionCostEstimate
-                  numTransactions={2}
-                  depositAmount={0.1}
-                  className="mb-6"
-                />
-              )}
-
-              {/* Form Fields */}
-              <form onSubmit={handleSubmit} className="space-y-6">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {/* Category & Location */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="projectTitle" className="text-blue-400 font-medium">
-                      Project Title *
-                    </Label>
-                    <Input
-                      id="projectTitle"
-                      value={formData.projectTitle}
-                      onChange={(e) => handleInputChange("projectTitle", e.target.value)}
-                      placeholder="e.g., Solar Panel Installation for Rural Schools"
-                      className="bg-black/50 border-blue-500/30 text-white placeholder:text-gray-400 focus:border-blue-500"
-                      required
-                    />
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="category" className="text-blue-400 font-medium">
-                      Project Category *
+                    <Label htmlFor="category" className="text-white font-medium text-sm">
+                      Category *
                     </Label>
                     <select
                       id="category"
                       value={formData.category}
                       onChange={(e) => handleInputChange("category", e.target.value)}
-                      className="w-full px-3 py-2 bg-black/50 border border-blue-500/30 text-white rounded-md focus:border-blue-500 focus:outline-none"
                       required
+                      className="w-full bg-white/5 border border-white/20 text-white rounded-xl px-3 py-2 sm:px-4 sm:py-3 focus:outline-none focus:ring-2 focus:ring-white/20 focus:border-white/40 text-sm sm:text-base h-10 sm:h-12 touch-manipulation"
                     >
-                      <option value="">Select a category</option>
-                      <option value="renewable-energy">Renewable Energy</option>
-                      <option value="carbon-capture">Carbon Capture</option>
-                      <option value="reforestation">Reforestation</option>
-                      <option value="sustainable-agriculture">Sustainable Agriculture</option>
-                      <option value="waste-management">Waste Management</option>
-                      <option value="clean-transportation">Clean Transportation</option>
+                      <option value="" className="bg-slate-800 text-white">Select category</option>
+                      <option value="renewable-energy" className="bg-slate-800 text-white">🔋 Renewable Energy</option>
+                      <option value="reforestation" className="bg-slate-800 text-white">🌳 Reforestation</option>
+                      <option value="water-conservation" className="bg-slate-800 text-white">💧 Water Conservation</option>
+                      <option value="waste-management" className="bg-slate-800 text-white">♻️ Waste Management</option>
+                      <option value="sustainable-agriculture" className="bg-slate-800 text-white">🌱 Sustainable Agriculture</option>
+                      <option value="carbon-capture" className="bg-slate-800 text-white">🏭 Carbon Capture</option>
+                      <option value="education" className="bg-slate-800 text-white">📚 Climate Education</option>
                     </select>
                   </div>
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="description" className="text-blue-400 font-medium">
-                    Project Description *
-                  </Label>
-                  <Textarea
-                    id="description"
-                    value={formData.description}
-                    onChange={(e) => handleInputChange("description", e.target.value)}
-                    placeholder="Describe your project in detail, including objectives, methodology, and expected outcomes..."
-                    className="bg-black/50 border-blue-500/30 text-white placeholder:text-gray-400 focus:border-blue-500 min-h-[120px]"
-                    required
-                  />
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                  <div className="space-y-2">
-                    <Label htmlFor="fundingAmount" className="text-blue-400 font-medium flex items-center gap-2">
-                      <DollarSignIcon className="w-4 h-4" />
-                      Funding Requested (USD) *
-                    </Label>
-                    <Input
-                      id="fundingAmount"
-                      type="number"
-                      value={formData.fundingAmount}
-                      onChange={(e) => handleInputChange("fundingAmount", e.target.value)}
-                      placeholder="50000"
-                      className="bg-black/50 border-blue-500/30 text-white placeholder:text-gray-400 focus:border-blue-500"
-                      required
-                    />
-                  </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="duration" className="text-blue-400 font-medium flex items-center gap-2">
-                      <CalendarIcon className="w-4 h-4" />
-                      Project Duration (months) *
-                    </Label>
-                    <Input
-                      id="duration"
-                      type="number"
-                      value={formData.duration}
-                      onChange={(e) => handleInputChange("duration", e.target.value)}
-                      placeholder="12"
-                      className="bg-black/50 border-blue-500/30 text-white placeholder:text-gray-400 focus:border-blue-500"
-                      required
-                    />
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="location" className="text-blue-400 font-medium">
+                    <Label htmlFor="location" className="text-white font-medium text-sm">
                       Location *
                     </Label>
                     <Input
                       id="location"
+                      type="text"
+                      placeholder="City, Country"
                       value={formData.location}
                       onChange={(e) => handleInputChange("location", e.target.value)}
-                      placeholder="e.g., Kenya, East Africa"
-                      className="bg-black/50 border-blue-500/30 text-white placeholder:text-gray-400 focus:border-blue-500"
                       required
+                      className="bg-white/5 border-white/20 text-white placeholder-white/40 focus:border-white/40 focus:ring-white/20 rounded-xl text-sm sm:text-base h-10 sm:h-12"
                     />
                   </div>
                 </div>
 
+                {/* Project Description */}
                 <div className="space-y-2">
-                  <Label htmlFor="expectedImpact" className="text-blue-400 font-medium">
-                    Expected Environmental Impact *
+                  <Label htmlFor="description" className="text-white font-medium text-sm">
+                    Project Description *
+                  </Label>
+                  <Textarea
+                    id="description"
+                    placeholder="Describe your project in detail, including objectives, methodology, and timeline..."
+                    value={formData.description}
+                    onChange={(e) => handleInputChange("description", e.target.value)}
+                    required
+                    rows={4}
+                    className="bg-white/5 border-white/20 text-white placeholder-white/40 focus:border-white/40 focus:ring-white/20 rounded-xl text-sm sm:text-base resize-none"
+                  />
+                  <p className="text-white/60 text-xs">
+                    {formData.description.length}/1000 characters
+                  </p>
+                </div>
+
+                {/* Expected Impact */}
+                <div className="space-y-2">
+                  <Label htmlFor="expectedImpact" className="text-white font-medium text-sm">
+                    Expected Climate Impact *
                   </Label>
                   <Textarea
                     id="expectedImpact"
+                    placeholder="Quantify the expected environmental benefits (e.g., CO2 reduction, people impacted, area covered)..."
                     value={formData.expectedImpact}
                     onChange={(e) => handleInputChange("expectedImpact", e.target.value)}
-                    placeholder="Quantify the expected environmental benefits (e.g., CO₂ reduction, energy saved, trees planted, etc.)"
-                    className="bg-black/50 border-blue-500/30 text-white placeholder:text-gray-400 focus:border-blue-500"
                     required
+                    rows={3}
+                    className="bg-white/5 border-white/20 text-white placeholder-white/40 focus:border-white/40 focus:ring-white/20 rounded-xl text-sm sm:text-base resize-none"
                   />
                 </div>
 
-                <div className="space-y-4">
-                  <Label className="text-blue-400 font-medium flex items-center gap-2">
-                    <UploadIcon className="w-4 h-4" />
-                    Supporting Documents (Optional)
-                  </Label>
-                  <div className="border-2 border-dashed border-blue-500/30 rounded-lg p-8 text-center">
-                    <UploadIcon className="w-12 h-12 text-blue-500/50 mx-auto mb-4" />
-                    <p className="text-gray-400 mb-2">Drag and drop files here, or click to browse</p>
-                    <p className="text-sm text-gray-500">PDF, DOC, or image files (max 10MB each)</p>
-                    <Button
-                      type="button"
-                      variant="outline"
-                      className="mt-4 border-blue-500/50 text-blue-400 hover:bg-blue-500/10 bg-transparent"
-                    >
-                      Choose Files
-                    </Button>
+                {/* Funding Amount & Duration */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="fundingAmount" className="text-white font-medium text-sm">
+                      Funding Requested (USD) *
+                    </Label>
+                    <div className="relative">
+                      <DollarSignIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-white/40" />
+                      <Input
+                        id="fundingAmount"
+                        type="number"
+                        placeholder="50000"
+                        value={formData.fundingAmount}
+                        onChange={(e) => handleInputChange("fundingAmount", e.target.value)}
+                        required
+                        min="1"
+                        className="pl-10 bg-white/5 border-white/20 text-white placeholder-white/40 focus:border-white/40 focus:ring-white/20 rounded-xl text-sm sm:text-base h-10 sm:h-12"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="duration" className="text-white font-medium text-sm">
+                      Project Duration
+                    </Label>
+                    <div className="relative">
+                      <CalendarIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-white/40" />
+                      <select
+                        id="duration"
+                        value={formData.duration}
+                        onChange={(e) => handleInputChange("duration", e.target.value)}
+                        className="w-full pl-10 bg-white/5 border border-white/20 text-white rounded-xl px-3 py-2 sm:px-4 sm:py-3 focus:outline-none focus:ring-2 focus:ring-white/20 focus:border-white/40 text-sm sm:text-base h-10 sm:h-12 touch-manipulation"
+                      >
+                        <option value="" className="bg-slate-800 text-white">Select duration</option>
+                        <option value="3-months" className="bg-slate-800 text-white">3 months</option>
+                        <option value="6-months" className="bg-slate-800 text-white">6 months</option>
+                        <option value="1-year" className="bg-slate-800 text-white">1 year</option>
+                        <option value="2-years" className="bg-slate-800 text-white">2 years</option>
+                        <option value="3-years+" className="bg-slate-800 text-white">3+ years</option>
+                      </select>
+                    </div>
                   </div>
                 </div>
 
-                <div className="flex flex-col sm:flex-row gap-4 pt-6">
-                  {error && (
-                    <div className="bg-red-500/10 border border-red-500/30 rounded-lg p-3 mb-4">
-                      <p className="text-red-600 text-sm">{error}</p>
-                    </div>
-                  )}
-                  
-                  {!isConnected && (
-                    <div className="bg-blue-500/10 border border-blue-500/30 rounded-lg p-3 mb-4">
-                      <p className="text-blue-600 text-sm">
-                        Please connect your wallet to submit proposals.{" "}
-                        <Link href="/connect-wallet" className="underline">
-                          Connect Wallet
-                        </Link>
-                      </p>
-                    </div>
-                  )}
-                  
-                  <Button
-                    type="submit"
-                    disabled={loading || !isConnected || transactionState.status === 'pending'}
-                    className="flex-1 bg-blue-500 hover:bg-blue-600 text-black font-semibold py-3 rounded-lg transition-all duration-300 transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed"
-                  >
-                    {transactionState.status === 'pending' ? (
-                      <div className="flex items-center space-x-2">
-                        <div className="w-4 h-4 border-2 border-black/30 border-t-black rounded-full animate-spin"></div>
-                        <span>Processing Transaction...</span>
-                      </div>
-                    ) : loading ? (
-                      <div className="flex items-center space-x-2">
-                        <div className="w-4 h-4 border-2 border-black/30 border-t-black rounded-full animate-spin"></div>
-                        <span>Preparing...</span>
-                      </div>
-                    ) : transactionState.status === 'confirmed' ? (
-                      <div className="flex items-center space-x-2">
-                        <div className="w-4 h-4 text-green-600">✓</div>
-                        <span>Submitted Successfully</span>
-                      </div>
-                    ) : (
-                      "Submit Proposal (0.1 ALGO)"
-                    )}
-                  </Button>
+                {/* Transaction Cost Estimate */}
+                <TransactionCostEstimate 
+                  numTransactions={1}
+                  className="bg-white/5 border-white/10 rounded-xl p-3 sm:p-4"
+                />
 
-                  <Button
-                    type="button"
-                    variant="outline"
-                    className="border-blue-500/50 text-blue-400 hover:bg-blue-500/10 bg-transparent"
-                  >
-                    Save as Draft
-                  </Button>
+                {/* Submit Button */}
+                <div className="pt-4">
+                  {!isConnected ? (
+                    <div className="space-y-3">
+                      <p className="text-center text-red-400 text-sm">
+                        Please connect your wallet to submit a proposal
+                      </p>
+                      <Button
+                        type="button"
+                        onClick={() => router.push('/connect-wallet')}
+                        className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium h-10 sm:h-12 rounded-xl text-sm sm:text-base touch-manipulation"
+                      >
+                        Connect Wallet
+                      </Button>
+                    </div>
+                  ) : (
+                    <Button
+                      type="submit"
+                      disabled={loading || transactionState.status === 'pending'}
+                      className="w-full bg-green-600 hover:bg-green-700 disabled:opacity-50 text-white font-medium h-10 sm:h-12 rounded-xl text-sm sm:text-base touch-manipulation"
+                    >
+                      {loading || transactionState.status === 'pending' ? (
+                        <div className="flex items-center space-x-2">
+                          <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                          <span>Submitting to Blockchain...</span>
+                        </div>
+                      ) : (
+                        <>
+                          <UploadIcon className="w-4 h-4 mr-2" />
+                          Submit Proposal
+                        </>
+                      )}
+                    </Button>
+                  )}
                 </div>
+
+                {/* Required Fields Note */}
+                <p className="text-white/60 text-xs text-center">
+                  * Required fields
+                </p>
+
               </form>
             </CardContent>
           </Card>
 
-          <div className="text-center space-y-2">
-            <p className="text-sm text-gray-800">
-              Need help with your proposal? Check out our{" "}
-              <a href="/submission-guidelines" className="text-black font-medium underline underline-offset-2">
-                submission guidelines
-              </a>
-            </p>
-          </div>
+          {/* Tips Card */}
+          <Card className="bg-white/5 backdrop-blur-xl border-white/10 rounded-2xl">
+            <CardHeader className="p-4 sm:p-6">
+              <CardTitle className="text-white text-base sm:text-lg">💡 Proposal Tips</CardTitle>
+            </CardHeader>
+            <CardContent className="p-4 sm:p-6 pt-0">
+              <ul className="space-y-2 text-white/70 text-xs sm:text-sm">
+                <li className="flex items-start gap-2">
+                  <span className="text-green-400 mt-1">•</span>
+                  <span>Be specific about your project's environmental impact and measurable outcomes</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-green-400 mt-1">•</span>
+                  <span>Include realistic funding requests with clear budget breakdown in description</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-green-400 mt-1">•</span>
+                  <span>Proposals undergo community voting - engagement with voters increases success rate</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-green-400 mt-1">•</span>
+                  <span>All transactions are recorded on Algorand blockchain for transparency</span>
+                </li>
+              </ul>
+            </CardContent>
+          </Card>
+
         </div>
       </main>
-
-      {/* Footer */}
-      <footer className="relative z-10 text-center py-6 text-gray-800 text-sm">
-        <p>&copy; {new Date().getFullYear()} TerraLinke. Empowering sustainable innovation.</p>
-      </footer>
     </div>
   )
 }

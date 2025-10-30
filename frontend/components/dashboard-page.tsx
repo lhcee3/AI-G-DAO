@@ -427,39 +427,57 @@ export function DashboardPage() {
       </div>
 
       {/* Floating Navigation */}
-      <nav className="fixed top-6 left-1/2 transform -translate-x-1/2 z-50 w-full max-w-6xl px-6">
-        <div className="bg-white/10 backdrop-blur-xl border border-white/20 rounded-3xl px-6 py-4 shadow-2xl hover:bg-white/15 transition-all duration-300">
+      <nav className="fixed top-3 left-1/2 transform -translate-x-1/2 z-50 w-full max-w-6xl px-3 sm:px-6 sm:top-6">
+        <div className="bg-white/10 backdrop-blur-xl border border-white/20 rounded-2xl sm:rounded-3xl px-4 sm:px-6 py-3 sm:py-4 shadow-2xl hover:bg-white/15 transition-all duration-300">
           <div className="flex items-center justify-between">
             {/* Logo */}
-            <div className="flex items-center space-x-3">
-              <div className="w-10 h-10 bg-gradient-to-br from-teal-500 to-emerald-500 rounded-2xl flex items-center justify-center shadow-lg shadow-teal-500/25">
-                <LeafIcon className="w-5 h-5 text-white" />
+            <div className="flex items-center space-x-2 sm:space-x-3">
+              <div className="w-8 h-8 sm:w-10 sm:h-10 bg-gradient-to-br from-teal-500 to-emerald-500 rounded-xl sm:rounded-2xl flex items-center justify-center shadow-lg shadow-teal-500/25">
+                <LeafIcon className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
               </div>
               <div>
-                <h1 className="text-white font-bold text-lg">TerraLinke</h1>
-                <p className="text-white/60 text-xs">Climate DAO Platform</p>
+                <h1 className="text-white font-bold text-base sm:text-lg">TerraLinke</h1>
+                <p className="text-white/60 text-xs hidden sm:block">Climate DAO Platform</p>
               </div>
             </div>
 
-            {/* Wallet Status */}
-            <div className="flex items-center space-x-3">
-              <WalletInfo />
+            {/* Mobile-first Controls */}
+            <div className="flex items-center space-x-2 sm:space-x-3">
+              <div className="hidden sm:block">
+                <WalletInfo />
+              </div>
               <NotificationsPanel />
               <Button variant="ghost" size="sm" className="text-white/80 hover:text-white hover:bg-white/10 rounded-xl p-2">
                 <SettingsIcon className="w-4 h-4" />
               </Button>
+              
+              {/* Mobile wallet info */}
+              <div className="sm:hidden">
+                {isConnected ? (
+                  <div className="flex items-center gap-2 px-2 py-1 bg-white/10 rounded-lg">
+                    <div className="w-2 h-2 bg-green-400 rounded-full"></div>
+                    <span className="text-white text-xs">{balance.toFixed(1)}</span>
+                  </div>
+                ) : (
+                  <Link href="/connect-wallet">
+                    <Button size="sm" className="bg-gradient-to-r from-blue-500 to-cyan-500 text-white text-xs px-3 py-1">
+                      Connect
+                    </Button>
+                  </Link>
+                )}
+              </div>
             </div>
           </div>
         </div>
       </nav>
 
       {/* Main Content */}
-      <main className="relative z-10 pt-32 pb-20 px-6">
-        <div className="max-w-7xl mx-auto space-y-8">
+      <main className="relative z-10 pt-20 sm:pt-32 pb-20 px-3 sm:px-6">
+        <div className="max-w-7xl mx-auto space-y-6 sm:space-y-8">
           
-          {/* Simple Welcome */}
-          <div className="mb-8">
-            <div className="inline-flex items-center gap-2 px-4 py-2 bg-white/10 backdrop-blur-xl border border-white/20 rounded-full text-sm text-white/80 mb-4">
+          {/* Mobile-optimized Welcome */}
+          <div className="mb-6 sm:mb-8">
+            <div className="inline-flex items-center gap-2 px-3 sm:px-4 py-2 bg-white/10 backdrop-blur-xl border border-white/20 rounded-full text-xs sm:text-sm text-white/80 mb-4">
               <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
              Take One step Towards a Greener Future
             </div>
@@ -580,8 +598,8 @@ export function DashboardPage() {
             </div>
           )}
 
-          {/* Dashboard Content Grid */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12">
+          {/* Dashboard Content Grid - Mobile-first */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-8 mb-8 sm:mb-12">
             
             {/* My Proposals Card - Enhanced with Real Data */}
             <UserProposalsTracker />
@@ -615,37 +633,38 @@ export function DashboardPage() {
                     const yesPercentage = totalVotes > 0 ? Math.round((proposal.voteYes / totalVotes) * 100) : 0;
                     
                     return (
-                      <div key={proposal.id} className="bg-white/5 rounded-2xl p-5 border border-white/10 hover:bg-white/10 transition-all duration-300">
-                        {/* Header Row */}
+                      <div key={proposal.id} className="bg-white/5 rounded-xl sm:rounded-2xl p-4 sm:p-5 border border-white/10 hover:bg-white/10 transition-all duration-300">
+                        {/* Mobile-optimized Header Row */}
                         <div className="flex items-start justify-between mb-3">
-                          <div className="flex-1">
-                            <div className="flex items-center gap-2 mb-2">
-                              <h4 className="text-white font-medium text-base line-clamp-1">{proposal.title}</h4>
+                          <div className="flex-1 min-w-0">
+                            <div className="flex flex-col sm:flex-row sm:items-center gap-2 mb-2">
+                              <h4 className="text-white font-medium text-sm sm:text-base line-clamp-2 sm:line-clamp-1">{proposal.title}</h4>
                               {(() => {
                                 const category = getCategoryById(proposal.category);
                                 return category ? (
-                                  <Badge className="bg-white/10 text-white text-xs px-2 py-1 shrink-0">
-                                    {category.icon} {category.name}
+                                  <Badge className="bg-white/10 text-white text-xs px-2 py-1 shrink-0 self-start sm:self-auto">
+                                    <span className="hidden sm:inline">{category.icon} </span>
+                                    {category.name}
                                   </Badge>
                                 ) : null;
                               })()}
                             </div>
                           </div>
-                          <div className="flex items-center gap-2 ml-3">
+                          <div className="flex flex-col sm:flex-row items-end sm:items-center gap-2 ml-3">
                             <FavoriteButton
                               proposalId={proposal.id.toString()}
                               size="sm"
                               variant="ghost"
                             />
-                            <Badge className={`${timeLeft > 0 ? 'bg-yellow-500/20 text-yellow-400' : 'bg-red-500/20 text-red-400'} text-xs px-2 py-1`}>
+                            <Badge className={`${timeLeft > 0 ? 'bg-yellow-500/20 text-yellow-400' : 'bg-red-500/20 text-red-400'} text-xs px-2 py-1 whitespace-nowrap`}>
                               <ClockIcon className="w-3 h-3 mr-1" />
                               {timeText}
                             </Badge>
                           </div>
                         </div>
 
-                        {/* Stats Row */}
-                        <div className="flex items-center justify-between text-sm mb-4">
+                        {/* Mobile-optimized Stats Row */}
+                        <div className="flex flex-col sm:flex-row sm:items-center justify-between text-xs sm:text-sm mb-3 sm:mb-4 gap-2 sm:gap-0">
                           <span className="text-white/60">
                             ${proposal.fundingAmount.toLocaleString()}
                           </span>
@@ -659,10 +678,10 @@ export function DashboardPage() {
                             </div>
                           )}
                         </div>
-                        <div className="grid grid-cols-2 gap-2">
+                        <div className="grid grid-cols-2 gap-2 sm:gap-3">
                           <Button 
                             size="sm" 
-                            className="bg-green-500/20 hover:bg-green-500/30 text-green-400 border border-green-500/30 rounded-xl h-8 text-xs"
+                            className="bg-green-500/20 hover:bg-green-500/30 text-green-400 border border-green-500/30 rounded-xl h-9 sm:h-8 text-xs touch-manipulation"
                             onClick={() => handleVote(proposal.id, 'for')}
                             disabled={votingProposalId === proposal.id}
                           >
@@ -670,7 +689,7 @@ export function DashboardPage() {
                           </Button>
                           <Button 
                             size="sm" 
-                            className="bg-red-500/10 border border-red-500/30 text-red-400 hover:bg-red-500/20 rounded-xl h-8 text-xs"
+                            className="bg-red-500/10 border border-red-500/30 text-red-400 hover:bg-red-500/20 rounded-xl h-9 sm:h-8 text-xs touch-manipulation"
                             onClick={() => handleVote(proposal.id, 'against')}
                             disabled={votingProposalId === proposal.id}
                           >
