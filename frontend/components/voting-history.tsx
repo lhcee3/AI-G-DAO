@@ -129,7 +129,7 @@ export function VotingHistory() {
                     variant="ghost"
                     size="sm"
                     className="h-6 px-2 text-xs text-blue-400 hover:text-blue-300 hover:bg-blue-500/10"
-                    onClick={() => window.open(`https://testnet.algoexplorer.io/tx/${vote.txId}`, '_blank')}
+                    onClick={() => window.open(`https://lora.algokit.io/testnet/transaction/${vote.txId}`, '_blank')}
                   >
                     <ExternalLinkIcon className="w-3 h-3 mr-1" />
                     View TX

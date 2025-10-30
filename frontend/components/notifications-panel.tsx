@@ -76,8 +76,8 @@ export function NotificationsPanel() {
       // TODO: Navigate to proposal details page
     }
     if (notification.txId) {
-      // Open transaction in explorer
-      window.open(`https://testnet.algoexplorer.io/tx/${notification.txId}`, '_blank');
+      // Open transaction in Lora explorer
+      window.open(`https://lora.algokit.io/testnet/transaction/${notification.txId}`, '_blank');
     }
   };
 
@@ -184,7 +184,7 @@ export function NotificationsPanel() {
                             className="h-6 px-2 text-xs text-blue-400 hover:text-blue-300 mt-2"
                             onClick={(e) => {
                               e.stopPropagation();
-                              window.open(`https://testnet.algoexplorer.io/tx/${notification.txId}`, '_blank');
+                              window.open(`https://lora.algokit.io/testnet/transaction/${notification.txId}`, '_blank');
                             }}
                           >
                             <ExternalLinkIcon className="w-3 h-3 mr-1" />

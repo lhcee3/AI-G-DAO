@@ -25,11 +25,11 @@ export const algorandClient = AlgorandClient.fromConfig({
   },
 });
 
-// Contract App IDs (these will be set after deployment)
+// Contract App IDs (read from environment variables)
 export const CONTRACT_IDS = {
-  CLIMATE_DAO: 738869852, // Real deployed contract ID on TestNet
-  IMPACT_ANALYTICS: 0, // Will be updated after deployment
-  VOTING_SYSTEM: 0, // Will be updated after deployment
+  CLIMATE_DAO: parseInt(process.env.NEXT_PUBLIC_CLIMATE_DAO_APP_ID || '0'),
+  IMPACT_ANALYTICS: parseInt(process.env.NEXT_PUBLIC_IMPACT_ANALYTICS_APP_ID || '0'),
+  VOTING_SYSTEM: parseInt(process.env.NEXT_PUBLIC_VOTING_SYSTEM_APP_ID || '0'),
 };
 
 // Create Algod client for direct SDK usage
