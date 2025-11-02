@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -17,6 +17,9 @@ const TransactionStatus = dynamic(() => import('@/components/transaction-status'
 });
 const VoteConfirmationDialog = dynamic(() => import('@/components/vote-confirmation-dialog').then(mod => ({ default: mod.VoteConfirmationDialog })), {
   loading: () => <div className="animate-pulse bg-white/5 rounded-xl h-48"></div>
+});
+const TransactionNotification = dynamic(() => import('@/components/transaction-notification').then(mod => ({ default: mod.TransactionNotification })), {
+  loading: () => <div></div>
 });
 import { TransactionResult } from '@/lib/transaction-builder';
 import Link from 'next/link';
@@ -38,7 +41,7 @@ interface Proposal {
 
 export default function VotePage() {
   const { isConnected, address, balance } = useWalletContext();
-  const { getProposals, voteOnProposal } = useClimateDAO();
+  const { getProposals, voteOnProposal, getUserVotingState } = useClimateDAO();
   const { notifyTransactionSuccess, notifyTransactionFailure } = useNotifications();
   const [proposals, setProposals] = useState<Proposal[]>([]);
   const [loading, setLoading] = useState(true);
@@ -49,6 +52,9 @@ export default function VotePage() {
     result?: TransactionResult;
     error?: string;
   }>({ proposalId: null, status: 'idle' });
+
+  // Track user voting history for each proposal
+  const [userVotingHistory, setUserVotingHistory] = useState<Map<number, { hasVoted: boolean; txId?: string; userVote?: 'for' | 'against' }>>(new Map());
 
   // Confirmation dialog state
   const [confirmationDialog, setConfirmationDialog] = useState<{
@@ -66,12 +72,51 @@ export default function VotePage() {
   // State for copy feedback
   const [copied, setCopied] = useState(false);
 
-  // Fetch proposals
+  // Transaction notification state
+  const [transactionNotification, setTransactionNotification] = useState<{
+    isOpen: boolean;
+    txId: string;
+    message: string;
+    type: 'success' | 'error' | 'info' | 'warning';
+  }>({
+    isOpen: false,
+    txId: '',
+    message: '',
+    type: 'success'
+  });
+
+  // Sort proposals by ID in descending order to show latest first
+  const sortedProposals = useMemo(() => {
+    return [...proposals].sort((a, b) => b.id - a.id);
+  }, [proposals]);
+
+  // Fetch proposals and user voting history
   useEffect(() => {
     const fetchProposals = async () => {
       try {
         const allProposals = await getProposals();
         setProposals(allProposals);
+        
+        // Fetch user voting history for each proposal
+        if (address && allProposals.length > 0) {
+          const votingHistoryMap = new Map();
+          await Promise.all(
+            allProposals.map(async (proposal) => {
+              try {
+                const userState = await getUserVotingState(proposal.id);
+                votingHistoryMap.set(proposal.id, {
+                  hasVoted: userState.hasVoted,
+                  txId: userState.votingRecord?.txId,
+                  userVote: userState.userVote
+                });
+              } catch (error) {
+                console.error(`Failed to fetch voting state for proposal ${proposal.id}:`, error);
+                votingHistoryMap.set(proposal.id, { hasVoted: false });
+              }
+            })
+          );
+          setUserVotingHistory(votingHistoryMap);
+        }
       } catch (error) {
         console.error('Failed to fetch proposals:', error);
       } finally {
@@ -79,10 +124,10 @@ export default function VotePage() {
       }
     };
 
-    if (isConnected) {
+    if (isConnected && address) {
       fetchProposals();
     }
-  }, [isConnected]); // Remove function dependencies to prevent infinite loops
+  }, [isConnected, address]); // Remove function dependencies to prevent infinite loops
 
   const handleVoteClick = (proposal: Proposal, voteType: 'for' | 'against') => {
     setConfirmationDialog({
@@ -103,34 +148,59 @@ export default function VotePage() {
     
     try {
       const result = await voteOnProposal(confirmationDialog.proposalId, confirmationDialog.voteType);
-      setVotingState({
-        proposalId: confirmationDialog.proposalId,
-        status: 'confirmed',
-        txId: result.txId,
-        result
-      });
       
-      // Notify success
-      notifyTransactionSuccess(
-        'Vote',
-        result.txId,
-        `Voted ${confirmationDialog.voteType?.toUpperCase()} on "${confirmationDialog.proposal?.title}"`
-      );
-      
-      // Close dialog
-      setConfirmationDialog({
-        isOpen: false,
-        proposalId: null,
-        proposal: null,
-        voteType: null
-      });
-      
-      // Refresh proposals after successful vote
-      setTimeout(async () => {
-        const updatedProposals = await getProposals();
-        setProposals(updatedProposals);
-        setVotingState({ proposalId: null, status: 'idle' });
-      }, 3000);
+      if (result.success) {
+        setVotingState({
+          proposalId: confirmationDialog.proposalId,
+          status: 'confirmed',
+          txId: result.txId,
+          result
+        });
+        
+        // Notify success
+        notifyTransactionSuccess(
+          'Vote',
+          result.txId,
+          `Voted ${confirmationDialog.voteType?.toUpperCase()} on "${confirmationDialog.proposal?.title}"`
+        );
+        
+        // Close dialog
+        setConfirmationDialog({
+          isOpen: false,
+          proposalId: null,
+          proposal: null,
+          voteType: null
+        });
+        
+        // Refresh proposals after successful vote
+        setTimeout(async () => {
+          const updatedProposals = await getProposals();
+          setProposals(updatedProposals);
+          setVotingState({ proposalId: null, status: 'idle' });
+        }, 3000);
+      } else {
+        // Handle already voted case with transaction ID
+        setVotingState({
+          proposalId: confirmationDialog.proposalId,
+          status: 'failed',
+          error: result.message
+        });
+        
+        setTransactionNotification({
+          isOpen: true,
+          txId: result.txId,
+          message: result.message || 'Already voted on this proposal',
+          type: 'warning'
+        });
+        
+        // Close dialog
+        setConfirmationDialog({
+          isOpen: false,
+          proposalId: null,
+          proposal: null,
+          voteType: null
+        });
+      }
       
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Vote failed';
@@ -140,7 +210,7 @@ export default function VotePage() {
         error: errorMessage
       });
       
-      // Notify failure
+      // For actual errors (not already voted case)
       notifyTransactionFailure('Vote', errorMessage);
       
       // Close dialog on error too
@@ -270,8 +340,8 @@ export default function VotePage() {
                   <div className="w-8 h-8 border-2 border-blue-500/30 border-t-blue-500 rounded-full animate-spin mx-auto mb-4"></div>
                   <p className="text-white/60">Loading proposals...</p>
                 </div>
-              ) : proposals.length > 0 ? (
-                proposals.map((proposal) => {
+              ) : sortedProposals.length > 0 ? (
+                sortedProposals.map((proposal) => {
                   const totalVotes = proposal.voteYes + proposal.voteNo;
                   const yesPercentage = totalVotes > 0 ? (proposal.voteYes / totalVotes) * 100 : 0;
                   const timeLeft = Math.ceil((proposal.endTime - Date.now()) / (24 * 60 * 60 * 1000));
@@ -381,41 +451,68 @@ export default function VotePage() {
                                 <label className="text-xs text-white/70 mb-2 block">Transaction ID:</label>
                                 <div className="flex items-center gap-2 bg-black/30 rounded-lg p-3">
                                   <code className="text-sm text-blue-400 font-mono break-all flex-1">
-                                    {votingState.proposalId === proposal.id && votingState.txId 
-                                      ? votingState.txId 
-                                      : 'No transaction yet - vote to generate transaction ID'}
+                                    {(() => {
+                                      // Show current voting transaction if available
+                                      if (votingState.proposalId === proposal.id && votingState.txId) {
+                                        return votingState.txId;
+                                      }
+                                      // Show previous vote transaction if user has already voted
+                                      const userHistory = userVotingHistory.get(proposal.id);
+                                      if (userHistory?.hasVoted && userHistory.txId) {
+                                        return userHistory.txId;
+                                      }
+                                      // Default message
+                                      return userHistory?.hasVoted 
+                                        ? 'Previous vote transaction ID not found'
+                                        : 'No transaction yet - vote to generate transaction ID';
+                                    })()}
                                   </code>
-                                  {votingState.proposalId === proposal.id && votingState.txId && (
-                                    <Button
-                                      size="sm"
-                                      variant="ghost"
-                                      onClick={async () => {
-                                        await navigator.clipboard.writeText(votingState.txId!);
-                                        setCopied(true);
-                                        setTimeout(() => setCopied(false), 2000);
-                                      }}
-                                      className="text-white/70 hover:text-white hover:bg-white/10 p-2 h-8 w-8"
-                                    >
-                                      <CopyIcon className="w-4 h-4" />
-                                    </Button>
-                                  )}
+                                  {(() => {
+                                    const currentTxId = votingState.proposalId === proposal.id && votingState.txId 
+                                      ? votingState.txId 
+                                      : userVotingHistory.get(proposal.id)?.txId;
+                                    return currentTxId && (
+                                      <Button
+                                        size="sm"
+                                        variant="ghost"
+                                        onClick={async () => {
+                                          await navigator.clipboard.writeText(currentTxId);
+                                          setCopied(true);
+                                          setTimeout(() => setCopied(false), 2000);
+                                        }}
+                                        className="text-white/70 hover:text-white hover:bg-white/10 p-2 h-8 w-8"
+                                      >
+                                        <CopyIcon className="w-4 h-4" />
+                                      </Button>
+                                    );
+                                  })()}
                                 </div>
-                                {copied && votingState.proposalId === proposal.id && votingState.txId && (
-                                  <p className="text-xs text-green-400 mt-1">Copied to clipboard!</p>
-                                )}
+                                {(() => {
+                                  const currentTxId = votingState.proposalId === proposal.id && votingState.txId 
+                                    ? votingState.txId 
+                                    : userVotingHistory.get(proposal.id)?.txId;
+                                  return copied && currentTxId && (
+                                    <p className="text-xs text-green-400 mt-1">Copied to clipboard!</p>
+                                  );
+                                })()}
                               </div>
                               
-                              {votingState.proposalId === proposal.id && votingState.txId && (
-                                <Button
-                                  size="sm"
-                                  variant="outline"
-                                  onClick={() => window.open(`https://lora.algokit.io/testnet/transaction/${votingState.txId}`, '_blank')}
-                                  className="w-full border-blue-500/30 text-blue-400 hover:bg-blue-500/10 bg-transparent text-xs"
-                                >
-                                  <ExternalLinkIcon className="w-4 h-4 mr-2" />
-                                  View on Lora Explorer
-                                </Button>
-                              )}
+                              {(() => {
+                                const currentTxId = votingState.proposalId === proposal.id && votingState.txId 
+                                  ? votingState.txId 
+                                  : userVotingHistory.get(proposal.id)?.txId;
+                                return currentTxId && (
+                                  <Button
+                                    size="sm"
+                                    variant="outline"
+                                    onClick={() => window.open(`https://lora.algokit.io/testnet/transaction/${currentTxId}`, '_blank')}
+                                    className="w-full border-blue-500/30 text-blue-400 hover:bg-blue-500/10 bg-transparent text-xs"
+                                  >
+                                    <ExternalLinkIcon className="w-4 h-4 mr-2" />
+                                    View on Lora Explorer
+                                  </Button>
+                                );
+                              })()}
                             </div>
                           </div>
                         )}
@@ -510,6 +607,15 @@ export default function VotePage() {
             isLoading={votingState.status === 'pending'}
           />
         )}
+
+        {/* Transaction Notification */}
+        <TransactionNotification
+          isOpen={transactionNotification.isOpen}
+          onClose={() => setTransactionNotification(prev => ({ ...prev, isOpen: false }))}
+          txId={transactionNotification.txId}
+          message={transactionNotification.message}
+          type={transactionNotification.type}
+        />
       </div>
     </WalletGuard>
   );
