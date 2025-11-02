@@ -136,6 +136,9 @@ export function DashboardPage() {
       filtered = filterProposalsByCategories(filtered, selectedCategories);
     }
     
+    // Sort by ID in descending order to show latest proposals first
+    filtered.sort((a, b) => b.id - a.id);
+    
     return filtered;
   }, [activeProposals, selectedCategories]);
 

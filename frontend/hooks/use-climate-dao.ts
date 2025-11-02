@@ -208,9 +208,9 @@ export function useClimateDAO() {
         console.log('⚠️ Duplicate vote attempt:', message);
         setError(message);
         return {
-          txId: '',
-          confirmedRound: 0,
-          timestamp: Date.now(),
+          txId: votingState.votingRecord?.txId || '',
+          confirmedRound: votingState.votingRecord?.confirmedRound || 0,
+          timestamp: votingState.votingRecord?.timestamp || Date.now(),
           success: false,
           message
         } as TransactionResult;

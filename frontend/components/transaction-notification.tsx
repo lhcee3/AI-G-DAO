@@ -23,27 +23,14 @@ export function TransactionNotification({
 
   useEffect(() => {
     if (isOpen) {
+      console.log('🚨 TransactionNotification opened with txId:', txId);
       // Auto-close after 8 seconds
       const timer = setTimeout(() => {
         onClose();
       }, 8000);
       return () => clearTimeout(timer);
     }
-  }, [isOpen, onClose]);
-
-  const copyToClipboard = async () => {
-    try {
-      await navigator.clipboard.writeText(txId);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
-    } catch (err) {
-      console.error('Failed to copy:', err);
-    }
-  };
-
-  const openInExplorer = () => {
-    window.open(`https://lora.algokit.io/testnet/transaction/${txId}`, '_blank');
-  };
+  }, [isOpen, onClose, txId]);
 
   if (!isOpen) return null;
 
@@ -86,7 +73,6 @@ export function TransactionNotification({
 
   const colors = getThemeColors();
 
-  // choose icon based on type
   const renderIcon = () => {
     if (type === 'success') return <CheckCircle2Icon className={`w-6 h-6 ${colors.icon}`} />
     if (type === 'error') return <XCircle className={`w-6 h-6 ${colors.icon}`} />
@@ -101,7 +87,7 @@ export function TransactionNotification({
         <div className="flex items-start justify-between mb-3">
           <div className="flex items-center gap-3">
             {renderIcon()}
-            <h3 className="text-white font-semibold">{(colors as any).title || 'Transaction Submitted'}</h3>
+            <h3 className="text-white font-semibold">{colors.title}</h3>
           </div>
           <Button
             variant="ghost"
@@ -114,50 +100,9 @@ export function TransactionNotification({
         </div>
 
         {/* Message */}
-        <p className={`text-sm mb-4 ${colors.accent}`}>
+        <p className={`text-sm ${colors.accent}`}>
           {message}
         </p>
-
-        {/* Transaction ID */}
-        <div className="space-y-3">
-          <div className="text-xs text-gray-400 uppercase tracking-wider">
-            Transaction ID
-          </div>
-          
-          <div className="flex items-center gap-2 p-3 bg-black/30 rounded-lg border border-gray-700/50">
-            <code className="text-xs text-gray-300 font-mono break-all flex-1">
-              {txId}
-            </code>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={copyToClipboard}
-              className="text-gray-400 hover:text-white h-8 w-8 p-0 shrink-0"
-              title="Copy Transaction ID"
-            >
-              <CopyIcon className="w-4 h-4" />
-            </Button>
-          </div>
-
-          {copied && (
-            <div className="text-xs text-emerald-400 animate-pulse">
-              ✓ Copied to clipboard!
-            </div>
-          )}
-
-          {/* Action Buttons */}
-          <div className="flex gap-2 pt-2">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={openInExplorer}
-              className="flex-1 bg-transparent border-gray-600 text-gray-300 hover:bg-gray-800 hover:text-white"
-            >
-              <ExternalLinkIcon className="w-4 h-4 mr-2" />
-              View on Explorer
-            </Button>
-          </div>
-        </div>
       </div>
     </div>
   );
