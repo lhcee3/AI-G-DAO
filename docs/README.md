@@ -135,8 +135,7 @@ NEXT_PUBLIC_GOVERNANCE_TOKEN_CONTRACT_ID=
 ## Project Structure
 
 ```
-AI-G-DAO/
-├── backend/                 # Backend services (future implementation)
+AI-G-DAO              
 ├── contracts/              
 │   └── climate-dao/        # Algorand smart contracts
 │       ├── smart_contracts/ # Contract source code
