@@ -65,7 +65,7 @@ export const PROPOSAL_CATEGORIES: ProposalCategory[] = [
     id: 'waste-management',
     name: 'Waste Management',
     description: 'Recycling, composting, and circular economy solutions',
-    icon: '♻️',
+    icon: 'recycle',
     color: 'purple',
     gradient: 'from-purple-500 to-indigo-500'
   },

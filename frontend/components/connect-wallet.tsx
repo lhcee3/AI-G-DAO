@@ -7,17 +7,35 @@ import Link from "next/link"
 import { useWalletContext } from "@/hooks/use-wallet"
 import { useRouter } from "next/navigation"
 import { useLoading } from "@/hooks/use-loading"
+import { useAnalytics } from "@/hooks/use-analytics"
 
 export function WalletConnectPage() {
   const { isConnected, address, balance, connect, disconnect, loading, error, clearError } = useWalletContext()
   const { setLoading } = useLoading()
+  const { trackEvent } = useAnalytics()
   const router = useRouter()
 
   const handleConnectWallet = async () => {
     try {
       clearError()
       setLoading(true, "Connecting to Pera Wallet...")
+      
+      // Track wallet connection attempt
+      trackEvent('wallet_connect', { 
+        action: 'attempt',
+        provider: 'pera_wallet',
+        timestamp: Date.now()
+      })
+      
       await connect()
+      
+      // Track successful wallet connection
+      trackEvent('wallet_connect', { 
+        action: 'success',
+        provider: 'pera_wallet',
+        address: address,
+        timestamp: Date.now()
+      })
       
       // Auto-redirect to dashboard after successful connection
       setLoading(true, "Redirecting to dashboard...")
@@ -26,6 +44,13 @@ export function WalletConnectPage() {
       }, 1000) // Give user a moment to see success message
     } catch (err) {
       console.error('Failed to connect wallet:', err)
+      
+      // Track wallet connection failure
+      trackEvent('error', { 
+        type: 'wallet_connection',
+        error: err instanceof Error ? err.message : 'Unknown error',
+        timestamp: Date.now()
+      })
     } finally {
       // Keep loading state for redirect
       if (!isConnected) {

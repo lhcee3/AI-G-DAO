@@ -3,6 +3,7 @@ import './globals.css'
 import { WalletProvider } from '@/hooks/use-wallet'
 import { LoadingProvider } from '@/hooks/use-loading'
 import { PageTransitionLoader } from '@/components/page-transition-loader'
+import { AnalyticsProvider } from '@/components/analytics-provider'
 
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_BASE_URL || 'https://terralinke.vercel.app'),
@@ -39,8 +40,10 @@ export default function RootLayout({
       <body>
         <LoadingProvider>
           <WalletProvider>
-            <PageTransitionLoader />
-            {children}
+            <AnalyticsProvider>
+              <PageTransitionLoader />
+              {children}
+            </AnalyticsProvider>
           </WalletProvider>
         </LoadingProvider>
       </body>

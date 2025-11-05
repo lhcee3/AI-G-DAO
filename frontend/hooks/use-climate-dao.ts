@@ -125,7 +125,7 @@ export function useClimateDAO() {
         // Simulate a delay for transaction processing
         await new Promise(resolve => setTimeout(resolve, 2000));
         
-        console.log('✅ DEMO MODE: Proposal submitted successfully with mock txId:', mockTxId);
+        console.log('DEMO MODE: Proposal submitted successfully with mock txId:', mockTxId);
         
         return {
           txId: mockTxId,
@@ -199,13 +199,13 @@ export function useClimateDAO() {
     setError(null);
 
     try {
-      console.log('🗳️ Starting vote:', vote, 'on proposal', proposalId);
+      console.log('Starting vote:', vote, 'on proposal', proposalId);
       
       // Check if user has already voted on this proposal
       const votingState = await climateDAOQuery.getUserVotingState(proposalId, address);
       if (votingState.hasVoted) {
         const message = `You have already voted "${votingState.userVote}" on this proposal`;
-        console.log('⚠️ Duplicate vote attempt:', message);
+        console.log('Duplicate vote attempt:', message);
         setError(message);
         return {
           txId: votingState.votingRecord?.txId || '',
@@ -235,7 +235,7 @@ export function useClimateDAO() {
       
       // Check if contract is deployed
       if (!CONTRACT_IDS.CLIMATE_DAO || CONTRACT_IDS.CLIMATE_DAO === 0) {
-        console.warn('⚠️ Smart contract not deployed, falling back to demo mode');
+        console.warn('Smart contract not deployed, falling back to demo mode');
         
         // Fallback to demo mode for development
         const mockTxId = 'DEMO_VOTE_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
@@ -280,7 +280,7 @@ export function useClimateDAO() {
       // Store vote in localStorage for UI updates
       await climateDAOQuery.storeVote(proposalId, vote, address, txId);
       
-      console.log(`✅ Vote "${vote}" recorded successfully with real txId:`, txId);
+      console.log(`Vote "${vote}" recorded successfully with real txId:`, txId);
       
       return {
         ...result,
@@ -291,7 +291,7 @@ export function useClimateDAO() {
       
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Voting failed';
-      console.error('❌ Voting error:', errorMessage);
+      console.error('Voting error:', errorMessage);
       setError(errorMessage);
       throw new Error(errorMessage);
     } finally {
