@@ -6,8 +6,28 @@ import { BotIcon, CoinsIcon, HandshakeIcon, LeafIcon, LightbulbIcon, VoteIcon, A
 import Link from "next/link"
 import Image from "next/image"
 import StarBorder from "@/components/ui/star-border"
+import { useAnalytics } from "@/hooks/use-analytics"
 
 export function LandingPage() {
+  const { trackEvent } = useAnalytics()
+
+  const handleCTAClick = (cta: string) => {
+    trackEvent('click', { 
+      type: 'cta_button',
+      button: cta,
+      page: 'landing',
+      timestamp: Date.now()
+    })
+  }
+
+  const handleLinkClick = (link: string) => {
+    trackEvent('click', { 
+      type: 'navigation_link',
+      link: link,
+      page: 'landing',
+      timestamp: Date.now()
+    })
+  }
   return (
     <div className="relative flex flex-col min-h-[100dvh] text-white overflow-hidden">
       {/* Moving Gradient Background */}
@@ -41,7 +61,7 @@ export function LandingPage() {
           >
             <GithubIcon className="w-4 h-4" />
           </a>
-          <Link href="/connect-wallet">
+          <Link href="/connect-wallet" onClick={() => handleLinkClick('header_connect_wallet')}>
             <Button variant="ghost" className="bg-white/5 border border-white/20 text-white hover:bg-white/10 text-xs sm:text-sm px-3 sm:px-4 py-2 h-8 sm:h-10 touch-manipulation">
               Connect Wallet
             </Button>
@@ -72,7 +92,7 @@ export function LandingPage() {
             </div>
             
             <div className="flex justify-center items-center pt-4">
-              <Link href="/connect-wallet">
+              <Link href="/connect-wallet" onClick={() => handleCTAClick('hero_get_started')}>
                 <StarBorder 
                   color="#14b8a6" 
                   speed="3s"
@@ -239,12 +259,12 @@ export function LandingPage() {
               Join the TerraLinke community and start funding climate projects that matter
             </p>
             <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center items-center pt-4">
-              <Link href="/connect-wallet">
+              <Link href="/connect-wallet" onClick={() => handleCTAClick('bottom_connect_wallet')}>
                 <Button className="w-full sm:w-auto bg-teal-600 hover:bg-teal-700 text-white font-medium px-6 sm:px-8 py-3 rounded-xl text-sm sm:text-base h-12 sm:h-14 touch-manipulation">
                   Connect Wallet & Start Voting
                 </Button>
               </Link>
-              <Link href="/submit-proposal">
+              <Link href="/submit-proposal" onClick={() => handleCTAClick('bottom_submit_proposal')}>
                 <Button variant="ghost" className="w-full sm:w-auto bg-white/5 border border-white/20 text-white hover:bg-white/10 font-medium px-6 sm:px-8 py-3 rounded-xl text-sm sm:text-base h-12 sm:h-14 touch-manipulation">
                   Submit Your Project
                 </Button>
@@ -310,7 +330,7 @@ export function LandingPage() {
           
           <div className="border-t border-white/10 mt-6 sm:mt-8 pt-4 sm:pt-6 text-center">
             <p className="text-white/40 text-xs">
-              © 2024 TerraLinke. Built with ❤️ for the planet.
+              © 2024 TerraLinke. Built with love for the planet.
             </p>
           </div>
         </div>

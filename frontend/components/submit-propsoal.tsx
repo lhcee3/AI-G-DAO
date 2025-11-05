@@ -12,6 +12,7 @@ import { useWalletContext } from "@/hooks/use-wallet"
 import { useClimateDAO } from "@/hooks/use-climate-dao"
 import { useRouter } from "next/navigation"
 import { useLoading } from "@/hooks/use-loading"
+import { useAnalytics } from "@/hooks/use-analytics"
 import dynamic from "next/dynamic"
 import { TransactionResult } from "@/lib/transaction-builder"
 
@@ -27,6 +28,7 @@ export function SubmitProposalPage() {
   const { isConnected, address } = useWalletContext()
   const { submitProposal, loading, error } = useClimateDAO()
   const { setLoading } = useLoading()
+  const { trackEvent } = useAnalytics()
   const router = useRouter()
   
   const [formData, setFormData] = useState({
@@ -75,6 +77,15 @@ export function SubmitProposalPage() {
       return
     }
 
+    // Track proposal submission attempt
+    trackEvent('proposal_submit', { 
+      action: 'attempt',
+      category: formData.category,
+      fundingAmount: formData.fundingAmount,
+      location: formData.location,
+      timestamp: Date.now()
+    })
+
     // Reset transaction state
     setTransactionState({ status: 'pending' })
     setLoading(true, "Submitting your proposal to the blockchain...")
@@ -90,6 +101,16 @@ export function SubmitProposalPage() {
         expectedImpact: formData.expectedImpact,
         category: formData.category,
         location: formData.location,
+      })
+      
+      // Track successful proposal submission
+      trackEvent('proposal_submit', { 
+        action: 'success',
+        proposalId: result.txId,
+        category: formData.category,
+        fundingAmount: fundingAmountNum,
+        location: formData.location,
+        timestamp: Date.now()
       })
       
       // Update transaction state with success
@@ -118,6 +139,14 @@ export function SubmitProposalPage() {
     } catch (err) {
       console.error('Failed to submit proposal:', err)
       const errorMessage = err instanceof Error ? err.message : 'Unknown error occurred'
+      
+      // Track proposal submission failure
+      trackEvent('error', { 
+        type: 'proposal_submission',
+        error: errorMessage,
+        category: formData.category,
+        timestamp: Date.now()
+      })
       
       // Update transaction state with error
       setTransactionState({

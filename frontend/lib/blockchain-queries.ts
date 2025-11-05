@@ -700,7 +700,7 @@ export class ClimateDAOQueryService {
       
       // If approaching limit, perform aggressive cleanup
       if (totalSize > STORAGE_LIMITS.cleanupThreshold * 1024) {
-        console.log('⚠️  Storage limit reached, performing aggressive cleanup...');
+        console.log('Storage limit reached, performing aggressive cleanup...');
         
         // 1. Keep only most recent proposals (sorted by creation time)
         const recentProposals = proposals
@@ -739,7 +739,7 @@ export class ClimateDAOQueryService {
           history: compressedHistory
         }).length;
         
-        console.log(`✅ Storage optimized: ${Math.round(newSize/1024)}KB (saved ${Math.round((totalSize - newSize)/1024)}KB)`);
+        console.log(`Storage optimized: ${Math.round(newSize/1024)}KB (saved ${Math.round((totalSize - newSize)/1024)}KB)`);
         
         return {
           cleaned: true,
@@ -757,7 +757,7 @@ export class ClimateDAOQueryService {
       };
       
     } catch (error) {
-      console.error('❌ Storage enforcement failed:', error);
+      console.error('Storage enforcement failed:', error);
       return {
         cleaned: false,
         currentSize: 0,
@@ -1272,7 +1272,7 @@ export class ClimateDAOQueryService {
         }
       });
       
-      console.log('🗑️ All proposal data cleared from localStorage');
+      console.log('All proposal data cleared from localStorage');
     } catch (error) {
       console.error('Error clearing proposals:', error);
     }
@@ -1290,7 +1290,7 @@ export class ClimateDAOQueryService {
         }
       });
       
-      console.log('🗑️ All voting data cleared from localStorage');
+      console.log('All voting data cleared from localStorage');
     } catch (error) {
       console.error('Error clearing votes:', error);
     }
@@ -1318,7 +1318,7 @@ export class ClimateDAOQueryService {
         }
       });
       
-      console.log('🗑️ ALL localStorage data cleared completely');
+      console.log('ALL localStorage data cleared completely');
       console.log('🔄 Refresh the page to see clean state');
     } catch (error) {
       console.error('Error clearing app data:', error);
@@ -1359,7 +1359,7 @@ if (typeof window !== 'undefined') {
     getStats: () => climateDAOQuery.getStats('dummy-address')
   };
   
-  console.log('🛠️ DevTools available: window.devTools');
+  console.log('DevTools available: window.devTools');
   console.log('  - clearProposals(): Clear all proposals');
   console.log('  - clearVotes(): Clear all votes');
   console.log('  - clearAllData(): Clear everything');

@@ -26,6 +26,7 @@ import {
 import Link from "next/link"
 import { useWalletContext } from "@/hooks/use-wallet"
 import { useClimateDAO } from "@/hooks/use-climate-dao"
+import { useAnalytics } from "@/hooks/use-analytics"
 import { StatsSkeleton, CardSkeleton } from "@/components/ui/skeleton"
 import { WalletInfo } from "@/components/wallet-guard"
 import { TransactionNotification } from "@/components/transaction-notification"
@@ -54,6 +55,7 @@ const NotificationsPanel = dynamic(() => import("@/components/notifications-pane
 export function DashboardPage() {
   const { isConnected, address, balance, disconnect } = useWalletContext()
   const { getProposals, getTotalProposals, getBlockchainStats, voteOnProposal, cleanupExpiredProposals, enforceStorageLimits } = useClimateDAO()
+  const { trackEvent } = useAnalytics()
   const [currentTime, setCurrentTime] = useState<Date | null>(null)
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
@@ -180,7 +182,7 @@ export function DashboardPage() {
         // 1. FIRST: Enforce aggressive storage limits (200KB constraint)
         const storageResult = await enforceStorageLimits()
         if (storageResult.cleaned) {
-          console.log(`🗑️ Storage cleanup: ${storageResult.oldSize}KB → ${storageResult.newSize}KB`)
+          console.log(`Storage cleanup: ${storageResult.oldSize}KB -> ${storageResult.newSize}KB`)
           setLastCleanup({ 
             removedCount: storageResult.proposalsRemoved || 0, 
             timestamp: Date.now() 
@@ -245,7 +247,7 @@ export function DashboardPage() {
           // Then clean expired proposals (more frequent, shorter retention)
           const expiredResult = await cleanupExpiredProposals(2) // Keep expired for only 2 days
           if (expiredResult.removedCount > 0) {
-            console.log(`🧹 Periodic cleanup: Removed ${expiredResult.removedCount} expired proposals`)
+            console.log(`Periodic cleanup: Removed ${expiredResult.removedCount} expired proposals`)
             // Refresh proposal data after cleanup
             fetchProposalData()
           }
@@ -299,13 +301,30 @@ export function DashboardPage() {
 
     try {
       setVotingProposalId(proposalId.toString())
-      console.log('🗳️ Starting vote process:', { proposalId, voteType, address })
+      console.log('Starting vote process:', { proposalId, voteType, address })
+      
+      // Track vote attempt
+      trackEvent('vote_cast', { 
+        action: 'attempt',
+        proposalId: proposalId,
+        voteType: voteType,
+        timestamp: Date.now()
+      })
       
       const result = await voteOnProposal(proposalId, voteType)
-      console.log('🎉 Vote result:', result)
+      console.log('Vote result:', result)
       
       // If the result explicitly indicates a non-success (e.g. duplicate vote), show a friendly notification
       if ((result as any).success === false && (result as any).message) {
+        // Track duplicate vote attempt
+        trackEvent('vote_cast', { 
+          action: 'duplicate',
+          proposalId: proposalId,
+          voteType: voteType,
+          message: (result as any).message,
+          timestamp: Date.now()
+        })
+        
         setTransactionNotification({
           isOpen: true,
           txId: '',
@@ -317,6 +336,15 @@ export function DashboardPage() {
 
       // If we get a result with txId, the vote was successful
       if (result.txId) {
+        // Track successful vote
+        trackEvent('vote_cast', { 
+          action: 'success',
+          proposalId: proposalId,
+          voteType: voteType,
+          txId: result.txId,
+          timestamp: Date.now()
+        })
+        
         // Refresh proposals data after successful vote
         const allProposals = await getProposals()
         setProposals(allProposals)
@@ -340,6 +368,15 @@ export function DashboardPage() {
       if (error instanceof Error) {
         errorMessage = error.message
       }
+      
+      // Track vote failure
+      trackEvent('error', { 
+        type: 'vote_cast',
+        proposalId: proposalId,
+        voteType: voteType,
+        error: errorMessage,
+        timestamp: Date.now()
+      })
       
       // Show error notification
       setTransactionNotification({
