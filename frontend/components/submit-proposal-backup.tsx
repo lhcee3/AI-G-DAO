@@ -47,10 +47,8 @@ export function SubmitProposalPage() {
     error?: string
   }>({ status: 'idle' })
 
-  // Reset form on successful transaction
   useEffect(() => {
     if (transactionState.status === 'confirmed') {
-      // Reset form after 3 seconds
       setTimeout(() => {
         setFormData({
           projectTitle: "",
@@ -75,7 +73,6 @@ export function SubmitProposalPage() {
       return
     }
 
-    // Reset transaction state
     setTransactionState({ status: 'pending' })
     setLoading(true, "Submitting your proposal to the blockchain...")
 
@@ -99,7 +96,6 @@ export function SubmitProposalPage() {
         result: result
       })
       
-      // Reset form after successful submission
       setFormData({
         projectTitle: "",
         description: "",
@@ -119,13 +115,11 @@ export function SubmitProposalPage() {
       console.error('Failed to submit proposal:', err)
       const errorMessage = err instanceof Error ? err.message : 'Unknown error occurred'
       
-      // Update transaction state with error
       setTransactionState({
         status: 'failed',
         error: errorMessage
       })
     } finally {
-      // Always ensure loading is turned off
       setLoading(false)
     }
   }

@@ -74,7 +74,6 @@ function useWallet(): WalletState {
 
       const account = accounts[0]
       
-      // Validate that this is a valid Algorand address
       if (!account || account.length !== 58) {
         throw new Error('Invalid Algorand address format. Please ensure you\'re using Pera Wallet.')
       }

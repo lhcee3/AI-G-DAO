@@ -16,7 +16,6 @@ export default function AdminPage() {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
-  // Check if already authenticated on mount
   useEffect(() => {
     const isLoggedIn = localStorage.getItem('admin_authenticated') === 'true';
     if (isLoggedIn) {
@@ -29,10 +28,8 @@ export default function AdminPage() {
     setLoading(true);
     setError('');
 
-    // Simulate login delay
     await new Promise(resolve => setTimeout(resolve, 1000));
 
-    // Hardcoded credentials
     if (username === 'Aneesh' && password === 'dishkavdishkav') {
       setIsAuthenticated(true);
       localStorage.setItem('admin_authenticated', 'true');

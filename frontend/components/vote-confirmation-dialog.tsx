@@ -89,12 +89,11 @@ export function VoteConfirmationDialog({
   const projectedTotal = projectedYes + projectedNo;
   const projectedYesPercentage = projectedTotal > 0 ? (projectedYes / projectedTotal) * 100 : 0;
 
-  // Check if voting is still valid
   const isVotingClosed = !currentVotes.isVotingActive;
   const hasUserVoted = votingState.hasVoted;
   const canVote = !isVotingClosed && !hasUserVoted;
   
-  const votingCost = 0.01; // Reduced from 0.001 ALGO
+  const votingCost = 0.01;
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>

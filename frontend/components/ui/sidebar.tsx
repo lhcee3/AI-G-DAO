@@ -5,7 +5,51 @@ import { Slot } from "@radix-ui/react-slot"
 import { VariantProps, cva } from "class-variance-authority"
 import { PanelLeft } from "lucide-react"
 
-import { useIsMobile } from "@/hooks/use-mobile"
+function useIsMobile() {
+  // Simple client-side hook to detect a mobile viewport (fallback when the shared hook is unavailable)
+  const [isMobile, setIsMobile] = React.useState<boolean>(false)
+
+  React.useEffect(() => {
+    if (typeof window === "undefined") return
+
+    const mql = window.matchMedia("(max-width: 768px)")
+    const handler = (e: MediaQueryListEvent | MediaQueryList) =>
+      setIsMobile("matches" in e ? e.matches : (e as MediaQueryList).matches)
+
+    // Initialize state
+    handler(mql)
+
+    // Add listener using the best available API
+    if ("addEventListener" in mql) {
+      // Modern browsers
+      (mql as unknown as MediaQueryList & { addEventListener: Function }).addEventListener(
+        "change",
+        handler as EventListener
+      )
+    } else {
+      // Fallback for older Safari
+      (mql as unknown as MediaQueryList & { addListener: Function }).addListener(
+        handler as unknown as (e: MediaQueryListEvent) => void
+      )
+    }
+
+    return () => {
+      if ("removeEventListener" in mql) {
+        (mql as unknown as MediaQueryList & { removeEventListener: Function }).removeEventListener(
+          "change",
+          handler as EventListener
+        )
+      } else {
+        (mql as unknown as MediaQueryList & { removeListener: Function }).removeListener(
+          handler as unknown as (e: MediaQueryListEvent) => void
+        )
+      }
+    }
+  }, [])
+
+  return isMobile
+}
+
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
