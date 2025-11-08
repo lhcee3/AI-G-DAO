@@ -229,4 +229,4 @@ Join the TerraLinke revolution:
 **TerraLinke** - Where AI meets humanity to save our planet  
 Built with love on Algorand's carbon-negative blockchain for maximum environmental impact.
 
-*Ready to revolutionize climate action? The future starts here.Come Join Us*
+*Ready to revolutionize climate action? The future starts here.Come Join Us, Today!*
