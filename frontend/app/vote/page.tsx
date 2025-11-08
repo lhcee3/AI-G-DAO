@@ -53,10 +53,8 @@ export default function VotePage() {
     error?: string;
   }>({ proposalId: null, status: 'idle' });
 
-  // Track user voting history for each proposal
   const [userVotingHistory, setUserVotingHistory] = useState<Map<number, { hasVoted: boolean; txId?: string; userVote?: 'for' | 'against' }>>(new Map());
 
-  // Confirmation dialog state
   const [confirmationDialog, setConfirmationDialog] = useState<{
     isOpen: boolean;
     proposalId: number | null;
@@ -127,7 +125,7 @@ export default function VotePage() {
     if (isConnected && address) {
       fetchProposals();
     }
-  }, [isConnected, address]); // Remove function dependencies to prevent infinite loops
+  }, [isConnected, address]);
 
   const handleVoteClick = (proposal: Proposal, voteType: 'for' | 'against') => {
     setConfirmationDialog({
@@ -164,7 +162,6 @@ export default function VotePage() {
           `Voted ${confirmationDialog.voteType?.toUpperCase()} on "${confirmationDialog.proposal?.title}"`
         );
         
-        // Close dialog
         setConfirmationDialog({
           isOpen: false,
           proposalId: null,
@@ -179,7 +176,6 @@ export default function VotePage() {
           setVotingState({ proposalId: null, status: 'idle' });
         }, 3000);
       } else {
-        // Handle already voted case with transaction ID
         setVotingState({
           proposalId: confirmationDialog.proposalId,
           status: 'failed',
@@ -193,7 +189,6 @@ export default function VotePage() {
           type: 'warning'
         });
         
-        // Close dialog
         setConfirmationDialog({
           isOpen: false,
           proposalId: null,
@@ -213,7 +208,6 @@ export default function VotePage() {
       // For actual errors (not already voted case)
       notifyTransactionFailure('Vote', errorMessage);
       
-      // Close dialog on error too
       setConfirmationDialog({
         isOpen: false,
         proposalId: null,
@@ -224,8 +218,6 @@ export default function VotePage() {
   };
 
   const handleVote = async (proposalId: number, vote: 'for' | 'against') => {
-    // Legacy handler - replaced by handleVoteClick + handleVoteConfirm
-    // Keeping for compatibility, but not used anymore
     console.warn('Legacy handleVote called - should use handleVoteClick instead');
   };
 

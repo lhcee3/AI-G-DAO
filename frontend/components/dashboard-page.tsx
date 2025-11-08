@@ -144,18 +144,15 @@ export function DashboardPage() {
     return filtered;
   }, [activeProposals, selectedCategories]);
 
-  // Validate wallet connection and address format for Algorand
   useEffect(() => {
     if (isConnected && address) {
-      // Validate Algorand address format (should be 58 characters)
       if (address.length !== 58) {
         console.warn('Invalid Algorand address format detected')
-        disconnect() // Force disconnect if not a valid Algorand address
+        disconnect()
       }
     }
   }, [isConnected, address, disconnect])
 
-  // Remove artificial loading delay for better performance
   useEffect(() => {
     setIsLoading(false)
   }, [])
@@ -173,7 +170,6 @@ export function DashboardPage() {
     return unsubscribe
   }, [])
 
-  // Fetch proposals data - optimized with aggressive storage management
   useEffect(() => {
     const fetchProposalData = async () => {
       try {
@@ -189,28 +185,23 @@ export function DashboardPage() {
           })
         }
 
-        // Update storage usage display
         setStorageUsage({
           size: storageResult.currentSize || storageResult.newSize || 0,
           limit: 200
         })
 
-        // 2. THEN: Clean up expired proposals (reduced retention to 3 days)
-        const cleanupResult = await cleanupExpiredProposals(3) // Reduced from 7 to 3 days
+        const cleanupResult = await cleanupExpiredProposals(3)
         if (cleanupResult.removedCount > 0) {
           console.log(`🕒 Expired cleanup: Removed ${cleanupResult.removedCount} old proposals`)
         }
 
-        // 3. Get all proposals in one call and process locally
         const allProposals = await getProposals()
         setProposals(allProposals)
         
-        // Filter active proposals locally instead of making another API call
         const activeProposals = allProposals.filter(p => p.status === 'active')
         setActiveProposals(activeProposals)
         
-        // Filter user proposals locally if connected
-        if (address) {
+        if (isConnected && address) {
           const userProposals = allProposals.filter(p => p.creator === address)
           setUserProposals(userProposals)
         }
@@ -218,7 +209,6 @@ export function DashboardPage() {
         // Use local data for counts
         setTotalProposalsCount(allProposals.length)
         
-        // Only get blockchain stats if needed for display
         const stats = await getBlockchainStats()
         setBlockchainStats(stats)
       } catch (error) {
@@ -231,10 +221,8 @@ export function DashboardPage() {
     if (isConnected) {
       fetchProposalData()
       
-      // Set up aggressive periodic cleanup for 200KB storage limit
       const cleanupInterval = setInterval(async () => {
         try {
-          // First check storage limits
           const storageResult = await enforceStorageLimits()
           if (storageResult.cleaned) {
             console.log('📱 Periodic storage cleanup completed')
@@ -244,11 +232,9 @@ export function DashboardPage() {
             })
           }
           
-          // Then clean expired proposals (more frequent, shorter retention)
-          const expiredResult = await cleanupExpiredProposals(2) // Keep expired for only 2 days
+          const expiredResult = await cleanupExpiredProposals(2)
           if (expiredResult.removedCount > 0) {
             console.log(`Periodic cleanup: Removed ${expiredResult.removedCount} expired proposals`)
-            // Refresh proposal data after cleanup
             fetchProposalData()
           }
         } catch (error) {
@@ -260,12 +246,10 @@ export function DashboardPage() {
     }
   }, [isConnected, address])
 
-  // Set initial time on client side only - no constant updates for performance
   useEffect(() => {
     setCurrentTime(new Date())
   }, [])
 
-  // Monitor storage usage
   useEffect(() => {
     const checkStorageUsage = () => {
       try {
@@ -283,11 +267,10 @@ export function DashboardPage() {
     }
 
     checkStorageUsage()
-    const interval = setInterval(checkStorageUsage, 60000) // Check every minute
+    const interval = setInterval(checkStorageUsage, 60000)
     return () => clearInterval(interval)
   }, [])
 
-  // Handle voting on proposals - Enhanced with notification system
   const handleVote = async (proposalId: number, voteType: 'for' | 'against') => {
     if (!isConnected) {
       setTransactionNotification({
@@ -303,7 +286,6 @@ export function DashboardPage() {
       setVotingProposalId(proposalId.toString())
       console.log('Starting vote process:', { proposalId, voteType, address })
       
-      // Track vote attempt
       trackEvent('vote_cast', { 
         action: 'attempt',
         proposalId: proposalId,
@@ -314,9 +296,7 @@ export function DashboardPage() {
       const result = await voteOnProposal(proposalId, voteType)
       console.log('Vote result:', result)
       
-      // If the result explicitly indicates a non-success (e.g. duplicate vote), show a friendly notification
       if ((result as any).success === false && (result as any).message) {
-        // Track duplicate vote attempt
         trackEvent('vote_cast', { 
           action: 'duplicate',
           proposalId: proposalId,
@@ -334,9 +314,7 @@ export function DashboardPage() {
         return
       }
 
-      // If we get a result with txId, the vote was successful
       if (result.txId) {
-        // Track successful vote
         trackEvent('vote_cast', { 
           action: 'success',
           proposalId: proposalId,
@@ -345,13 +323,11 @@ export function DashboardPage() {
           timestamp: Date.now()
         })
         
-        // Refresh proposals data after successful vote
         const allProposals = await getProposals()
         setProposals(allProposals)
         const activeProposals = allProposals.filter(p => p.status === 'active')
         setActiveProposals(activeProposals)
         
-        // Show success notification with copyable transaction ID
         setTransactionNotification({
           isOpen: true,
           txId: result.txId,
@@ -369,7 +345,6 @@ export function DashboardPage() {
         errorMessage = error.message
       }
       
-      // Track vote failure
       trackEvent('error', { 
         type: 'vote_cast',
         proposalId: proposalId,
@@ -378,7 +353,6 @@ export function DashboardPage() {
         timestamp: Date.now()
       })
       
-      // Show error notification
       setTransactionNotification({
         isOpen: true,
         txId: '',
@@ -581,7 +555,6 @@ export function DashboardPage() {
             <ProposalSearch
               proposals={proposals}
               onSearchResults={(results) => {
-                // Search results are handled by filteredProposals useMemo
               }}
               onSearchTermChange={setSearchTerm}
             />

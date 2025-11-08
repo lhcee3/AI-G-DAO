@@ -28,7 +28,6 @@ export function WalletGuard({
     }
   }, [isConnected, loading, router])
 
-  // Show loading while checking wallet status
   if (loading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900 flex items-center justify-center">
@@ -77,11 +76,9 @@ export function WalletGuard({
     )
   }
 
-  // All checks passed, render children
   return <>{children}</>
 }
 
-// Component for displaying wallet info in headers
 export function WalletInfo({ showFullAddress = false }: { showFullAddress?: boolean }) {
   const { isConnected, address, balance } = useWalletContext()
 

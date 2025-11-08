@@ -72,8 +72,7 @@ export function NotificationsPanel() {
     
     // Navigate to relevant page if needed
     if (notification.proposalId) {
-      // Could navigate to proposal details
-      // TODO: Navigate to proposal details page
+      
     }
     if (notification.txId) {
       // Open transaction in Lora explorer

@@ -150,9 +150,6 @@ export function useAnalytics() {
 
     // Save updated analytics
     localStorage.setItem('aigdao_analytics', JSON.stringify(analytics));
-
-    // Log for debugging (remove in production)
-    console.log(`Analytics Event: ${type}`, { data, analytics });
   }, []);
 
   // Track page view automatically

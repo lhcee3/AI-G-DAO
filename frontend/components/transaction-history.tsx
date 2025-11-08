@@ -69,9 +69,6 @@ export function TransactionHistory() {
           }
         }));
 
-        // TODO: Add proposal submission history
-        // TODO: Add proposal outcome notifications
-        
         setTransactions(voteTransactions);
       } catch (error) {
         console.error('Failed to fetch transaction history:', error);

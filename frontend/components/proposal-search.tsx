@@ -61,7 +61,6 @@ export function ProposalSearch({
         onSearchResults(results);
         onSearchTermChange(searchTerm);
         
-        // Get suggestions
         const newSuggestions = searchEngine.getSuggestions(proposals, searchTerm);
         setSuggestions(newSuggestions);
         setIsSearching(false);
@@ -82,11 +81,10 @@ export function ProposalSearch({
 
   const handleSearchSubmit = (term: string = searchTerm) => {
     if (term.trim()) {
-      // Add to recent searches
       const newRecentSearches = [
         term.trim(),
         ...recentSearches.filter(s => s !== term.trim())
-      ].slice(0, 5); // Keep only 5 recent searches
+      ].slice(0, 5);
       
       setRecentSearches(newRecentSearches);
       localStorage.setItem('terralinke_recent_searches', JSON.stringify(newRecentSearches));
