@@ -13,7 +13,7 @@ TerraLinke is a hybrid governance platform that leverages AI-powered analysis an
 
 **Live Application**: [terralinke.vercel.app](https://terralinke.vercel.app)
 
-**Smart Contract (Algorand TestNet)**: [Application ID 744174033](https://lora.algokit.io/testnet/application/744174033)
+**Deployed Smart Contract ID (Algorand TestNet)**: [Application ID 744174033](https://lora.algokit.io/testnet/application/744174033)
 
 **Test Results**: [View comprehensive test documentation](https://github.com/lhcee3/AI-G-DAO/blob/main/test/test-results/TEST_RESULTS_LOG.md)
 
@@ -43,7 +43,7 @@ TerraLinke is a hybrid governance platform that leverages AI-powered analysis an
 - Smart contract automation for transparent governance
 - Immutable record-keeping and data integrity
 
-## Technology Stack
+## Tech Stack
 
 ### Frontend
 - **Next.js 15.2.4** - React framework with app router
@@ -203,8 +203,6 @@ We welcome contributions from the community. To contribute:
 4. Push to the branch (`git push origin feature/your-feature`)
 5. Open a Pull Request
 
-Please ensure all tests pass and maintain code coverage standards. See [CONTRIBUTING.md](./CONTRIBUTING.md) for detailed guidelines.
-
 ## Security
 
 TerraLinke implements multiple security layers:
@@ -225,18 +223,9 @@ This project is licensed under the GNU Affero General Public License v3.0 (AGPL-
 - **Live Application**: [terralinke.vercel.app](https://terralinke.vercel.app)
 - **GitHub Repository**: [AI-G-DAO](https://github.com/lhcee3/AI-G-DAO)
 - **Smart Contract**: [Algorand TestNet Application](https://lora.algokit.io/testnet/application/744174033)
-- **Test Documentation**: [Test Results](https://github.com/lhcee3/AI-G-DAO/blob/main/test/test-results/TEST_RESULTS_LOG.md)
+- **Test Documentation**: [Test Results](https://github.com/lhcee3/AI-G-DAO/blob/main/LICENSE)
 - **Developer**: [Aneesh](https://github.com/lhcee3)
 - **Algorand**: [Official Website](https://algorand.com)
-
-## Support
-
-For questions, issues, or feature requests:
-
-1. Review the [documentation](./docs/README.md)
-2. Search [existing issues](https://github.com/lhcee3/AI-G-DAO/issues)
-3. Create a [new issue](https://github.com/lhcee3/AI-G-DAO/issues/new)
-4. Join community discussions
 
 ---
 
