@@ -329,9 +329,14 @@ export function LandingPage() {
           </div>
           
           <div className="border-t border-white/10 mt-6 sm:mt-8 pt-4 sm:pt-6 text-center">
-            <p className="text-white/40 text-xs">
-              © 2024 TerraLinke. Built with love for the planet.
-            </p>
+            <a
+              href="https://github.com/lhcee3"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-white/40 text-xs inline-block"
+            >
+              © 2025 TerraLinke. Built with love for the planet by Aneesh.
+            </a>
           </div>
         </div>
       </footer>
