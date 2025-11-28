@@ -250,3 +250,168 @@ class VotingSystem(ARC4Contract):
         assert Txn.sender == self.admin or is_dao, "not authorized"
 
         self.member_tokens[member.bytes] = tokens.bytes
+
+
+    # ------------------ submit proposal ------------------
+    @arc4.abimethod()
+    def submit_proposal(self, title: arc4.String, description: arc4.String, funding: arc4.UInt64) -> UInt64:
+        # check caller has enough tokens
+        mem_b, ok = self.member_tokens.maybe(Txn.sender.bytes)
+        assert ok, "not a registered member"
+        bal = arc4.UInt64.from_bytes(mem_b)
+        assert bal.native >= self.min_tokens_to_propose.native, "need min tokens to propose"
+
+        pid = self.total_proposals + UInt64(1)
+        now = Global.latest_timestamp
+        end = now + self.voting_period.native
+
+        proposal = ProposalData(
+            title=title,
+            description=description,
+            funding=funding,
+            proposer=arc4.Address(Txn.sender.bytes),
+            creation_time=arc4.UInt64(now),
+            end_time=arc4.UInt64(end),
+            status=arc4.UInt64(0)
+        )
+
+        self.proposals[pid] = proposal.bytes
+
+        votes = VoteData(
+            yes_votes=arc4.UInt64(0),
+            no_votes=arc4.UInt64(0),
+            abstain_votes=arc4.UInt64(0),
+            total_voters=arc4.UInt64(0),
+            total_voting_power=arc4.UInt64(0)
+        )
+        self.votes[pid] = votes.bytes
+
+        self.total_proposals = pid
+        return pid
+
+    # ------------------ vote ------------------
+    @arc4.abimethod()
+    def vote(self, proposal_id: arc4.UInt64, choice: arc4.UInt64, voting_power: arc4.UInt64) -> None:
+        pid = proposal_id.as_uint64()
+        p_bytes, ok = self.proposals.maybe(pid)
+        assert ok, "proposal missing"
+
+        proposal = ProposalData.from_bytes(p_bytes)
+        proposal.validate()
+
+        now = Global.latest_timestamp
+        assert now <= proposal.end_time.native, "voting ended"
+        assert proposal.status.native == 0, "already finalized"
+
+        mem_b, reg = self.member_tokens.maybe(Txn.sender.bytes)
+        assert reg, "not member"
+        balance = arc4.UInt64.from_bytes(mem_b)
+        assert balance.native >= voting_power.native, "insufficient balance"
+
+        # prevent double vote
+        key = op.itob(pid)+ Txn.sender.bytes
+        value, voted = self.voter_records.maybe(key)
+        assert not voted, "already voted"
+
+        # update votes
+        v_bytes = self.votes[pid]
+        summary = VoteData.from_bytes(v_bytes)
+        summary.validate()
+
+        if choice.native == 0:
+            summary.abstain_votes = arc4.UInt64(summary.abstain_votes.native + voting_power.native)
+        elif choice.native == 1:
+            summary.yes_votes = arc4.UInt64(summary.yes_votes.native + voting_power.native)
+        elif choice.native == 2:
+            summary.no_votes = arc4.UInt64(summary.no_votes.native + voting_power.native)
+        else:
+            assert False, "invalid choice"
+
+        summary.total_voters = arc4.UInt64(summary.total_voters.native + 1)
+        summary.total_voting_power = arc4.UInt64(summary.total_voting_power.native + voting_power.native)
+
+        self.votes[pid] = summary.bytes
+
+        # store voter record
+        rec = VoterRecord(
+            voter=arc4.Address(Txn.sender.bytes),
+            choice=choice,
+            voting_power=voting_power,
+            timestamp=arc4.UInt64(now)
+        )
+        self.voter_records[key] = rec.bytes
+
+    # ------------------ finalize ------------------
+    @arc4.abimethod()
+    def finalize(self, proposal_id: arc4.UInt64) -> arc4.UInt64:
+        pid = proposal_id.as_uint64()
+        p_bytes, ok = self.proposals.maybe(pid)
+        assert ok, "no proposal"
+
+        proposal = ProposalData.from_bytes(p_bytes)
+        proposal.validate()
+
+        now = Global.latest_timestamp
+        assert now > proposal.end_time.native, "voting still open"
+        assert proposal.status.native == 0, "already finalized"
+
+        v_bytes = self.votes[pid]
+        summary = VoteData.from_bytes(v_bytes)
+        summary.validate()
+
+        quorum = (self.total_token_supply * 10) // 100
+
+        if summary.total_voting_power.native < quorum:
+            proposal.status = arc4.UInt64(3)  # no quorum
+        else:
+            if summary.yes_votes.native > summary.no_votes.native:
+                proposal.status = arc4.UInt64(1)
+            else:
+                proposal.status = arc4.UInt64(2)
+
+        # write back
+        self.proposals[pid] = proposal.bytes
+        return proposal.status
+
+    # ------------------ award ------------------
+    @arc4.abimethod()
+    def award_credits(self, proposal_id: arc4.UInt64, amount: arc4.UInt64) -> None:
+        assert Txn.sender == self.admin
+        pid: UInt64 = proposal_id.as_uint64()
+        p_bytes, ok = self.proposals.maybe(pid)
+        assert ok
+
+        proposal = ProposalData.from_bytes(p_bytes)
+        proposal.validate()
+        assert proposal.status.native == 1, "proposal not approved"
+        assert self.credit_token_id != UInt64(0), "credit token not set"
+        
+        receiver: Account = proposal.proposer.native
+        
+        itxn.AssetTransfer(
+            asset_receiver=receiver,
+            xfer_asset=self.credit_token_id,
+            asset_amount=amount.native,
+            fee=0
+        ).submit()
+
+    # ------------------ getters ------------------
+    @arc4.abimethod(readonly=True)
+    def get_proposal(self, proposal_id: arc4.UInt64) -> ProposalData:
+        pid = proposal_id.as_uint64()
+        p_bytes = self.proposals[pid]
+        return ProposalData.from_bytes(p_bytes)
+
+    @arc4.abimethod(readonly=True)
+    def get_vote_summary(self, proposal_id: arc4.UInt64) -> VoteData:
+        pid = proposal_id.as_uint64()
+        v_bytes = self.votes[pid]
+        return VoteData.from_bytes(v_bytes)
+
+    @arc4.abimethod(allow_actions=['OptIn'])
+    def opt_in(self) -> arc4.String:
+        return arc4.String("Welcome to VotingSystem")
+
+    @arc4.abimethod(allow_actions=['CloseOut'])
+    def opt_out(self) -> None:
+        pass
