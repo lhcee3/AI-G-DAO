@@ -49,3 +49,27 @@ def u64_to_bytes(v: arc4.UInt64) -> Bytes:
 @algopy.subroutine
 def bytes_to_u64(b: Bytes) -> arc4.UInt64:
     return arc4.UInt64.from_bytes(b)
+
+
+# -----------------------------
+# ClimateDAO: token creation + membership
+# -----------------------------
+class ClimateDAO(ARC4Contract):
+    def __init__(self) -> None:
+        # store token ids as primitive UInt64 values encoded as bytes when needed
+        # token ids are kept as plain python int in this contract for simplicity
+        self.dao_token_id = UInt64(0)
+        self.credit_token_id = UInt64(0)
+        self.dao_token = Asset()
+        self.credit_token = Asset()
+
+        # member balances stored in BoxMap<Bytes, Bytes> -- key = account bytes, value = arc4.UInt64.bytes
+        self.member_tokens = BoxMap(Bytes, Bytes, key_prefix=b"member_")
+
+        # simple counters
+        self.total_members = UInt64(0)
+        self.user_proposals_count = LocalState(UInt64, key=b"user_proposals")
+        self.user_votes_count = LocalState(UInt64, key=b"user_votes")
+
+        # admin
+        self.admin = Global.creator_address
