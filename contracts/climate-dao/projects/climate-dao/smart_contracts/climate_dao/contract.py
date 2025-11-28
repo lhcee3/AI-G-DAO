@@ -224,3 +224,29 @@ class VotingSystem(ARC4Contract):
         self.linked_dao = Bytes(b"")
         self.credit_token_id = UInt64(0)
         self.total_token_supply = UInt64(0)
+
+
+    # ------------------ admin setters ------------------
+    @arc4.abimethod()
+    def set_linked_dao(self, dao_app_addr: arc4.String) -> None:
+        assert Txn.sender == self.admin
+        self.linked_dao = dao_app_addr.bytes
+
+    @arc4.abimethod()
+    def set_credit_token(self, asset_id: arc4.UInt64) -> None:
+        assert Txn.sender == self.admin
+        self.credit_token_id = asset_id.as_uint64()
+
+    @arc4.abimethod()
+    def set_total_token_supply(self, supply: arc4.UInt64) -> None:
+        assert Txn.sender == self.admin
+        self.total_token_supply = supply.as_uint64()
+
+    # ------------------ member registration ------------------
+    @arc4.abimethod()
+    def register_member(self, member: arc4.Address, tokens: arc4.UInt64) -> None:
+        # allow if caller is admin or linked DAO app (by address bytes)
+        is_dao = bool(self.linked_dao) and Txn.sender.bytes == self.linked_dao
+        assert Txn.sender == self.admin or is_dao, "not authorized"
+
+        self.member_tokens[member.bytes] = tokens.bytes
