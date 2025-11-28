@@ -167,3 +167,33 @@ class ImpactAnalytics(ARC4Contract):
         self.project_impacts = BoxMap(UInt64, Bytes, key_prefix=b"impact_")
         self.project_creators = BoxMap(Bytes, UInt64, key_prefix=b"creator_")
         self.ai_scores = BoxMap(UInt64, UInt64, key_prefix=b"ai_")
+
+
+    @arc4.abimethod()
+    def register_project(self, project_name: arc4.String, project_type: arc4.String, expected_co2: arc4.UInt64, expected_trees: arc4.UInt64, expected_energy: arc4.UInt64, location: arc4.String) -> arc4.UInt64:
+        pid = self.total_projects + UInt64(1)
+
+        # store minimal info as bytes (concatenate) — simple pattern
+        raw = project_name.bytes + b"|" + project_type.bytes + b"|" + location.bytes + b"|" + Txn.sender.bytes
+        self.projects[pid] = raw
+
+        impact_raw = expected_co2.bytes + b"|" + expected_trees.bytes + b"|" + expected_energy.bytes
+        self.project_impacts[pid] = impact_raw
+
+        self.project_creators[Txn.sender.bytes] = pid
+
+        # simple ai score
+        ai = self._calculate_ai_score(expected_co2.as_uint64(), expected_trees.as_uint64(), expected_energy.as_uint64())
+        self.ai_scores[pid] = ai
+
+        self.total_projects = pid
+        return arc4.UInt64(pid)
+    
+    @arc4.abimethod()
+    def _calculate_ai_score(self, co2: UInt64, trees: UInt64, energy: UInt64) -> UInt64:
+        co2_score = (co2 * 40) // 100
+        tree_score = (trees * 30) // 1000
+        energy_score = (energy * 30) // 100
+        total = co2_score + tree_score + energy_score
+        max_score = UInt64(1000)
+        return total if total <= max_score else max_score
