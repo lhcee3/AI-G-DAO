@@ -197,3 +197,30 @@ class ImpactAnalytics(ARC4Contract):
         total = co2_score + tree_score + energy_score
         max_score = UInt64(1000)
         return total if total <= max_score else max_score
+
+# -----------------------------
+# VotingSystem (FULL STRUCT-BASED)
+# -----------------------------
+class VotingSystem(ARC4Contract):
+    def __init__(self) -> None:
+        # config
+        self.voting_period = arc4.UInt64(604800)  # 7 days
+        self.min_tokens_to_propose = arc4.UInt64(100 * 1_000_000)
+
+        # membership mirror: key = account bytes, value = arc4.UInt64.bytes
+        self.member_tokens = BoxMap(Bytes, Bytes, key_prefix=b"member_")
+
+        # proposals and votes stored as bytes of the struct
+        self.proposals = BoxMap(UInt64, Bytes, key_prefix=b"prop_")
+        self.votes = BoxMap(UInt64, Bytes, key_prefix=b"votes_")
+
+        # voter records: key = proposal_id.bytes + voter.bytes -> value = VoterRecord.bytes
+        self.voter_records = BoxMap(Bytes, Bytes, key_prefix=b"vrec_")
+
+        self.total_proposals = UInt64(0)
+
+        # admin and linking
+        self.admin = Global.creator_address
+        self.linked_dao = Bytes(b"")
+        self.credit_token_id = UInt64(0)
+        self.total_token_supply = UInt64(0)
