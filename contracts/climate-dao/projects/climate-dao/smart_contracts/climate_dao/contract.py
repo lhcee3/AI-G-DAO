@@ -151,3 +151,19 @@ class ClimateDAO(ARC4Contract):
     def get_member_tokens(self, member: arc4.Address) -> arc4.UInt64:
         b, ok = self.member_tokens.maybe(member.bytes)
         return arc4.UInt64.from_bytes(b) if ok else arc4.UInt64(0)
+
+
+# -----------------------------
+# ImpactAnalytics (kept simple)
+# -----------------------------
+class ImpactAnalytics(ARC4Contract):
+    def __init__(self) -> None:
+        self.total_projects = UInt64(0)
+        self.total_co2_saved = UInt64(0)
+        self.total_trees_planted = UInt64(0)
+        self.total_renewable_energy = UInt64(0)
+
+        self.projects = BoxMap(UInt64, Bytes, key_prefix=b"project_")
+        self.project_impacts = BoxMap(UInt64, Bytes, key_prefix=b"impact_")
+        self.project_creators = BoxMap(Bytes, UInt64, key_prefix=b"creator_")
+        self.ai_scores = BoxMap(UInt64, UInt64, key_prefix=b"ai_")
