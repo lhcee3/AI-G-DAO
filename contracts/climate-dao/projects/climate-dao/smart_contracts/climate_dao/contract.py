@@ -50,7 +50,6 @@ def u64_to_bytes(v: arc4.UInt64) -> Bytes:
 def bytes_to_u64(b: Bytes) -> arc4.UInt64:
     return arc4.UInt64.from_bytes(b)
 
-
 # -----------------------------
 # ClimateDAO: token creation + membership
 # -----------------------------
@@ -152,7 +151,6 @@ class ClimateDAO(ARC4Contract):
         b, ok = self.member_tokens.maybe(member.bytes)
         return arc4.UInt64.from_bytes(b) if ok else arc4.UInt64(0)
 
-
 # -----------------------------
 # ImpactAnalytics (kept simple)
 # -----------------------------
@@ -167,7 +165,6 @@ class ImpactAnalytics(ARC4Contract):
         self.project_impacts = BoxMap(UInt64, Bytes, key_prefix=b"impact_")
         self.project_creators = BoxMap(Bytes, UInt64, key_prefix=b"creator_")
         self.ai_scores = BoxMap(UInt64, UInt64, key_prefix=b"ai_")
-
 
     @arc4.abimethod()
     def register_project(self, project_name: arc4.String, project_type: arc4.String, expected_co2: arc4.UInt64, expected_trees: arc4.UInt64, expected_energy: arc4.UInt64, location: arc4.String) -> arc4.UInt64:
@@ -225,7 +222,6 @@ class VotingSystem(ARC4Contract):
         self.credit_token_id = UInt64(0)
         self.total_token_supply = UInt64(0)
 
-
     # ------------------ admin setters ------------------
     @arc4.abimethod()
     def set_linked_dao(self, dao_app_addr: arc4.String) -> None:
@@ -250,7 +246,6 @@ class VotingSystem(ARC4Contract):
         assert Txn.sender == self.admin or is_dao, "not authorized"
 
         self.member_tokens[member.bytes] = tokens.bytes
-
 
     # ------------------ submit proposal ------------------
     @arc4.abimethod()
