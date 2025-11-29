@@ -13,7 +13,10 @@ TerraLinke is a hybrid governance platform that leverages AI-powered analysis an
 
 **Live Application**: [terralinke.vercel.app](https://terralinke.vercel.app)
 
-**Deployed Smart Contract ID (Algorand TestNet)**: [Application ID 744174033](https://lora.algokit.io/testnet/application/744174033)
+**Deployed Smart Contract ID (Algorand TestNet)**: 
+- Climate DAO App ID: [Application ID 750393217](https://lora.algokit.io/testnet/application/750393217)
+- Voting System App ID: [Application ID 750393387](https://lora.algokit.io/testnet/application/750393387)
+- Impact Analytics App ID: [Application ID 750393563](https://lora.algokit.io/testnet/application/750393563)
 
 **Test Results**: [View comprehensive test documentation](https://github.com/lhcee3/AI-G-DAO/blob/main/test/test-results/TEST_RESULTS_LOG.md)
 
